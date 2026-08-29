@@ -1,3 +1,126 @@
-import type {Metadata} from 'next';import {notFound} from 'next/navigation';import {SiteHeader,SiteFooter} from '@/components/site-chrome';import {events} from '@/lib/sample-data';import ApplicationForm from '@/components/application-form';
-export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const e=events.find(x=>x.slug===slug);if(!e)return{};return{title:e.title,description:`${e.date} ${e.venue}で開催するWWWイベント`,openGraph:{title:e.title,description:`${e.date} · ${e.venue}`,images:[]},twitter:{title:e.title,description:`${e.date} · ${e.venue}`,images:[]}}}
-export default async function EventDetail({params}:{params:Promise<{slug:string}>}){const {slug}=await params;const e=events.find(x=>x.slug===slug);if(!e)notFound();const jsonLd={'@context':'https://schema.org','@type':'Event',name:e.title,startDate:'2026-09-19T11:00:00+09:00',endDate:'2026-09-19T16:00:00+09:00',eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',eventStatus:'https://schema.org/EventScheduled',location:{'@type':'Place',name:e.venue},offers:{'@type':'Offer',price:e.price,priceCurrency:'JPY',availability:'https://schema.org/InStock'}};return <><SiteHeader/><main className="event-detail"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(jsonLd)}}/><p className="eyebrow">WWW EVENT</p><h1>{e.title}</h1><div className="wide-visual">{e.venue}</div><div className="event-detail-grid"><article><dl><div><dt>DATE</dt><dd>{e.date} 11:00–16:00</dd></div><div><dt>VENUE</dt><dd>{e.venue}</dd></div><div><dt>FEE</dt><dd>¥{e.price.toLocaleString()}</dd></div><div><dt>CAPACITY</dt><dd>{e.capacity}名</dd></div></dl><h2>畑を歩き、土地を味わう一日。</h2><p>秋を迎える余市の畑を訪ね、生産者の話を聞きます。最後は地元の食材とワインを囲む小さなテーブルへ。</p><h3>持ち物</h3><p>歩きやすい靴、帽子、飲み物</p><h3>注意事項</h3><p>天候により内容が変更になる場合があります。</p></article><ApplicationForm eventId={e.id}/></div></main><SiteFooter/></>}
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { SiteHeader, SiteFooter } from '@/components/site-chrome';
+import { eventBySlug } from '@/lib/data';
+import ApplicationForm from '@/components/application-form';
+export const dynamic = 'force-dynamic';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params,
+    e = await eventBySlug(slug);
+  if (!e) return {};
+  const description = `${e.start_at.slice(0, 10)} ${e.venue}で開催するWWWイベント`;
+  return {
+    title: e.title,
+    description,
+    openGraph: {
+      title: e.title,
+      description,
+      images: e.cover_image ? [e.cover_image] : [],
+    },
+    twitter: {
+      title: e.title,
+      description,
+      images: e.cover_image ? [e.cover_image] : [],
+    },
+  };
+}
+export default async function EventDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params,
+    e = await eventBySlug(slug);
+  if (!e) notFound();
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: e.title,
+    startDate: e.start_at,
+    endDate: e.end_at,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: { '@type': 'Place', name: e.venue },
+    offers: {
+      '@type': 'Offer',
+      price: e.price,
+      priceCurrency: 'JPY',
+      availability: e.registration_enabled
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/SoldOut',
+    },
+  };
+  return (
+    <>
+      <SiteHeader />
+      <main className="event-detail">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <p className="eyebrow">WWW EVENT</p>
+        <h1>{e.title}</h1>
+        <div
+          className="wide-visual"
+          style={
+            e.cover_image
+              ? { backgroundImage: `url(${e.cover_image})` }
+              : undefined
+          }
+        >
+          {e.cover_image ? '' : e.venue}
+        </div>
+        <div className="event-detail-grid">
+          <article>
+            <dl>
+              <div>
+                <dt>DATE</dt>
+                <dd>
+                  {e.start_at.slice(0, 16).replace('T', ' ')}–
+                  {e.end_at.slice(11, 16)}
+                </dd>
+              </div>
+              <div>
+                <dt>VENUE</dt>
+                <dd>{e.venue}</dd>
+              </div>
+              <div>
+                <dt>FEE</dt>
+                <dd>¥{e.price.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt>CAPACITY</dt>
+                <dd>
+                  {e.applications}/{e.capacity}名
+                </dd>
+              </div>
+            </dl>
+            <h2>{e.description || 'イベント詳細'}</h2>
+            {e.items_to_bring && (
+              <>
+                <h3>持ち物</h3>
+                <p>{e.items_to_bring}</p>
+              </>
+            )}
+            {e.precautions && (
+              <>
+                <h3>注意事項</h3>
+                <p>{e.precautions}</p>
+              </>
+            )}
+          </article>
+          {e.registration_enabled ? (
+            <ApplicationForm eventId={e.id} />
+          ) : (
+            <p>現在、受付を停止しています。</p>
+          )}
+        </div>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
