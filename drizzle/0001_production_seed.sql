@@ -1,0 +1,7 @@
+INSERT OR IGNORE INTO admin_users (id,access_email,role,created_at) VALUES ('admin-owner-production','harusanx@gmail.com','owner','2026-08-29T00:00:00.000Z');
+INSERT OR IGNORE INTO settings (key,value,updated_at) VALUES ('site_url','"https://wine-work-women-core.harusanx552653.chatgpt.site"','2026-08-29T00:00:00.000Z'),('contact','"harusanx@gmail.com"','2026-08-29T00:00:00.000Z');
+INSERT OR IGNORE INTO event_applications (id,event_id,member_id,name,email,line_name,member_type,applied_at,application_status,payment_status,notes,created_at,updated_at) VALUES ('a1','e1','m1','山田 花子','hanako@example.jp','hanako_wine','member','2026-08-22T10:00:00.000Z','approved','paid','','2026-08-22T10:00:00.000Z','2026-08-22T10:00:00.000Z'),('a2','e1','m2','佐藤 美咲','misaki@example.jp','misaki','member','2026-08-23T10:00:00.000Z','approved','unpaid','','2026-08-23T10:00:00.000Z','2026-08-23T10:00:00.000Z');
+INSERT OR IGNORE INTO event_payments (id,application_id,amount,status,paid_at,created_at,updated_at) VALUES ('p1','a1',5500,'paid','2026-08-22T12:00:00.000Z','2026-08-22T10:00:00.000Z','2026-08-22T12:00:00.000Z'),('p2','a2',5500,'unpaid',NULL,'2026-08-23T10:00:00.000Z','2026-08-23T10:00:00.000Z');
+INSERT OR IGNORE INTO content_placements (id,content_id,surface,position,featured,pinned,is_new) VALUES ('pl1','c1','member_home',1,1,1,1),('pl2','c2','public_home',1,1,1,0);
+CREATE INDEX IF NOT EXISTS idx_applications_email_event ON event_applications(email,event_id) WHERE deleted_at IS NULL;
+PRAGMA optimize;

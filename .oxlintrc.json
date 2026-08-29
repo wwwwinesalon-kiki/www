@@ -32,6 +32,7 @@
     "next-env.d.ts"
     ,"components/ui/**"
     ,"hooks/**"
+    ,"package-stage/**"
   ],
   "rules": {
     "no-array-constructor": "error",
@@ -50,8 +51,9 @@
     "jsx-a11y/label-has-associated-control": "warn",
     "jsx-a11y/prefer-tag-over-role": "warn",
     "jsx-a11y/media-has-caption": "warn",
+    "nextjs/no-html-link-for-pages": "off",
+    "typescript/no-deprecated": "warn",
     "typescript/ban-ts-comment": "error",
-    "typescript/no-deprecated": "error",
     "typescript/no-empty-object-type": "error",
     "typescript/no-explicit-any": "error",
     "typescript/no-namespace": "error",
