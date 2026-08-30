@@ -1,1 +1,31 @@
-import {env} from 'cloudflare:workers';const allowed=new Set(['page_view','content_view','event_detail_view','event_apply','member_login']);export async function POST(req:Request){const b=await req.json() as {eventType:string;sessionId:string;path:string;entityId?:string};if(!allowed.has(b.eventType)||!b.sessionId||!b.path)return new Response(null,{status:204});await env.DB.prepare('INSERT INTO analytics_events (id,event_type,session_id,path,entity_id,occurred_at) VALUES (?,?,?,?,?,?)').bind(crypto.randomUUID(),b.eventType,b.sessionId.slice(0,64),b.path.slice(0,500),b.entityId||null,new Date().toISOString()).run();return new Response(null,{status:204})}
+import { env } from 'cloudflare:workers';
+const allowed = new Set([
+  'page_view',
+  'content_view',
+  'event_detail_view',
+  'event_apply',
+  'member_login',
+]);
+export async function POST(req: Request) {
+  const b = (await req.json()) as {
+    eventType: string;
+    sessionId: string;
+    path: string;
+    entityId?: string;
+  };
+  if (!allowed.has(b.eventType) || !b.sessionId || !b.path)
+    return new Response(null, { status: 204 });
+  await env.DB.prepare(
+    'INSERT INTO analytics_events (id,event_type,session_id,path,entity_id,occurred_at) VALUES (?,?,?,?,?,?)',
+  )
+    .bind(
+      crypto.randomUUID(),
+      b.eventType,
+      b.sessionId.slice(0, 64),
+      b.path.slice(0, 500),
+      b.entityId || null,
+      new Date().toISOString(),
+    )
+    .run();
+  return new Response(null, { status: 204 });
+}

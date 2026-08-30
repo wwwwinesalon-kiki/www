@@ -15,6 +15,7 @@ export default function PublicMenu() {
         <Link href="/events">EVENT</Link>
         <Link href="/faq">FAQ</Link>
         <Link href="/join">JOIN</Link>
+        <Link href="/contact">CONTACT</Link>
       </nav>
     </details>
   );

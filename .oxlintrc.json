@@ -29,12 +29,12 @@
     "build/**",
     "dist/**",
     "coverage/**",
-    "next-env.d.ts"
-    ,"components/ui/**"
-    ,"hooks/**"
-    ,"package-stage/**"
-    ,"package-stage-v3/**"
-    ,"package-stage-v4/**"
+    "next-env.d.ts",
+    "components/ui/**",
+    "hooks/**",
+    "package-stage/**",
+    "package-stage-v3/**",
+    "package-stage-v4/**"
   ],
   "rules": {
     "no-array-constructor": "error",

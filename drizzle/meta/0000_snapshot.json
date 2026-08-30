@@ -39,9 +39,7 @@
       "indexes": {
         "idx_admin_email": {
           "name": "idx_admin_email",
-          "columns": [
-            "access_email"
-          ],
+          "columns": ["access_email"],
           "isUnique": true
         }
       },
@@ -85,11 +83,7 @@
       "indexes": {
         "idx_analytics_daily_unique": {
           "name": "idx_analytics_daily_unique",
-          "columns": [
-            "day",
-            "metric",
-            "dimension"
-          ],
+          "columns": ["day", "metric", "dimension"],
           "isUnique": true
         }
       },
@@ -147,10 +141,7 @@
       "indexes": {
         "idx_analytics_type_date": {
           "name": "idx_analytics_type_date",
-          "columns": [
-            "event_type",
-            "occurred_at"
-          ],
+          "columns": ["event_type", "occurred_at"],
           "isUnique": false
         }
       },
@@ -222,17 +213,12 @@
       "indexes": {
         "idx_audit_entity": {
           "name": "idx_audit_entity",
-          "columns": [
-            "entity_type",
-            "entity_id"
-          ],
+          "columns": ["entity_type", "entity_id"],
           "isUnique": false
         },
         "idx_audit_created": {
           "name": "idx_audit_created",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -300,12 +286,8 @@
           "name": "content_media_content_id_contents_id_fk",
           "tableFrom": "content_media",
           "tableTo": "contents",
-          "columnsFrom": [
-            "content_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["content_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -377,10 +359,7 @@
       "indexes": {
         "idx_placements_surface_position": {
           "name": "idx_placements_surface_position",
-          "columns": [
-            "surface",
-            "position"
-          ],
+          "columns": ["surface", "position"],
           "isUnique": false
         }
       },
@@ -389,12 +368,8 @@
           "name": "content_placements_content_id_contents_id_fk",
           "tableFrom": "content_placements",
           "tableTo": "contents",
-          "columnsFrom": [
-            "content_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["content_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -529,17 +504,12 @@
       "indexes": {
         "idx_contents_slug": {
           "name": "idx_contents_slug",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         },
         "idx_contents_listing": {
           "name": "idx_contents_listing",
-          "columns": [
-            "type",
-            "publish_status"
-          ],
+          "columns": ["type", "publish_status"],
           "isUnique": false
         }
       },
@@ -667,10 +637,7 @@
       "indexes": {
         "idx_app_event_status": {
           "name": "idx_app_event_status",
-          "columns": [
-            "event_id",
-            "application_status"
-          ],
+          "columns": ["event_id", "application_status"],
           "isUnique": false
         }
       },
@@ -679,12 +646,8 @@
           "name": "event_applications_event_id_events_id_fk",
           "tableFrom": "event_applications",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -692,12 +655,8 @@
           "name": "event_applications_member_id_members_id_fk",
           "tableFrom": "event_applications",
           "tableTo": "members",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["member_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -783,9 +742,7 @@
       "indexes": {
         "idx_payments_status": {
           "name": "idx_payments_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -794,12 +751,8 @@
           "name": "event_payments_application_id_event_applications_id_fk",
           "tableFrom": "event_payments",
           "tableTo": "event_applications",
-          "columnsFrom": [
-            "application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["application_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -976,16 +929,12 @@
       "indexes": {
         "idx_events_slug": {
           "name": "idx_events_slug",
-          "columns": [
-            "slug"
-          ],
+          "columns": ["slug"],
           "isUnique": true
         },
         "idx_events_start": {
           "name": "idx_events_start",
-          "columns": [
-            "start_at"
-          ],
+          "columns": ["start_at"],
           "isUnique": false
         }
       },
@@ -1106,16 +1055,12 @@
       "indexes": {
         "idx_members_status": {
           "name": "idx_members_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "idx_members_email": {
           "name": "idx_members_email",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": false
         }
       },
@@ -1173,9 +1118,7 @@
       "indexes": {
         "idx_notifications_unread": {
           "name": "idx_notifications_unread",
-          "columns": [
-            "read_at"
-          ],
+          "columns": ["read_at"],
           "isUnique": false
         }
       },

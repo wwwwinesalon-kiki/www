@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import PublicMenu from '@/components/public-menu';
+import { publicEvents, visibleContents } from '@/lib/data';
 
 const gallery = [
   ['/images/www/gathering.webp', 'ワインを囲むひととき', 'left'],
@@ -15,7 +16,13 @@ const gallery = [
 ];
 
 export const dynamic = 'force-dynamic';
-export default function Home() {
+export default async function Home() {
+  const [events, contents] = await Promise.all([
+    publicEvents(),
+    visibleContents(false),
+  ]);
+  const upcoming = events.slice(0, 3),
+    featured = contents.slice(0, 3);
   return (
     <main className="public-home">
       <PublicMenu />
@@ -50,6 +57,66 @@ export default function Home() {
             />
           </Link>
         ))}
+      </section>
+      <section className="home-updates" aria-labelledby="updates-title">
+        <p className="concept-kicker">CURRENT WWW</p>
+        <h2 id="updates-title">いま、WWWで起きていること</h2>
+        <div className="update-columns">
+          <div>
+            <p className="update-label">NEXT EVENT</p>
+            {upcoming.length ? (
+              upcoming.map((event) => (
+                <Link
+                  className="update-row"
+                  href={`/events/${event.slug}`}
+                  key={event.id}
+                >
+                  <time>
+                    {event.start_at.slice(0, 10).replaceAll('-', '.')}
+                  </time>
+                  <strong>{event.title}</strong>
+                  <span>
+                    {event.registration_enabled
+                      ? event.applications >= event.capacity &&
+                        event.waitlist_enabled
+                        ? 'キャンセル待ち'
+                        : '受付中'
+                      : '受付終了'}
+                  </span>
+                </Link>
+              ))
+            ) : (
+              <p className="update-empty">次回イベントは準備中です。</p>
+            )}
+            <Link href="/events" className="more-link">
+              EVENTをすべて見る
+            </Link>
+          </div>
+          <div>
+            <p className="update-label">LATEST STORIES</p>
+            {featured.length ? (
+              featured.map((content) => (
+                <Link
+                  className="update-row"
+                  href={`/news/${content.slug}`}
+                  key={content.id}
+                >
+                  <time>
+                    {content.published_at?.slice(0, 10).replaceAll('-', '.') ||
+                      'NEW'}
+                  </time>
+                  <strong>{content.title}</strong>
+                  <span>{content.is_new ? 'NEW' : content.type}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="update-empty">新しい読みものを準備中です。</p>
+            )}
+            <Link href="/news" className="more-link">
+              NEWSをすべて見る
+            </Link>
+          </div>
+        </div>
       </section>
       <section className="home-concept">
         <p className="concept-kicker">WWW...?</p>

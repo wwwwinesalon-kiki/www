@@ -1,0 +1,153 @@
+.public-home,
+.public-page,
+.event-detail,
+.join-page,
+.story.public-story {
+  font-family: var(--font-mincho-jp), serif;
+}
+.public-home button,
+.public-home input,
+.public-home select,
+.public-page button,
+.public-page input {
+  font-family: var(--font-sans-jp), sans-serif;
+}
+.home-updates {
+  width: min(960px, 88vw);
+  margin: 0 auto;
+  padding: 40px 0 130px;
+}
+.home-updates > h2 {
+  text-align: center;
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  margin: -45px 0 70px;
+}
+.update-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 70px;
+}
+.update-label {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(109, 55, 64, 0.28);
+}
+.update-row {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 19px 0;
+  border-bottom: 1px solid rgba(109, 55, 64, 0.16);
+}
+.update-row time {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #8b7778;
+}
+.update-row strong {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.update-row span {
+  font-family: var(--font-sans-jp);
+  font-size: 8px;
+  border: 1px solid rgba(109, 55, 64, 0.28);
+  padding: 4px 7px;
+}
+.update-empty {
+  font-size: 11px;
+  padding: 20px 0;
+}
+.more-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid;
+}
+.legal-page section {
+  max-width: 780px;
+  margin: 0;
+}
+.legal-page h2 {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin: 45px 0 14px;
+}
+.legal-page p {
+  font-size: 12px;
+  line-height: 2;
+}
+.legal-note {
+  color: #8a7778;
+}
+.legal-dl {
+  border-top: 1px solid rgba(109, 55, 64, 0.2);
+}
+.legal-dl div {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 30px;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(109, 55, 64, 0.16);
+}
+.legal-dl dt {
+  font-weight: 600;
+}
+.legal-dl dd {
+  margin: 0;
+  line-height: 1.8;
+}
+.public-story time {
+  font-size: 10px;
+  color: #8a7778;
+}
+.public-story img {
+  width: 100%;
+  height: auto;
+  margin: 40px 0;
+}
+.account-panel {
+  width: min(760px, calc(100% - 40px));
+  margin: 0 auto 120px;
+  padding: clamp(28px, 6vw, 64px);
+  border: 1px solid rgba(101, 65, 57, 0.18);
+  background: rgba(255, 253, 248, 0.72);
+}
+.account-panel h2 {
+  margin-top: 0;
+}
+.account-panel p {
+  line-height: 2;
+}
+@media (max-width: 760px) {
+  .home-updates {
+    width: 86vw;
+    padding-bottom: 90px;
+  }
+  .home-updates > h2 {
+    font-size: 20px;
+    margin-bottom: 42px;
+  }
+  .update-columns {
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+  .update-row {
+    grid-template-columns: 72px 1fr auto;
+    gap: 9px;
+  }
+  .update-row strong {
+    font-size: 10px;
+  }
+  .legal-dl div {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

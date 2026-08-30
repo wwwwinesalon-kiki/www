@@ -15,6 +15,7 @@ const copy: Record<string, [string, string]> = {
   news: ['NEWS', 'WWWからのお知らせ。'],
   events: ['EVENT', '次に会える場所。'],
   archive: ['ARCHIVE', 'これまでの物語をたどる。'],
+  account: ['ACCOUNT', '会員情報とお支払いについて。'],
 };
 export default async function MemberPage({
   params,
@@ -92,6 +93,34 @@ export default async function MemberPage({
             ) : (
               <p>公開中のイベントはありません。</p>
             )}
+          </section>
+        </main>
+        <SiteFooter />
+      </>
+    );
+  }
+  if (key === 'account') {
+    return (
+      <>
+        <SiteHeader member />
+        <main className="member-page">
+          <div className="member-hero">
+            <p className="eyebrow">{label}</p>
+            <h1>{title}</h1>
+          </div>
+          <section className="account-panel">
+            <h2>会費・登録内容の確認</h2>
+            <p>
+              会費のお支払い、カード変更、退会手続きは会費ペイで行います。現在の会員サイトは共通ログインのため、個人の氏名や決済履歴は表示しません。
+            </p>
+            <p>
+              登録状況が分からない場合は、会費ペイに登録したお名前とメールアドレスを添えてお問い合わせください。
+            </p>
+            <div className="legal-actions">
+              <Link className="button" href="/contact">
+                お問い合わせ
+              </Link>
+            </div>
           </section>
         </main>
         <SiteFooter />

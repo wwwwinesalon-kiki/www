@@ -1,4 +1,111 @@
-export const members=[{id:'m1',name:'山田 花子',line:'hanako_wine',email:'hanako@example.jp',status:'active',joined:'2026-06-12',source:'LINE',lastContact:'2026-08-25'},{id:'m2',name:'佐藤 美咲',line:'misaki',email:'misaki@example.jp',status:'pause',joined:'2025-11-03',source:'イベント',lastContact:'2026-07-14'},{id:'m3',name:'鈴木 玲奈',line:'rena_s',email:'rena@example.jp',status:'invited',joined:'—',source:'紹介',lastContact:'2026-08-28'}];
-export const events=[{id:'e1',title:'余市の畑と、秋のテーブル',slug:'yoichi-autumn-table',date:'2026.09.19',venue:'北海道・余市',capacity:20,applications:17,price:5500,status:'公開中'},{id:'e2',title:'NOMIKAI Vol.12',slug:'nomikai-12',date:'2026.10.08',venue:'東京・清澄白河',capacity:30,applications:9,price:4500,status:'公開中'}];
-export const contents=[{id:'c1',type:'FIELD',title:'収穫前、余市の畑から',slug:'yoichi-before-harvest',summary:'実りの季節を待つ畑と、生産者の声。',publicVisible:false,memberVisible:true,status:'公開'},{id:'c2',type:'PEOPLE',title:'つくる人｜藤田さん',slug:'fujita-winemaker',summary:'この土地でワインをつくる理由を聞きました。',publicVisible:true,memberVisible:true,status:'公開'},{id:'c3',type:'TABLE',title:'白ワインと秋野菜の食卓',slug:'white-wine-autumn',summary:'家で楽しむ、季節のペアリング。',publicVisible:true,memberVisible:false,status:'公開'}];
-export const payments=[{id:'p1',name:'山田 花子',event:'余市の畑と、秋のテーブル',amount:5500,status:'paid'},{id:'p2',name:'佐藤 美咲',event:'余市の畑と、秋のテーブル',amount:5500,status:'unpaid'},{id:'p3',name:'鈴木 玲奈',event:'NOMIKAI Vol.12',amount:4500,status:'unpaid'}] as const;
+export const members = [
+  {
+    id: 'm1',
+    name: '山田 花子',
+    line: 'hanako_wine',
+    email: 'hanako@example.jp',
+    status: 'active',
+    joined: '2026-06-12',
+    source: 'LINE',
+    lastContact: '2026-08-25',
+  },
+  {
+    id: 'm2',
+    name: '佐藤 美咲',
+    line: 'misaki',
+    email: 'misaki@example.jp',
+    status: 'pause',
+    joined: '2025-11-03',
+    source: 'イベント',
+    lastContact: '2026-07-14',
+  },
+  {
+    id: 'm3',
+    name: '鈴木 玲奈',
+    line: 'rena_s',
+    email: 'rena@example.jp',
+    status: 'invited',
+    joined: '—',
+    source: '紹介',
+    lastContact: '2026-08-28',
+  },
+];
+export const events = [
+  {
+    id: 'e1',
+    title: '余市の畑と、秋のテーブル',
+    slug: 'yoichi-autumn-table',
+    date: '2026.09.19',
+    venue: '北海道・余市',
+    capacity: 20,
+    applications: 17,
+    price: 5500,
+    status: '公開中',
+  },
+  {
+    id: 'e2',
+    title: 'NOMIKAI Vol.12',
+    slug: 'nomikai-12',
+    date: '2026.10.08',
+    venue: '東京・清澄白河',
+    capacity: 30,
+    applications: 9,
+    price: 4500,
+    status: '公開中',
+  },
+];
+export const contents = [
+  {
+    id: 'c1',
+    type: 'FIELD',
+    title: '収穫前、余市の畑から',
+    slug: 'yoichi-before-harvest',
+    summary: '実りの季節を待つ畑と、生産者の声。',
+    publicVisible: false,
+    memberVisible: true,
+    status: '公開',
+  },
+  {
+    id: 'c2',
+    type: 'PEOPLE',
+    title: 'つくる人｜藤田さん',
+    slug: 'fujita-winemaker',
+    summary: 'この土地でワインをつくる理由を聞きました。',
+    publicVisible: true,
+    memberVisible: true,
+    status: '公開',
+  },
+  {
+    id: 'c3',
+    type: 'TABLE',
+    title: '白ワインと秋野菜の食卓',
+    slug: 'white-wine-autumn',
+    summary: '家で楽しむ、季節のペアリング。',
+    publicVisible: true,
+    memberVisible: false,
+    status: '公開',
+  },
+];
+export const payments = [
+  {
+    id: 'p1',
+    name: '山田 花子',
+    event: '余市の畑と、秋のテーブル',
+    amount: 5500,
+    status: 'paid',
+  },
+  {
+    id: 'p2',
+    name: '佐藤 美咲',
+    event: '余市の畑と、秋のテーブル',
+    amount: 5500,
+    status: 'unpaid',
+  },
+  {
+    id: 'p3',
+    name: '鈴木 玲奈',
+    event: 'NOMIKAI Vol.12',
+    amount: 4500,
+    status: 'unpaid',
+  },
+] as const;

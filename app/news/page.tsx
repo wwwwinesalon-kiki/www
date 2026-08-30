@@ -1,5 +1,6 @@
 import { SiteHeader, SiteFooter } from '@/components/site-chrome';
 import { visibleContents } from '@/lib/data';
+import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export default async function News() {
   const contents = await visibleContents(false, 'NEWS');
@@ -15,7 +16,9 @@ export default async function News() {
               <article key={c.id}>
                 <time>{c.published_at?.slice(0, 10) || '公開日未設定'}</time>
                 <span>{c.type}</span>
-                <h2>{c.title}</h2>
+                <h2>
+                  <Link href={`/news/${c.slug}`}>{c.title}</Link>
+                </h2>
                 <p>{c.summary}</p>
               </article>
             ))
