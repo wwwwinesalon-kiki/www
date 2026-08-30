@@ -2,10 +2,10 @@ import Image from 'next/image';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 
 const partners = [
-  { name: 'ドメーヌモン', person: '山中敦生様', image: '/images/about/partners/domaine-mont.jpg', href: 'https://domainemont.com/', note: '余市の登地区でブドウと向き合い土地の個性を映すワインを造る生産者' },
-  { name: '山田堂', person: '山田雄一様', image: '/images/about/partners/yamadado.png', href: 'https://yamadado.jp/', note: '日々の食卓に寄り添う上質なテーブルワインを目指す余市の小さなワイナリー' },
-  { name: 'ドメーヌタカヒコ', person: '曽我貴彦様', image: '/images/about/partners/takahiko.jpg', href: 'https://www.takahiko.co.jp/', note: '余市の風土とピノ・ノワールの可能性を追い続けるワイナリー' },
-  { name: 'Special Wine Partner', person: '高松亨様', image: '/images/about/partners/takamatsu.jpg', href: 'https://www.town.yoichi.hokkaido.jp/sangyou/machidukuri/chiikiokoshikyouryokutaiR401.html', note: '世界で経験を重ね余市のワインと地域の魅力をつなぐマスターソムリエ' },
+  { name: 'ドメーヌモン', person: '山中敦生様', image: '/images/about/partners/domaine-mont.png', href: 'https://domainemont.com/', note: '余市の登地区でブドウと向き合い土地の個性を映すワインを造る生産者' },
+  { name: '山田堂', person: '山田雄一様', image: '/images/about/partners/yamadado-new.png', href: 'https://yamadado.jp/', note: '日々の食卓に寄り添う上質なテーブルワインを目指す余市の小さなワイナリー' },
+  { name: 'ドメーヌ・タカヒコ', person: '曽我貴彦様', image: '/images/about/partners/takahiko-new.png', href: 'https://www.takahiko.co.jp/', note: '余市の風土とピノ・ノワールの可能性を追い続けるワイナリー' },
+  { name: 'たかまつとおる', person: 'Special Wine Partner', image: '/images/about/partners/takamatsu-new.png', href: 'https://www.town.yoichi.hokkaido.jp/sangyou/machidukuri/chiikiokoshikyouryokutaiR401.html', note: '世界で経験を重ね余市のワインと地域の魅力をつなぐマスターソムリエ' },
 ];
 
 const experiences = ['ワイナリー訪問', '生産者との交流', '畑訪問', '収穫体験', 'FIELDツアー', '特別な食事会'];
