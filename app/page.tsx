@@ -1,84 +1,114 @@
 import Link from 'next/link';
-import { ArrowRight, CalendarDays, MapPin } from 'lucide-react';
-import { publicEvents } from '@/lib/data';
+import Image from 'next/image';
+import PublicMenu from '@/components/public-menu';
+
+const gallery = [
+  ['/images/www/gathering.webp', 'ワインを囲むひととき', 'left'],
+  ['/images/www/bottles.webp', 'つくり手のワイン', 'center'],
+  ['/images/www/women.webp', '会話を楽しむ女性たち', 'center'],
+  ['/images/www/gathering.webp', 'テーブルを囲む時間', 'center'],
+  ['/images/www/women.webp', 'ワインがつなぐ出会い', 'right'],
+  ['/images/www/gathering.webp', '料理とワイン', 'right'],
+  ['/images/www/bottles.webp', '夜のワインバー', 'left'],
+  ['/images/www/landscape.webp', 'WWWの物語', 'center'],
+  ['/images/www/women.webp', '日常にある豊かさ', 'left'],
+];
 
 export const dynamic = 'force-dynamic';
-export default async function Home() {
-  const next = (await publicEvents())[0];
+export default function Home() {
   return (
-    <main>
-      <header className="site-header">
-        <Link href="/" className="brand">
-          <span>WWW</span>
-          <small>WINE WORK WOMEN</small>
-        </Link>
-        <nav aria-label="メインナビゲーション">
-          <Link href="/about">ABOUT</Link>
-          <Link href="/news">NEWS</Link>
-          <Link href="/events">EVENT</Link>
-          <Link href="/faq">FAQ</Link>
-        </nav>
-        <Link href="/join" className="button compact">
-          JOIN US <ArrowRight size={15} />
-        </Link>
-      </header>
-      <section className="hero">
-        <p className="eyebrow">WINE CONNECTS US</p>
-        <h1>
-          ワインから、
-          <br />
-          人生をちょっと豊かに。
-        </h1>
-        <p className="hero-copy">
-          つくる人、届ける人、楽しむ人。ワインをきっかけに、女性たちの仕事と暮らしがつながるコミュニティです。
-        </p>
-        <div className="hero-actions">
-          <Link href="/join" className="button">
-            WWWに参加する <ArrowRight size={17} />
-          </Link>
-          <Link href="/about" className="text-link">
-            私たちについて
-          </Link>
-        </div>
-        <div className="wine-orbit" aria-hidden="true">
-          <span>WWW</span>
-        </div>
+    <main className="public-home">
+      <PublicMenu />
+      <section className="home-hero" aria-label="Wine Work Women">
+        <Image
+          src="/images/www/landscape.webp"
+          alt="海辺の風景を描いた線画"
+          width={1672}
+          height={941}
+          priority
+        />
+        <h1>WWW</h1>
       </section>
-      <section className="event-band">
-        <div>
-          <p className="eyebrow">NEXT EVENT</p>
-          <h2>{next?.title || '現在、公開中のイベントはありません'}</h2>
-        </div>
-        {next && (
-          <>
-            <div className="event-meta">
-              <span>
-                <CalendarDays size={18} /> {next.start_at.slice(0, 10)}
-              </span>
-              <span>
-                <MapPin size={18} /> {next.venue}
-              </span>
-            </div>
-            <Link
-              href={`/events/${next.slug}`}
-              className="round-link"
-              aria-label="イベント詳細"
-            >
-              <ArrowRight />
-            </Link>
-          </>
-        )}
+      <section className="home-story" aria-label="WWWのはじまり">
+        <p>「最近飲むことが増えた」</p>
+        <p>「もう少し深く知ってみたい」</p>
+        <p>ワイン熱が上がってきた</p>
+        <p>そんな女性の皆様に</p>
       </section>
-      <section className="intro">
-        <p className="eyebrow">OUR COMMUNITY</p>
-        <h2>
-          知るほどに、会いたくなる。
-          <br />
-          会うほどに、好きになる。
-        </h2>
-        <p>
-          畑の声、つくり手の物語、食卓のアイデア。WWWは、ワインの向こう側にいる人と土地を、日々の暮らしへ届けます。
-        </p>
+      <section className="home-gallery" aria-label="WWWのギャラリー">
+        {gallery.map(([src, alt, position], index) => (
+          <Link
+            href={index < 3 ? '/about' : index < 6 ? '/events' : '/news'}
+            key={`${alt}-${index}`}
+          >
+            <Image
+              src={src}
+              alt={alt}
+              width={600}
+              height={420}
+              style={{ objectPosition: position }}
+            />
+          </Link>
+        ))}
+      </section>
+      <section className="home-concept">
+        <p className="concept-kicker">WWW...?</p>
+        <article>
+          <Image
+            src="/images/www/gathering.webp"
+            alt="グラス越しのワイン会"
+            width={900}
+            height={600}
+          />
+          <div>
+            <p className="concept-number">一</p>
+            <h2>ワイン造りを知る</h2>
+            <p>
+              美味しいワインとは。想いが詰まった一本の向こうにある、土地や造り手の物語を訪ねます。
+            </p>
+          </div>
+        </article>
+        <article>
+          <Image
+            src="/images/www/bottles.webp"
+            alt="並べられたワインボトル"
+            width={900}
+            height={600}
+          />
+          <div>
+            <p className="concept-number">二</p>
+            <h2>
+              飲み会という名の
+              <br />
+              ワイン勉強会
+            </h2>
+            <p>
+              料理と会話を囲みながら、香りや味わいの違いを気軽に楽しむ時間です。知識より、感じたことを大切に。
+            </p>
+          </div>
+        </article>
+        <article>
+          <Image
+            src="/images/www/women.webp"
+            alt="ワインを囲んで語らう女性たち"
+            width={900}
+            height={600}
+          />
+          <div>
+            <p className="concept-name">Wine Work Women</p>
+            <h2>
+              ワインから、
+              <br />
+              仕事と暮らしをつなぐ。
+            </h2>
+            <p>
+              つくる人、届ける人、楽しむ人。WWWは、ワインをきっかけに女性たちの新しい出会いを育てるコミュニティです。
+            </p>
+          </div>
+        </article>
+        <Link href="/join" className="line-cta">
+          <span>申込や詳細は</span>公式LINE
+        </Link>
       </section>
     </main>
   );
