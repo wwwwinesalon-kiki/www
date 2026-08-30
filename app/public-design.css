@@ -152,6 +152,7 @@
 }
 .home-concept article > img {
   width: 100%;
+  height: auto;
   aspect-ratio: 1.48;
   object-fit: cover;
   filter: saturate(0.94) contrast(1.01);
