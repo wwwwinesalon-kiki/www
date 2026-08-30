@@ -4,7 +4,7 @@ export default function Contact() {
     <LegalPage eyebrow="CONTACT" title="お問い合わせ">
       <h2>WWWへのご連絡</h2>
       <p>
-        参加　イベント　会費ペイでのお支払い　会員情報については公式LINEまたは運営メールへお問い合わせください
+        参加イベント会費ペイでのお支払い会員情報については公式LINEまたは運営メールへお問い合わせください
       </p>
       <p>
         <a

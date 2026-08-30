@@ -9,7 +9,7 @@ export default async function Events() {
       <SiteHeader />
       <main className="public-page">
         <p className="eyebrow">EVENTS</p>
-        <h1>会う　味わう　つながる</h1>
+        <h1>会う味わうつながる</h1>
         <div className="event-list">
           {events.length ? (
             events.map((e, i) => (

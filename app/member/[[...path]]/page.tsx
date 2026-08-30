@@ -111,7 +111,7 @@ export default async function MemberPage({
           <section className="account-panel">
             <h2>会費・登録内容の確認</h2>
             <p>
-              会費のお支払い　カード変更　退会手続きは会費ペイで行います　現在の会員サイトは共通ログインのため個人の氏名や決済履歴は表示しません
+              会費のお支払いカード変更退会手続きは会費ペイで行います現在の会員サイトは共通ログインのため個人の氏名や決済履歴は表示しません
             </p>
             <p>
               登録状況が分からない場合は会費ペイに登録したお名前とメールアドレスを添えてお問い合わせください
@@ -137,7 +137,7 @@ export default async function MemberPage({
         <div className="member-hero">
           <p className="eyebrow">{label}</p>
           <h1>{title}</h1>
-          <p>つくる人　土地　食卓をつなぐ会員だけの読みものと体験</p>
+          <p>つくる人土地食卓をつなぐ会員だけの読みものと体験</p>
         </div>
         <section className="content-grid">
           {contents.length ? (

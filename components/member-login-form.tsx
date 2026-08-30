@@ -70,7 +70,7 @@ export default function MemberLoginForm() {
       )}
       {state === 'registered' && (
         <output>
-          登録を受け付けました　メール確認と運営の承認後にログインできます
+          登録を受け付けましたメール確認と運営の承認後にログインできます
         </output>
       )}
       <button

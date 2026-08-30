@@ -59,7 +59,7 @@ export default async function Home() {
       {(upcoming.length > 0 || featured.length > 0) && (
         <section className="home-updates" aria-labelledby="updates-title">
           <p className="concept-kicker">CURRENT WWW</p>
-          <h2 id="updates-title">いま WWWで起きていること</h2>
+          <h2 id="updates-title">WWW TOPICS</h2>
           <div className="update-columns">
             <div>
               <p className="update-label">NEXT EVENT</p>
@@ -132,10 +132,10 @@ export default async function Home() {
           <div>
             <h2>ワイン造りを知る</h2>
             <div className="concept-copy">
-              <p>美味しいワインは　長い時間と手間をかけて造られ...</p>
+              <p>美味しいワインは長い時間と手間をかけて造られ...</p>
               <p>「それは知ってる。」</p>
-              <p>聞くことがなかった　聞ける場所がなかった</p>
-              <p>かけた想いやこだわりを　実際の生産者から聞いてみませんか？</p>
+              <p>聞くことがなかった聞ける場所がなかった</p>
+              <p>かけた想いやこだわりを実際の生産者から聞いてみませんか？</p>
             </div>
           </div>
         </article>
@@ -155,13 +155,13 @@ export default async function Home() {
             </h2>
             <div className="concept-copy">
               <p>
-                場所は余市町の石蔵のカフェ&amp;バーで　余市産旬の食材と一緒にワインの勉強会。
+                場所は余市町の石蔵のカフェ&amp;バーで余市産旬の食材と一緒にワインの勉強会。
               </p>
               <p>
-                実際に造り手の皆さんやワインソムリエなど　普段はお会いできない特別講師を招いて
+                実際に造り手の皆さんやワインソムリエなど普段はお会いできない特別講師を招いて
               </p>
               <p>
-                気軽に参加できる　ワイン勉強会（という名の飲み会）を　定期的に開催しています
+                気軽に参加できるワイン勉強会（という名の飲み会）を定期的に開催しています
               </p>
             </div>
           </div>

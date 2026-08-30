@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import AnalyticsTracker from '@/components/analytics-tracker';
 import WineRippleBackground from '@/components/wine-ripple-background';
+import JoinUsCta from '@/components/join-us-cta';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -33,6 +34,7 @@ export default function RootLayout({
         <WineRippleBackground />
         <AnalyticsTracker />
         <div className="site-content">{children}</div>
+        <JoinUsCta />
       </body>
     </html>
   );

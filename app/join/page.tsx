@@ -11,7 +11,7 @@ export default function Join() {
           新しい出会いと
         </h1>
         <p>
-          まずは公式LINEを追加してください　活動のご案内と会費ペイでの入会手続きをお送りします
+          まずは公式LINEを追加してください<br />活動のご案内と入会手続きをお送りします
         </p>
         <a
           className="line-cta line-cta-inline"
@@ -29,7 +29,7 @@ export default function Join() {
             <b>01</b>公式LINEを追加
           </li>
           <li>
-            <b>02</b>会費ペイで手続き
+            <b>02</b>案内に沿って登録
           </li>
           <li>
             <b>03</b>Member Siteへ

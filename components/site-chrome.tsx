@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import PublicMenu from '@/components/public-menu';
+import { WineGlassIcon } from '@/components/join-us-cta';
 export function SiteHeader({ member = false }: { member?: boolean }) {
   return (
     <header className="site-header">
@@ -38,8 +39,9 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
           <button className="plain-action">ログアウト</button>
         </form>
       ) : (
-        <Link href="/join" className="button compact">
-          JOIN US <ArrowRight size={15} />
+        <Link href="/join" className="button compact header-join wine-fill-button">
+          <WineGlassIcon className="header-join-glass" />
+          <span>JOIN US</span> <ArrowRight size={15} />
         </Link>
       )}
     </header>
@@ -52,7 +54,7 @@ export function SiteFooter() {
         <span>WWW</span>
         <small>WINE WORK WOMEN</small>
       </div>
-      <p>ワインから　人生をちょっと豊かに</p>
+      <p>ワインから人生をちょっと豊かに</p>
       <div>
         <Link href="/about">ABOUT</Link>
         <Link href="/events">EVENT</Link>

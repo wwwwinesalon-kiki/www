@@ -62,7 +62,7 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
       )}
       {state === 'error' && (
         <p className="form-error" role="alert">
-          送信できませんでした　内容は保持されています　もう一度お試しください
+          送信できませんでした内容は保持されていますもう一度お試しください
         </p>
       )}
     </form>
