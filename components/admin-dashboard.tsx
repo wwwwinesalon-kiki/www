@@ -27,6 +27,8 @@ type Member = {
   source: string | null;
   lastContact: string | null;
   created_at: string;
+  notes: string | null;
+  interestCategories: string | null;
 };
 type EventRow = {
   id: string;
@@ -41,6 +43,15 @@ type EventRow = {
   registration_enabled: number;
   waitlist_enabled: number;
   member_visible: number;
+  event_type: string;
+  description: string | null;
+  start_at: string;
+  end_at: string;
+  member_only: number;
+  public_visible: number;
+  cover_image: string | null;
+  items_to_bring: string | null;
+  precautions: string | null;
 };
 type Application = {
   id: string;
@@ -51,6 +62,8 @@ type Application = {
   application_status: string;
   payment_status: string;
   event_title: string;
+  event_id: string;
+  notes: string | null;
 };
 type Payment = {
   id: string;
@@ -508,9 +521,13 @@ function Members({
   reload: () => Promise<void>;
 }) {
   const [q, setQ] = useState(''),
-    [adding, setAdding] = useState(false);
-  const rows = data.members.filter((m) =>
-    (m.name + (m.email || '')).toLowerCase().includes(q.toLowerCase()),
+    [adding, setAdding] = useState(false),
+    [status, setStatus] = useState('all'),
+    [selected, setSelected] = useState<string | null>(null);
+  const rows = data.members.filter(
+    (m) =>
+      (status === 'all' || m.status === status) &&
+      (m.name + (m.email || '')).toLowerCase().includes(q.toLowerCase()),
   );
   return (
     <>
@@ -538,6 +555,18 @@ function Members({
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
+        <select
+          aria-label="会員ステータスFilter"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="all">全Status</option>
+          <option value="candidate">candidate</option>
+          <option value="invited">invited</option>
+          <option value="active">active</option>
+          <option value="pause">pause</option>
+          <option value="churned">churned</option>
+        </select>
         <a className="toolbar-link" href="/api/admin/members.csv">
           CSV Export
         </a>
@@ -545,7 +574,14 @@ function Members({
       <section className="panel table-panel">
         <table>
           <TableHead
-            labels={['会員', 'ステータス', '入会日', '流入', '最終接触']}
+            labels={[
+              '会員',
+              'ステータス',
+              '入会日',
+              '流入',
+              '最終接触',
+              '操作',
+            ]}
           />
           <tbody>
             {rows.map((m) => (
@@ -573,12 +609,110 @@ function Members({
                 <td>{m.joined}</td>
                 <td>{m.source}</td>
                 <td>{m.lastContact}</td>
+                <td>
+                  <button
+                    className="small-button"
+                    onClick={() => setSelected(selected === m.id ? null : m.id)}
+                  >
+                    詳細 / Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      {selected && (
+        <MemberEditor
+          member={data.members.find((m) => m.id === selected)!}
+          patch={patch}
+          reload={reload}
+        />
+      )}
     </>
+  );
+}
+function MemberEditor({
+  member,
+  patch,
+  reload,
+}: {
+  member: Member;
+  patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
+  reload: () => Promise<void>;
+}) {
+  const [message, setMessage] = useState('');
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage('保存中…');
+    const b = Object.fromEntries(new FormData(e.currentTarget));
+    await patch('members', member.id, {
+      ...b,
+          interest_categories: (typeof b.interest_categories==='string'?b.interest_categories:'')
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean),
+    });
+    setMessage('保存しました');
+  };
+  const archive = async () => {
+    if (!confirm('この会員をArchiveしますか？')) return;
+    const r = await fetch(`/api/admin/entity/members/${member.id}`, {
+      method: 'DELETE',
+    });
+    setMessage(r.ok ? 'Archiveしました' : 'Archiveできませんでした');
+    if (r.ok) await reload();
+  };
+  return (
+    <form className="panel settings-form" onSubmit={submit}>
+      <h2>{member.name} / Detail</h2>
+      <label>
+        氏名
+        <input name="name" defaultValue={member.name} />
+      </label>
+      <label>
+        LINE
+        <input name="line_name" defaultValue={member.line || ''} />
+      </label>
+      <label>
+        Email
+        <input name="email" type="email" defaultValue={member.email || ''} />
+      </label>
+      <label>
+        Source
+        <input name="source" defaultValue={member.source || ''} />
+      </label>
+      <label>
+        最終接触
+        <input
+          name="last_contact_at"
+          type="date"
+          defaultValue={member.lastContact || ''}
+        />
+      </label>
+      <label>
+        興味Category
+        <input
+          name="interest_categories"
+          defaultValue={member.interestCategories || ''}
+        />
+      </label>
+      <label>
+        Memo
+        <textarea name="notes" defaultValue={member.notes || ''} />
+      </label>
+      <div>
+        <button className="admin-primary">保存</button>
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => void archive()}
+        >
+          Archive
+        </button>
+      </div>
+      <output>{message}</output>
+    </form>
   );
 }
 function CreateMember({ done }: { done: () => Promise<void> }) {
@@ -614,7 +748,12 @@ function Events({
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
   reload: () => Promise<void>;
 }) {
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(false),
+    [selected, setSelected] = useState<string | null>(null),
+    [q, setQ] = useState('');
+  const rows = data.events.filter((e) =>
+    (e.title + e.venue).toLowerCase().includes(q.toLowerCase()),
+  );
   return (
     <>
       <Heading
@@ -634,6 +773,14 @@ function Events({
           }}
         />
       )}
+      <div className="toolbar">
+        <input
+          aria-label="イベント検索"
+          placeholder="イベント名・会場で検索"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </div>
       <section className="panel table-panel">
         <table>
           <TableHead
@@ -646,10 +793,11 @@ function Events({
               'Member',
               '受付',
               'Waitlist',
+              '操作',
             ]}
           />
           <tbody>
-            {data.events.map((e) => (
+            {rows.map((e) => (
               <tr key={e.id}>
                 <td>
                   <b>{e.title}</b>
@@ -700,11 +848,26 @@ function Events({
                     }
                   />
                 </td>
+                <td>
+                  <button
+                    className="small-button"
+                    onClick={() => setSelected(selected === e.id ? null : e.id)}
+                  >
+                    Detail / Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      {selected && (
+        <EventEditor
+          event={data.events.find((e) => e.id === selected)!}
+          patch={patch}
+          reload={reload}
+        />
+      )}
     </>
   );
 }
@@ -748,6 +911,126 @@ function CreateEvent({ done }: { done: () => Promise<void> }) {
     </form>
   );
 }
+function EventEditor({
+  event,
+  patch,
+  reload,
+}: {
+  event: EventRow;
+  patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
+  reload: () => Promise<void>;
+}) {
+  const [message, setMessage] = useState('');
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage('保存中…');
+    const b = Object.fromEntries(new FormData(e.currentTarget));
+    await patch('events', event.id, {
+      ...b,
+      capacity: Number(b.capacity),
+      price: Number(b.price),
+    });
+    setMessage('保存しました');
+  };
+  const duplicate = async () => {
+    const body = {
+      ...event,
+      title: `${event.title} Copy`,
+      slug: `${event.slug}-copy-${Date.now()}`,
+      publish_status: 'draft',
+      public_visible: false,
+      member_visible: false,
+    };
+    const r = await fetch('/api/admin/entity/events', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    setMessage(r.ok ? '複製しました' : '複製できませんでした');
+    if (r.ok) await reload();
+  };
+  const archive = async () => {
+    if (!confirm('このEventをArchiveしますか？')) return;
+    await patch('events', event.id, {
+      archived_at: new Date().toISOString(),
+      publish_status: 'archived',
+      public_visible: false,
+      member_visible: false,
+      registration_enabled: false,
+    });
+    setMessage('Archiveしました');
+  };
+  return (
+    <form className="panel settings-form" onSubmit={submit}>
+      <h2>{event.title} / Detail</h2>
+      <label>
+        Event名
+        <input name="title" defaultValue={event.title} />
+      </label>
+      <label>
+        Slug
+        <input name="slug" defaultValue={event.slug} />
+      </label>
+      <label>
+        Type
+        <input name="event_type" defaultValue={event.event_type} />
+      </label>
+      <label>
+        開始
+        <input name="start_at" defaultValue={event.start_at} />
+      </label>
+      <label>
+        終了
+        <input name="end_at" defaultValue={event.end_at} />
+      </label>
+      <label>
+        会場
+        <input name="venue" defaultValue={event.venue} />
+      </label>
+      <label>
+        定員
+        <input name="capacity" type="number" defaultValue={event.capacity} />
+      </label>
+      <label>
+        参加費
+        <input name="price" type="number" defaultValue={event.price} />
+      </label>
+      <label>
+        説明
+        <textarea name="description" defaultValue={event.description || ''} />
+      </label>
+      <label>
+        持ち物
+        <textarea
+          name="items_to_bring"
+          defaultValue={event.items_to_bring || ''}
+        />
+      </label>
+      <label>
+        注意事項
+        <textarea name="precautions" defaultValue={event.precautions || ''} />
+      </label>
+      <div>
+        <button className="admin-primary">保存</button>
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => void duplicate()}
+        >
+          複製
+        </button>
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => void archive()}
+        >
+          Archive
+        </button>
+      </div>
+      <output>{message}</output>
+    </form>
+  );
+}
 function Applications({
   data,
   patch,
@@ -755,17 +1038,79 @@ function Applications({
   data: Data;
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
 }) {
+  const [q, setQ] = useState(''),
+    [status, setStatus] = useState('all'),
+    [payment, setPayment] = useState('all'),
+    [eventId, setEventId] = useState('all');
+  const rows = data.applications.filter(
+    (a) =>
+      (status === 'all' || a.application_status === status) &&
+      (payment === 'all' || a.payment_status === payment) &&
+      (eventId === 'all' || a.event_id === eventId) &&
+      (a.name + a.email + a.event_title)
+        .toLowerCase()
+        .includes(q.toLowerCase()),
+  );
   return (
     <>
       <Heading
         title="Event Applications"
         desc={`${data.applications.length}件の申込`}
       />
+      <div className="toolbar">
+        <input
+          aria-label="申込検索"
+          placeholder="氏名・メール・イベント"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <select
+          aria-label="申込Status Filter"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="all">全Status</option>
+          {[
+            'pending',
+            'approved',
+            'waitlist',
+            'cancelled',
+            'attended',
+            'no_show',
+          ].map((x) => (
+            <option key={x}>{x}</option>
+          ))}
+        </select>
+        <select
+          aria-label="Payment Filter"
+          value={payment}
+          onChange={(e) => setPayment(e.target.value)}
+        >
+          <option value="all">全Payment</option>
+          <option>unpaid</option>
+          <option>paid</option>
+          <option>refunded</option>
+          <option>waived</option>
+        </select>
+        <select
+          aria-label="Event Filter"
+          value={eventId}
+          onChange={(e) => setEventId(e.target.value)}
+        >
+          <option value="all">全Event</option>
+          {data.events.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.title}
+            </option>
+          ))}
+        </select>
+      </div>
       <section className="panel table-panel">
         <table>
           <TableHead
             labels={[
               '参加者',
+              'Memo',
               'イベント',
               '申込日時',
               '申込状態',
@@ -774,11 +1119,22 @@ function Applications({
             ]}
           />
           <tbody>
-            {data.applications.map((a) => (
+            {rows.map((a) => (
               <tr key={a.id}>
                 <td>
                   <b>{a.name}</b>
                   <small>{a.email}</small>
+                </td>
+                <td>
+                  <input
+                    aria-label={`${a.name} Memo`}
+                    defaultValue={a.notes || ''}
+                    onBlur={(e) =>
+                      void patch('event_applications', a.id, {
+                        notes: e.target.value,
+                      })
+                    }
+                  />
                 </td>
                 <td>{a.event_title}</td>
                 <td>{a.applied_at?.slice(0, 10)}</td>
@@ -833,13 +1189,39 @@ function Payments({
   data: Data;
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
 }) {
-  const s = paymentSummary(data.payments);
+  const s = paymentSummary(data.payments),
+    [q, setQ] = useState(''),
+    [status, setStatus] = useState('all'),
+    rows = data.payments.filter(
+      (p) =>
+        (status === 'all' || p.status === status) &&
+        (p.name + p.event).toLowerCase().includes(q.toLowerCase()),
+    );
   return (
     <>
       <Heading
         title="Payments"
         desc="イベント参加費のみ（月額会費は会費ペイ）"
       />
+      <div className="toolbar">
+        <input
+          aria-label="入金検索"
+          placeholder="氏名・イベント"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <select
+          aria-label="入金Status Filter"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="all">全Status</option>
+          <option>unpaid</option>
+          <option>paid</option>
+          <option>refunded</option>
+          <option>waived</option>
+        </select>
+      </div>
       <section className="stats">
         <Stat label="回収予定" value={yen(s.expected)} />
         <Stat label="回収済" value={yen(s.collected)} />
@@ -847,7 +1229,7 @@ function Payments({
         <Stat label="回収率" value={`${s.rate}%`} />
       </section>
       <section className="panel payment-list">
-        {data.payments.map((p) => (
+        {rows.map((p) => (
           <div key={p.id}>
             <div>
               <b>{p.name}</b>
@@ -883,7 +1265,17 @@ function Contents({
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
   reload: () => Promise<void>;
 }) {
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(false),
+    [selected, setSelected] = useState<string | null>(null),
+    [q, setQ] = useState(''),
+    [type, setType] = useState('all'),
+    [status, setStatus] = useState('all');
+  const rows = data.contents.filter(
+    (c) =>
+      (type === 'all' || c.type === type) &&
+      (status === 'all' || c.status === status) &&
+      (c.title + c.summary).toLowerCase().includes(q.toLowerCase()),
+  );
   return (
     <>
       <Heading
@@ -904,13 +1296,57 @@ function Contents({
         />
       )}
       <MediaUploader contents={data.contents} done={reload} />
+      <div className="toolbar">
+        <input
+          aria-label="Content検索"
+          placeholder="タイトル・概要"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <select
+          aria-label="Content Type Filter"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option value="all">全Type</option>
+          {[
+            'PEOPLE',
+            'FIELD',
+            'TABLE',
+            'NEWS',
+            'EVENT_REPORT',
+            'GUIDE',
+            'FAQ',
+            'FEATURE',
+          ].map((x) => (
+            <option key={x}>{x}</option>
+          ))}
+        </select>
+        <select
+          aria-label="Content Status Filter"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="all">全Status</option>
+          <option>draft</option>
+          <option>published</option>
+          <option>archived</option>
+        </select>
+      </div>
       <section className="panel table-panel">
         <table>
           <TableHead
-            labels={['コンテンツ', 'タイプ', 'Public', 'Member', '状態']}
+            labels={[
+              'コンテンツ',
+              'タイプ',
+              'Public',
+              'Member',
+              '状態',
+              '操作',
+            ]}
           />
           <tbody>
-            {data.contents.map((c) => (
+            {rows.map((c) => (
               <tr key={c.id}>
                 <td>
                   <b>{c.title}</b>
@@ -956,12 +1392,153 @@ function Contents({
                     <option value="archived">アーカイブ</option>
                   </select>
                 </td>
+                <td>
+                  <button
+                    className="small-button"
+                    onClick={() => setSelected(selected === c.id ? null : c.id)}
+                  >
+                    Detail / Edit
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      {selected && (
+        <ContentEditor
+          content={data.contents.find((c) => c.id === selected)!}
+          patch={patch}
+          reload={reload}
+        />
+      )}
     </>
+  );
+}
+function ContentEditor({
+  content,
+  patch,
+  reload,
+}: {
+  content: Content;
+  patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
+  reload: () => Promise<void>;
+}) {
+  const [message, setMessage] = useState('');
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setMessage('保存中…');
+    const b = Object.fromEntries(new FormData(e.currentTarget));
+    await patch('contents', content.id, {
+      ...b,
+        tags: (typeof b.tags==='string'?b.tags:'')
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean),
+    });
+    setMessage('保存しました');
+  };
+  const duplicate = async () => {
+    const body = {
+      ...content,
+      title: `${content.title} Copy`,
+      slug: `${content.slug}-copy-${Date.now()}`,
+      publish_status: 'draft',
+      public_visible: false,
+      member_visible: false,
+    };
+    const r = await fetch('/api/admin/entity/contents', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    setMessage(r.ok ? '複製しました' : '複製できませんでした');
+    if (r.ok) await reload();
+  };
+  const archive = async () => {
+    if (!confirm('このContentをArchiveしますか？')) return;
+    await patch('contents', content.id, {
+      archived_at: new Date().toISOString(),
+      publish_status: 'archived',
+      public_visible: false,
+      member_visible: false,
+    });
+    setMessage('Archiveしました');
+  };
+  return (
+    <form className="panel settings-form" onSubmit={submit}>
+      <h2>{content.title} / Detail</h2>
+      <label>
+        Title
+        <input name="title" defaultValue={content.title} />
+      </label>
+      <label>
+        Slug
+        <input name="slug" defaultValue={content.slug} />
+      </label>
+      <label>
+        Type
+        <select name="type" defaultValue={content.type}>
+          {[
+            'PEOPLE',
+            'FIELD',
+            'TABLE',
+            'NEWS',
+            'EVENT_REPORT',
+            'GUIDE',
+            'FAQ',
+            'FEATURE',
+          ].map((x) => (
+            <option key={x}>{x}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Summary
+        <textarea name="summary" defaultValue={content.summary} />
+      </label>
+      <label>
+        Body
+        <textarea name="body" defaultValue={content.body} />
+      </label>
+      <label>
+        Tags
+        <input name="tags" defaultValue={content.tags || ''} />
+      </label>
+      <label>
+        Cover Image
+        <input value={content.cover_image || ''} readOnly />
+      </label>
+      <label>
+        Audio
+        <input value={content.audio || ''} readOnly />
+      </label>
+      <div>
+        <button className="admin-primary">保存</button>
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => void duplicate()}
+        >
+          複製
+        </button>
+        <a
+          className="small-button"
+          href={`/member/${content.type.toLowerCase()}/${content.slug}`}
+          target="_blank"
+        >
+          Preview
+        </a>
+        <button
+          type="button"
+          className="small-button"
+          onClick={() => void archive()}
+        >
+          Archive
+        </button>
+      </div>
+      <output>{message}</output>
+    </form>
   );
 }
 function CreateContent({ done }: { done: () => Promise<void> }) {
@@ -1228,6 +1805,47 @@ function SettingsPage({
             <option value="7">7日</option>
             <option value="30">30日</option>
             <option value="90">90日</option>
+          </select>
+        </label>
+        <label>
+          Categories
+          <input
+            name="categories"
+            defaultValue={settingText(
+              data.settings.categories,
+              'PEOPLE,FIELD,TABLE,NEWS',
+            )}
+          />
+        </label>
+        <label>
+          Tags
+          <input
+            name="tags"
+            defaultValue={settingText(data.settings.tags, '')}
+          />
+        </label>
+        <label>
+          Event Types
+          <input
+            name="event_types"
+            defaultValue={settingText(
+              data.settings.event_types,
+              'FIELD訪問,食事会,セミナー',
+            )}
+          />
+        </label>
+        <label>
+          Notification Settings
+          <select
+            name="notification_settings"
+            defaultValue={settingText(
+              data.settings.notification_settings,
+              'important',
+            )}
+          >
+            <option value="important">重要のみ</option>
+            <option value="all">すべて</option>
+            <option value="off">OFF</option>
           </select>
         </label>
         <button className="admin-primary">保存</button>
