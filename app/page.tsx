@@ -4,15 +4,15 @@ import PublicMenu from '@/components/public-menu';
 import { publicEvents, visibleContents } from '@/lib/data';
 
 const gallery = [
-  ['/images/www/gathering.webp', 'ワインを囲むひととき', 'left'],
-  ['/images/www/bottles.webp', 'つくり手のワイン', 'center'],
-  ['/images/www/women.webp', '会話を楽しむ女性たち', 'center'],
-  ['/images/www/gathering.webp', 'テーブルを囲む時間', 'center'],
-  ['/images/www/women.webp', 'ワインがつなぐ出会い', 'right'],
-  ['/images/www/gathering.webp', '料理とワイン', 'right'],
-  ['/images/www/bottles.webp', '夜のワインバー', 'left'],
-  ['/images/www/landscape.webp', 'WWWの物語', 'center'],
-  ['/images/www/women.webp', '日常にある豊かさ', 'left'],
+  ['/images/www/20260624/9.jpg', '石蔵の入口から見えるワイン会', 'center'],
+  ['/images/www/20260624/20.jpg', '余市のワインが並ぶ店内', 'center'],
+  ['/images/www/20260624/33.jpg', '食卓で料理を囲む時間', 'center'],
+  ['/images/www/20260624/28.jpg', '石蔵で開かれるワイン会', 'center'],
+  ['/images/www/20260624/24.jpg', '余市の食材を使った料理', 'center'],
+  ['/images/www/20260624/30.jpg', 'ワインと一緒に味わう料理', 'center'],
+  ['/images/www/20260624/68.jpg', '光を映すワイングラス', 'center'],
+  ['/images/www/20260624/18.jpg', '料理とワインを味わう時間', 'center'],
+  ['/images/www/20260624/11.jpg', '小さな石ぐらKiKiの外観', 'center'],
 ];
 
 export const dynamic = 'force-dynamic';
@@ -48,8 +48,9 @@ export default async function Home() {
             <Image
               src={src}
               alt={alt}
-              width={600}
-              height={420}
+              width={2048}
+              height={1365}
+              quality={95}
               style={{ objectPosition: position }}
             />
           </div>
@@ -119,58 +120,87 @@ export default async function Home() {
         </section>
       )}
       <section className="home-concept">
-        <p className="concept-kicker">WWW...?</p>
+        <p className="concept-kicker">www...?</p>
         <article>
           <Image
-            src="/images/www/gathering.webp"
+            src="/images/www/20260624/34.jpg"
             alt="グラス越しのワイン会"
-            width={900}
-            height={600}
+            width={2048}
+            height={1365}
+            quality={95}
           />
           <div>
-            <p className="concept-number">一</p>
             <h2>ワイン造りを知る</h2>
-            <p>
-              美味しいワインとは　想いが詰まった一本の向こうにある土地や造り手の物語を訪ねます
-            </p>
+            <div className="concept-copy">
+              <p>美味しいワインは　長い時間と手間をかけて造られ...</p>
+              <p>「それは知ってる。」</p>
+              <p>聞くことがなかった　聞ける場所がなかった</p>
+              <p>かけた想いやこだわりを　実際の生産者から聞いてみませんか？</p>
+            </div>
           </div>
         </article>
         <article>
           <Image
-            src="/images/www/bottles.webp"
-            alt="並べられたワインボトル"
-            width={900}
-            height={600}
+            src="/images/www/20260624/5.jpg"
+            alt="ワイン会で乾杯する参加者"
+            width={2048}
+            height={1365}
+            quality={95}
           />
           <div>
-            <p className="concept-number">二</p>
             <h2>
               飲み会という名の
               <br />
               ワイン勉強会
             </h2>
-            <p>
-              料理と会話を囲みながら香りや味わいの違いを気軽に楽しむ時間です　知識より感じたことを大切に
-            </p>
+            <div className="concept-copy">
+              <p>
+                場所は余市町の石蔵のカフェ&amp;バーで　余市産旬の食材と一緒にワインの勉強会。
+              </p>
+              <p>
+                実際に造り手の皆さんやワインソムリエなど　普段はお会いできない特別講師を招いて
+              </p>
+              <p>
+                気軽に参加できる　ワイン勉強会（という名の飲み会）を　定期的に開催しています
+              </p>
+            </div>
           </div>
         </article>
-        <article>
+        <article className="profile-article">
           <Image
-            src="/images/www/women.webp"
-            alt="ワインを囲んで語らう女性たち"
-            width={900}
-            height={600}
+            src="/images/www/20260624/8.jpg"
+            alt="小さな石ぐらKiKiで語らうKana Ninomiya"
+            width={2048}
+            height={1365}
+            quality={95}
           />
           <div>
-            <p className="concept-name">Wine Work Women</p>
-            <h2>
-              ワインから
-              <br />
-              仕事と暮らしをつなぐ
-            </h2>
-            <p>
-              つくる人　届ける人　楽しむ人　WWWはワインをきっかけに女性たちの新しい出会いを育てるコミュニティです
-            </p>
+            <h2>Kana Ninomiya</h2>
+            <div className="concept-copy profile-copy">
+              <p>
+                北海道余市町で、小さな石ぐらKiKi Café &amp;
+                Barを営みながら、食とワインを通じたコミュニティづくりに取り組んでいます。
+              </p>
+              <p>
+                これまで東京で接客・店舗運営に携わり、その後、結婚・子育てを経て故郷の北海道へ。
+              </p>
+              <p>
+                現在は飲食店運営のほか、地域活動にも関わりながら、人と人、人と地域をつなぐ場づくりを続けています。
+              </p>
+              <p>余市には、世界に誇るワインと生産者がいます。</p>
+              <p>
+                しかし、その価値が十分に伝わり、次のファンへとつながる機会はまだ多くありません。WWWは、そんな余市のワイン文化への新しい入口として生まれました。
+              </p>
+              <p>
+                知識や経験の有無に関係なく、「少し興味がある」「もっと知ってみたい」そんな人たちが集い、学び、語り合いながら、余市という土地の魅力に触れられる場所です。
+              </p>
+              <p>
+                私はワインは人と土地をつなぐ文化だと考えています。ワインをきっかけに人がつながり、人がつながることで地域が育つ。
+              </p>
+              <p>
+                WWWを通じて、余市の未来のワイン文化を次の世代へつないでいきたいと思っています。
+              </p>
+            </div>
           </div>
         </article>
         <a href={process.env.LINE_JOIN_URL || '/contact'} className="line-cta">
