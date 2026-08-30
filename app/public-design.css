@@ -82,6 +82,10 @@
     rgba(252, 249, 242, 0.18)
   );
 }
+.home-hero h1,
+.brand span {
+  font-family: var(--font-sans-jp), Arial, sans-serif;
+}
 .home-hero h1 {
   position: relative;
   z-index: 1;
