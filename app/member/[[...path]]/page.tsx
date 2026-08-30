@@ -9,13 +9,13 @@ export const metadata: Metadata = {
 };
 export const dynamic = 'force-dynamic';
 const copy: Record<string, [string, string]> = {
-  people: ['PEOPLE', 'この人に会いたい、から始まる物語。'],
-  field: ['FIELD', '畑から届く、いまだけの声。'],
-  table: ['TABLE', 'ワインのある食卓を、もっと自由に。'],
-  news: ['NEWS', 'WWWからのお知らせ。'],
-  events: ['EVENT', '次に会える場所。'],
-  archive: ['ARCHIVE', 'これまでの物語をたどる。'],
-  account: ['ACCOUNT', '会員情報とお支払いについて。'],
+  people: ['PEOPLE', 'この人に会いたいから始まる物語'],
+  field: ['FIELD', '畑から届くいまだけの声'],
+  table: ['TABLE', 'ワインのある食卓をもっと自由に'],
+  news: ['NEWS', 'WWWからのお知らせ'],
+  events: ['EVENT', '次に会える場所'],
+  archive: ['ARCHIVE', 'これまでの物語をたどる'],
+  account: ['ACCOUNT', '会員情報とお支払いについて'],
 };
 export default async function MemberPage({
   params,
@@ -63,7 +63,7 @@ export default async function MemberPage({
       </>
     );
   }
-  const [label, title] = copy[key] || ['MEMBER HOME', 'ワインの向こう側へ。'];
+  const [label, title] = copy[key] || ['MEMBER HOME', 'ワインの向こう側へ'];
   if (key === 'events') {
     const events = await publicEvents(true);
     return (
@@ -91,7 +91,7 @@ export default async function MemberPage({
                 </Link>
               ))
             ) : (
-              <p>公開中のイベントはありません。</p>
+              <p>公開中のイベントはありません</p>
             )}
           </section>
         </main>
@@ -111,10 +111,10 @@ export default async function MemberPage({
           <section className="account-panel">
             <h2>会費・登録内容の確認</h2>
             <p>
-              会費のお支払い、カード変更、退会手続きは会費ペイで行います。現在の会員サイトは共通ログインのため、個人の氏名や決済履歴は表示しません。
+              会費のお支払い　カード変更　退会手続きは会費ペイで行います　現在の会員サイトは共通ログインのため個人の氏名や決済履歴は表示しません
             </p>
             <p>
-              登録状況が分からない場合は、会費ペイに登録したお名前とメールアドレスを添えてお問い合わせください。
+              登録状況が分からない場合は会費ペイに登録したお名前とメールアドレスを添えてお問い合わせください
             </p>
             <div className="legal-actions">
               <Link className="button" href="/contact">
@@ -137,7 +137,7 @@ export default async function MemberPage({
         <div className="member-hero">
           <p className="eyebrow">{label}</p>
           <h1>{title}</h1>
-          <p>つくる人、土地、食卓をつなぐ、会員だけの読みものと体験。</p>
+          <p>つくる人　土地　食卓をつなぐ会員だけの読みものと体験</p>
         </div>
         <section className="content-grid">
           {contents.length ? (
@@ -156,7 +156,7 @@ export default async function MemberPage({
               </Link>
             ))
           ) : (
-            <p>まだコンテンツがありません。</p>
+            <p>コンテンツはありません</p>
           )}
         </section>
       </main>

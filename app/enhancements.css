@@ -40,8 +40,13 @@
   grid-template-columns: 90px 1fr auto;
   gap: 16px;
   align-items: center;
-  padding: 19px 0;
+  min-height: 68px;
+  padding: 19px 12px;
   border-bottom: 1px solid rgba(109, 55, 64, 0.16);
+}
+.update-row:hover,
+.update-row:focus-visible {
+  background: rgba(109, 55, 64, 0.07);
 }
 .update-row time {
   font-size: 9px;
@@ -64,11 +69,21 @@
   padding: 20px 0;
 }
 .more-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 210px;
+  min-height: 52px;
+  padding: 0 16px;
   margin-top: 20px;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
-  border-bottom: 1px solid;
+  border: 1px solid;
+}
+.more-link:hover,
+.more-link:focus-visible {
+  background: #6d3740;
+  color: #fff;
 }
 .legal-page section {
   max-width: 780px;
@@ -126,7 +141,33 @@
 .account-panel p {
   line-height: 2;
 }
+.site-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding-inline: 6px;
+}
+.site-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+}
+.mobile-public-menu {
+  display: none;
+}
 @media (max-width: 760px) {
+  .mobile-public-menu {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin-right: 6px;
+  }
+  .mobile-public-menu .public-menu {
+    position: fixed;
+    top: 11px;
+    left: 12px;
+  }
   .home-updates {
     width: 86vw;
     padding-bottom: 90px;

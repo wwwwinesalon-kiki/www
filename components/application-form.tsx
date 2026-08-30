@@ -58,11 +58,11 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
         {state === 'sending' ? '送信中…' : 'このイベントに申し込む'}
       </button>
       {state === 'success' && (
-        <output className="form-success">お申し込みを受け付けました。</output>
+        <output className="form-success">お申し込みを受け付けました</output>
       )}
       {state === 'error' && (
         <p className="form-error" role="alert">
-          送信できませんでした。内容は保持されています。もう一度お試しください。
+          送信できませんでした　内容は保持されています　もう一度お試しください
         </p>
       )}
     </form>

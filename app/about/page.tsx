@@ -6,15 +6,15 @@ export default function About() {
       <main className="public-page">
         <p className="eyebrow">ABOUT WWW</p>
         <h1>
-          ワインを通して、
+          ワインを通して
           <br />
-          仕事と暮らしをつなぐ。
+          仕事と暮らしをつなぐ
         </h1>
         <div className="wide-visual">WINE · WORK · WOMEN</div>
         <section>
           <h2>私たちが大切にしていること</h2>
           <p>
-            知ること、会うこと、味わうこと。その体験の積み重ねが、日々の選択を少し豊かにすると信じています。
+            知ること　会うこと　味わうこと　その体験の積み重ねが日々の選択を少し豊かにすると信じています
           </p>
         </section>
       </main>

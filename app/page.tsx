@@ -44,10 +44,7 @@ export default async function Home() {
       </section>
       <section className="home-gallery" aria-label="WWWのギャラリー">
         {gallery.map(([src, alt, position], index) => (
-          <Link
-            href={index < 3 ? '/about' : index < 6 ? '/events' : '/news'}
-            key={`${alt}-${index}`}
-          >
+          <div key={`${alt}-${index}`}>
             <Image
               src={src}
               alt={alt}
@@ -55,69 +52,72 @@ export default async function Home() {
               height={420}
               style={{ objectPosition: position }}
             />
-          </Link>
+          </div>
         ))}
       </section>
-      <section className="home-updates" aria-labelledby="updates-title">
-        <p className="concept-kicker">CURRENT WWW</p>
-        <h2 id="updates-title">いま、WWWで起きていること</h2>
-        <div className="update-columns">
-          <div>
-            <p className="update-label">NEXT EVENT</p>
-            {upcoming.length ? (
-              upcoming.map((event) => (
-                <Link
-                  className="update-row"
-                  href={`/events/${event.slug}`}
-                  key={event.id}
-                >
-                  <time>
-                    {event.start_at.slice(0, 10).replaceAll('-', '.')}
-                  </time>
-                  <strong>{event.title}</strong>
-                  <span>
-                    {event.registration_enabled
-                      ? event.applications >= event.capacity &&
-                        event.waitlist_enabled
-                        ? 'キャンセル待ち'
-                        : '受付中'
-                      : '受付終了'}
-                  </span>
+      {(upcoming.length > 0 || featured.length > 0) && (
+        <section className="home-updates" aria-labelledby="updates-title">
+          <p className="concept-kicker">CURRENT WWW</p>
+          <h2 id="updates-title">いま WWWで起きていること</h2>
+          <div className="update-columns">
+            <div>
+              <p className="update-label">NEXT EVENT</p>
+              {upcoming.length
+                ? upcoming.map((event) => (
+                    <Link
+                      className="update-row"
+                      href={`/events/${event.slug}`}
+                      key={event.id}
+                    >
+                      <time>
+                        {event.start_at.slice(0, 10).replaceAll('-', '.')}
+                      </time>
+                      <strong>{event.title}</strong>
+                      <span>
+                        {event.registration_enabled
+                          ? event.applications >= event.capacity &&
+                            event.waitlist_enabled
+                            ? 'キャンセル待ち'
+                            : '受付中'
+                          : '受付終了'}
+                      </span>
+                    </Link>
+                  ))
+                : null}
+              {upcoming.length > 0 && (
+                <Link href="/events" className="more-link">
+                  EVENTをすべて見る <b>→</b>
                 </Link>
-              ))
-            ) : (
-              <p className="update-empty">次回イベントは準備中です。</p>
-            )}
-            <Link href="/events" className="more-link">
-              EVENTをすべて見る
-            </Link>
-          </div>
-          <div>
-            <p className="update-label">LATEST STORIES</p>
-            {featured.length ? (
-              featured.map((content) => (
-                <Link
-                  className="update-row"
-                  href={`/news/${content.slug}`}
-                  key={content.id}
-                >
-                  <time>
-                    {content.published_at?.slice(0, 10).replaceAll('-', '.') ||
-                      'NEW'}
-                  </time>
-                  <strong>{content.title}</strong>
-                  <span>{content.is_new ? 'NEW' : content.type}</span>
+              )}
+            </div>
+            <div>
+              <p className="update-label">LATEST STORIES</p>
+              {featured.length
+                ? featured.map((content) => (
+                    <Link
+                      className="update-row"
+                      href={`/news/${content.slug}`}
+                      key={content.id}
+                    >
+                      <time>
+                        {content.published_at
+                          ?.slice(0, 10)
+                          .replaceAll('-', '.') || 'NEW'}
+                      </time>
+                      <strong>{content.title}</strong>
+                      <span>{content.is_new ? 'NEW' : content.type}</span>
+                    </Link>
+                  ))
+                : null}
+              {featured.length > 0 && (
+                <Link href="/news" className="more-link">
+                  NEWSをすべて見る <b>→</b>
                 </Link>
-              ))
-            ) : (
-              <p className="update-empty">新しい読みものを準備中です。</p>
-            )}
-            <Link href="/news" className="more-link">
-              NEWSをすべて見る
-            </Link>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
       <section className="home-concept">
         <p className="concept-kicker">WWW...?</p>
         <article>
@@ -131,7 +131,7 @@ export default async function Home() {
             <p className="concept-number">一</p>
             <h2>ワイン造りを知る</h2>
             <p>
-              美味しいワインとは。想いが詰まった一本の向こうにある、土地や造り手の物語を訪ねます。
+              美味しいワインとは　想いが詰まった一本の向こうにある土地や造り手の物語を訪ねます
             </p>
           </div>
         </article>
@@ -150,7 +150,7 @@ export default async function Home() {
               ワイン勉強会
             </h2>
             <p>
-              料理と会話を囲みながら、香りや味わいの違いを気軽に楽しむ時間です。知識より、感じたことを大切に。
+              料理と会話を囲みながら香りや味わいの違いを気軽に楽しむ時間です　知識より感じたことを大切に
             </p>
           </div>
         </article>
@@ -164,18 +164,23 @@ export default async function Home() {
           <div>
             <p className="concept-name">Wine Work Women</p>
             <h2>
-              ワインから、
+              ワインから
               <br />
-              仕事と暮らしをつなぐ。
+              仕事と暮らしをつなぐ
             </h2>
             <p>
-              つくる人、届ける人、楽しむ人。WWWは、ワインをきっかけに女性たちの新しい出会いを育てるコミュニティです。
+              つくる人　届ける人　楽しむ人　WWWはワインをきっかけに女性たちの新しい出会いを育てるコミュニティです
             </p>
           </div>
         </article>
-        <Link href="/join" className="line-cta">
-          <span>申込や詳細は</span>公式LINE
-        </Link>
+        <a href={process.env.LINE_JOIN_URL || '/contact'} className="line-cta">
+          <span className="line-cta-mark">LINE</span>
+          <span className="line-cta-copy">
+            <small>申込や詳細はこちら</small>
+            <strong>公式LINEを開く</strong>
+          </span>
+          <span className="line-cta-arrow">→</span>
+        </a>
       </section>
     </main>
   );

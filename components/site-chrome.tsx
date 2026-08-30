@@ -1,8 +1,14 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import PublicMenu from '@/components/public-menu';
 export function SiteHeader({ member = false }: { member?: boolean }) {
   return (
     <header className="site-header">
+      {!member && (
+        <div className="mobile-public-menu">
+          <PublicMenu />
+        </div>
+      )}
       <Link href={member ? '/member' : '/'} className="brand">
         <span>WWW</span>
         <small>WINE WORK WOMEN</small>
@@ -46,7 +52,7 @@ export function SiteFooter() {
         <span>WWW</span>
         <small>WINE WORK WOMEN</small>
       </div>
-      <p>ワインから、人生をちょっと豊かに。</p>
+      <p>ワインから　人生をちょっと豊かに</p>
       <div>
         <Link href="/about">ABOUT</Link>
         <Link href="/events">EVENT</Link>

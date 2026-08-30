@@ -116,7 +116,7 @@ export default async function EventDetail({
           {e.registration_enabled ? (
             <ApplicationForm eventId={e.id} />
           ) : (
-            <p>現在、受付を停止しています。</p>
+            <p>現在受付を停止しています</p>
           )}
         </div>
       </main>

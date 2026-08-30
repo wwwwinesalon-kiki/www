@@ -18,12 +18,11 @@ export const metadata: Metadata = {
     default: 'Wine Work Women｜ワインから人生を豊かに',
     template: '%s｜Wine Work Women',
   },
-  description:
-    'ワインをきっかけに、女性たちの仕事と暮らしがつながるコミュニティ。',
+  description: 'ワインをきっかけに女性たちの仕事と暮らしがつながるコミュニティ',
   alternates: { canonical: '/' },
   openGraph: {
     title: 'Wine Work Women',
-    description: 'ワインから、人生をちょっと豊かに。',
+    description: 'ワインから人生をちょっと豊かに',
     type: 'website',
     locale: 'ja_JP',
   },

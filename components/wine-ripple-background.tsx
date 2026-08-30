@@ -33,7 +33,6 @@ export default function WineRippleBackground() {
       height = 0,
       frame = 0,
       tapCount = 0;
-    let paperCanvas: HTMLCanvasElement | null = null;
     const ripples: Ripple[] = [];
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let pointer: {
@@ -54,43 +53,9 @@ export default function WineRippleBackground() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      createPaperTexture();
-    };
-    const createPaperTexture = () => {
-      paperCanvas = document.createElement('canvas');
-      paperCanvas.width = Math.max(1, Math.round(width));
-      paperCanvas.height = Math.max(1, Math.round(height));
-      const paperCtx = paperCanvas.getContext('2d');
-      if (!paperCtx) return;
-      const bg = paperCtx.createLinearGradient(0, 0, width, height);
-      bg.addColorStop(0, '#fcfaf5');
-      bg.addColorStop(0.45, '#f7f3eb');
-      bg.addColorStop(1, '#fffdf8');
-      paperCtx.fillStyle = bg;
-      paperCtx.fillRect(0, 0, width, height);
-      const specks = Math.min(24000, Math.round(width * height * 0.014));
-      for (let i = 0; i < specks; i++) {
-        paperCtx.fillStyle = `rgba(120,110,95,${Math.random() * 0.018})`;
-        paperCtx.fillRect(Math.random() * width, Math.random() * height, 1, 1);
-      }
-      for (let i = 0; i < 180; i++) {
-        const x = Math.random() * width,
-          y = Math.random() * height;
-        paperCtx.save();
-        paperCtx.translate(x, y);
-        paperCtx.rotate((Math.random() - 0.5) * 0.8);
-        paperCtx.strokeStyle = `rgba(140,128,110,${Math.random() * 0.012})`;
-        paperCtx.lineWidth = 0.5;
-        paperCtx.beginPath();
-        paperCtx.moveTo(0, 0);
-        paperCtx.lineTo(8 + Math.random() * 40, (Math.random() - 0.5) * 3);
-        paperCtx.stroke();
-        paperCtx.restore();
-      }
     };
     const draw = (now: number) => {
       ctx.clearRect(0, 0, width, height);
-      if (paperCanvas) ctx.drawImage(paperCanvas, 0, 0, width, height);
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
       for (let i = ripples.length - 1; i >= 0; i--) {
@@ -170,7 +135,6 @@ export default function WineRippleBackground() {
       pointer = null;
     };
     resize();
-    if (paperCanvas) ctx.drawImage(paperCanvas, 0, 0, width, height);
     addEventListener('resize', resize);
     addEventListener('pointerdown', down, { passive: true });
     addEventListener('pointermove', move, { passive: true });

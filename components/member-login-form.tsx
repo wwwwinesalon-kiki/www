@@ -33,7 +33,7 @@ export default function MemberLoginForm() {
       </button>
       {state === 'error' && (
         <p role="alert">
-          パスワードを確認してください。入力内容は保持されています。
+          パスワードを確認してください　入力内容は保持されています
         </p>
       )}
     </form>

@@ -14,10 +14,10 @@ export default function Login() {
       </Link>
       <div className="login-box">
         <p className="eyebrow">MEMBERS ONLY</p>
-        <h1>おかえりなさい。</h1>
-        <p>会員限定の物語と、次の体験へ。</p>
+        <h1>おかえりなさい</h1>
+        <p>会員限定の物語と次の体験へ</p>
         <MemberLoginForm />
-        <small>パスワードをお忘れの場合は運営へお問い合わせください。</small>
+        <small>パスワードをお忘れの場合は運営へお問い合わせください</small>
       </div>
     </main>
   );

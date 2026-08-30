@@ -6,15 +6,23 @@ export default function Join() {
       <main className="join-page">
         <p className="eyebrow">JOIN WWW</p>
         <h1>
-          次の一杯を、
+          次の一杯を
           <br />
-          新しい出会いと。
+          新しい出会いと
         </h1>
         <p>
-          まずは公式LINEを追加してください。活動のご案内と、会費ペイでの入会手続きをお送りします。
+          まずは公式LINEを追加してください　活動のご案内と会費ペイでの入会手続きをお送りします
         </p>
-        <a className="button" href={process.env.LINE_JOIN_URL || '#'}>
-          LINEでWWWを追加する
+        <a
+          className="line-cta line-cta-inline"
+          href={process.env.LINE_JOIN_URL || '/contact'}
+        >
+          <span className="line-cta-mark">LINE</span>
+          <span className="line-cta-copy">
+            <small>入会手続きはこちら</small>
+            <strong>公式LINEを開く</strong>
+          </span>
+          <span className="line-cta-arrow">→</span>
         </a>
         <ol>
           <li>

@@ -23,7 +23,7 @@ export default async function News() {
               </article>
             ))
           ) : (
-            <p>まだお知らせはありません。</p>
+            <p>お知らせはありません</p>
           )}
         </div>
       </main>
