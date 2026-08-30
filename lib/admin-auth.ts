@@ -1,23 +1,27 @@
-import { env } from 'cloudflare:workers';
 import type { AdminRole } from './auth';
+import { createClient } from '@/lib/supabase/server';
 export async function requireAdmin(req: Request, write = false) {
   if (write) {
     const origin = req.headers.get('origin');
     if (origin && new URL(origin).origin !== new URL(req.url).origin)
       return null;
   }
-  const email =
-    req.headers.get('cf-access-authenticated-user-email') ||
-    req.headers.get('oai-authenticated-user-email') ||
-    (process.env.NODE_ENV !== 'production' ? 'owner@local.test' : '');
-  if (!email) return null;
-  const row = await env.DB.prepare(
-    'SELECT role FROM admin_users WHERE access_email=?',
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  const role = data?.role as AdminRole | undefined;
+  if (
+    !role ||
+    !['owner', 'editor', 'viewer'].includes(role) ||
+    (write && role === 'viewer')
   )
-    .bind(email)
-    .first<{ role: AdminRole }>();
-  const role =
-    row?.role || (process.env.NODE_ENV !== 'production' ? 'owner' : null);
-  if (!role || (write && role === 'viewer')) return null;
-  return { email, role };
+    return null;
+  return { email: user.email || user.id, role, userId: user.id, supabase };
 }

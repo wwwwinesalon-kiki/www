@@ -1,20 +1,29 @@
-import { env } from 'cloudflare:workers';
 import { requireAdmin } from '@/lib/admin-auth';
 export async function GET(req: Request) {
-  if (!(await requireAdmin(req)))
-    return new Response('Forbidden', { status: 403 });
-  const { results } = await env.DB.prepare(
-    'SELECT name,line_name,email,status,joined_at,source,last_contact_at FROM members WHERE deleted_at IS NULL ORDER BY created_at DESC',
-  ).all<Record<string, string | null>>();
-  const esc = (v: string | null) => `"${(v ?? '').replaceAll('"', '""')}"`;
+  const actor = await requireAdmin(req);
+  if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const { data, error } = await actor.supabase
+    .from('profiles')
+    .select('email,name,role,status,created_at')
+    .order('created_at');
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  const escape = (value: unknown) => {
+    const text =
+      typeof value === 'string' || typeof value === 'number' ? `${value}` : '';
+    return `"${text.replaceAll('"', '""')}"`;
+  };
   const csv = [
-    'name,line_name,email,status,joined_at,source,last_contact_at',
-    ...results.map((r) => Object.values(r).map(esc).join(',')),
-  ].join('\r\n');
-  return new Response('\ufeff' + csv, {
+    'email,name,role,status,created_at',
+    ...(data || []).map((row) =>
+      [row.email, row.name, row.role, row.status, row.created_at]
+        .map(escape)
+        .join(','),
+    ),
+  ].join('\n');
+  return new Response(`\uFEFF${csv}`, {
     headers: {
       'content-type': 'text/csv; charset=utf-8',
-      'content-disposition': 'attachment; filename="www-members.csv"',
+      'content-disposition': 'attachment; filename="members.csv"',
     },
   });
 }

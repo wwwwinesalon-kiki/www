@@ -1,26 +1,22 @@
-import { env } from 'cloudflare:workers';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyMemberSession } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 export default async function ProtectedMemberLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const jar = await cookies();
-  const setting = await env.DB.prepare(
-    "SELECT value FROM settings WHERE key='member_password_version'",
-  ).first<{ value: string }>();
-  const version = setting?.value
-    ? String(JSON.parse(setting.value))
-    : process.env.MEMBER_SESSION_VERSION || '1';
-  const valid = await verifyMemberSession(
-    jar.get('www_member')?.value,
-    process.env.MEMBER_SESSION_SECRET ||
-      'local-preview-secret-change-in-production',
-    version,
-  );
-  if (!valid) redirect('/member/login');
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/member/login');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('status')
+    .eq('id', user.id)
+    .single();
+  if (!profile || profile.status !== 'active')
+    redirect('/member/login?status=pending');
   return children;
 }

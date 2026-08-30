@@ -1,4 +1,4 @@
-import { env } from 'cloudflare:workers';
+import { createClient } from '@/lib/supabase/server';
 
 export type EventView = {
   id: string;
@@ -43,36 +43,56 @@ export type ContentView = {
 };
 
 export async function publicEvents(member = false) {
+  const supabase = await createClient();
   const visibility = member ? 'member_visible' : 'public_visible';
-  const { results } = await env.DB.prepare(
-    `SELECT e.*,(SELECT COUNT(*) FROM event_applications a WHERE a.event_id=e.id AND a.deleted_at IS NULL AND a.application_status NOT IN ('cancelled','no_show')) applications FROM events e WHERE e.deleted_at IS NULL AND e.archived_at IS NULL AND e.publish_status='published' AND e.${visibility}=1 ORDER BY e.start_at`,
-  ).all<EventView>();
-  return results;
+  const { data, error } = await supabase
+    .from('events')
+    .select('*,event_applications(count)')
+    .is('deleted_at', null)
+    .is('archived_at', null)
+    .eq('publish_status', 'published')
+    .eq(visibility, true)
+    .order('start_at');
+  if (error) return [];
+  return (data || []).map((event) => ({
+    ...event,
+    applications: event.event_applications?.[0]?.count || 0,
+    member_only: Number(event.member_only),
+    registration_enabled: Number(event.registration_enabled),
+    waitlist_enabled: Number(event.waitlist_enabled),
+    public_visible: Number(event.public_visible),
+    member_visible: Number(event.member_visible),
+  })) as EventView[];
 }
 export async function eventBySlug(slug: string, member = false) {
-  const visibility = member ? 'member_visible' : 'public_visible';
-  return env.DB.prepare(
-    `SELECT e.*,(SELECT COUNT(*) FROM event_applications a WHERE a.event_id=e.id AND a.deleted_at IS NULL AND a.application_status NOT IN ('cancelled','no_show')) applications FROM events e WHERE e.slug=? AND e.deleted_at IS NULL AND e.archived_at IS NULL AND e.publish_status='published' AND e.${visibility}=1`,
-  )
-    .bind(slug)
-    .first<EventView>();
+  const events = await publicEvents(member);
+  return events.find((event) => event.slug === slug) || null;
 }
 export async function visibleContents(member = false, type?: string) {
-  const visibility = member ? 'member_visible' : 'public_visible',
-    surface = member ? 'member_home' : 'public_home';
-  const where = type ? ' AND c.type=?' : '';
-  const sql = `SELECT c.*,p.position,p.featured,p.pinned,p.is_new FROM contents c LEFT JOIN content_placements p ON p.content_id=c.id AND p.surface=? AND p.archived_at IS NULL WHERE c.deleted_at IS NULL AND c.archived_at IS NULL AND c.publish_status='published' AND c.${visibility}=1${where} ORDER BY COALESCE(p.pinned,0) DESC,COALESCE(p.position,999999),c.published_at DESC`;
-  const q = env.DB.prepare(sql);
-  const { results } = type
-    ? await q.bind(surface, type).all<ContentView>()
-    : await q.bind(surface).all<ContentView>();
-  return results;
+  const supabase = await createClient();
+  const visibility = member ? 'member_visible' : 'public_visible';
+  let query = supabase
+    .from('contents')
+    .select('*')
+    .is('deleted_at', null)
+    .is('archived_at', null)
+    .eq('publish_status', 'published')
+    .eq(visibility, true)
+    .order('published_at', { ascending: false });
+  if (type) query = query.eq('type', type);
+  const { data, error } = await query;
+  if (error) return [];
+  return (data || []).map((content) => ({
+    ...content,
+    public_visible: Number(content.public_visible),
+    member_visible: Number(content.member_visible),
+    position: null,
+    featured: null,
+    pinned: null,
+    is_new: Number(content.is_new),
+  })) as ContentView[];
 }
 export async function contentBySlug(slug: string, member = true) {
-  const visibility = member ? 'member_visible' : 'public_visible';
-  return env.DB.prepare(
-    `SELECT c.*,NULL position,NULL featured,NULL pinned,NULL is_new FROM contents c WHERE c.slug=? AND c.deleted_at IS NULL AND c.archived_at IS NULL AND c.publish_status='published' AND c.${visibility}=1`,
-  )
-    .bind(slug)
-    .first<ContentView>();
+  const contents = await visibleContents(member);
+  return contents.find((content) => content.slug === slug) || null;
 }

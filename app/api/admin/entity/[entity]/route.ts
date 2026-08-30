@@ -1,155 +1,104 @@
-import { env } from 'cloudflare:workers';
 import { requireAdmin } from '@/lib/admin-auth';
 import { validateEvent } from '@/lib/domain';
-const cfg = {
-  members: { table: 'members', required: ['name', 'status'] },
-  events: {
-    table: 'events',
-    required: [
-      'title',
-      'slug',
-      'start_at',
-      'end_at',
-      'venue',
-      'capacity',
-      'price',
-    ],
-  },
-  contents: { table: 'contents', required: ['type', 'title', 'slug', 'body'] },
+
+const tables = {
+  members: 'profiles',
+  events: 'events',
+  contents: 'contents',
 } as const;
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ entity: string }> },
 ) {
-  if (!(await requireAdmin(req)))
-    return Response.json({ error: 'Forbidden' }, { status: 403 });
-  const { entity } = await params,
-    c = cfg[entity as keyof typeof cfg];
-  if (!c) return Response.json({ error: 'Unknown entity' }, { status: 404 });
-  const { results } = await env.DB.prepare(
-    `SELECT * FROM ${c.table} WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 200`,
-  ).all();
-  return Response.json(results);
+  const actor = await requireAdmin(req);
+  if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const { entity } = await params;
+  const table = tables[entity as keyof typeof tables];
+  if (!table)
+    return Response.json({ error: 'Unknown entity' }, { status: 404 });
+  const { data, error } = await actor.supabase
+    .from(table)
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json(data);
 }
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ entity: string }> },
 ) {
   const actor = await requireAdmin(req, true);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
-  const { entity } = await params,
-    c = cfg[entity as keyof typeof cfg];
-  if (!c) return Response.json({ error: 'Unknown entity' }, { status: 404 });
-  const b = (await req.json()) as Record<string, unknown>;
-  if (c.required.some((k) => b[k] === undefined || b[k] === ''))
+  const { entity } = await params;
+  if (entity === 'members')
     return Response.json(
-      { error: '必須項目を入力してください' },
+      { error: '会員はSupabase Authで招待してください' },
       { status: 422 },
     );
+  const table = tables[entity as keyof typeof tables];
+  if (!table)
+    return Response.json({ error: 'Unknown entity' }, { status: 404 });
+  const body = (await req.json()) as Record<string, unknown>;
   if (entity === 'events') {
+    const text = (value: unknown) => (typeof value === 'string' ? value : '');
     const errors = validateEvent({
-      slug: String(b.slug),
-      capacity: Number(b.capacity),
-      price: Number(b.price),
-      startAt: String(b.start_at),
-      endAt: String(b.end_at),
+      slug: text(body.slug),
+      capacity: Number(body.capacity),
+      price: Number(body.price),
+      startAt: text(body.start_at),
+      endAt: text(body.end_at),
     });
     if (Object.keys(errors).length)
       return Response.json({ errors }, { status: 422 });
   }
-  const now = new Date().toISOString(),
-    id = crypto.randomUUID();
-  let sql = '',
-    values: unknown[] = [];
-  if (entity === 'members') {
-    sql =
-      'INSERT INTO members (id,name,line_name,email,status,joined_at,source,last_contact_at,interest_categories,notes,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
-    values = [
-      id,
-      b.name,
-      b.line_name || null,
-      b.email || null,
-      b.status,
-      b.joined_at || null,
-      b.source || null,
-      b.last_contact_at || null,
-      JSON.stringify(b.interest_categories || []),
-      b.notes || null,
-      now,
-      now,
-    ];
-  } else if (entity === 'events') {
-    sql =
-      'INSERT INTO events (id,title,slug,event_type,description,start_at,end_at,venue,capacity,price,member_only,registration_enabled,waitlist_enabled,publish_status,public_visible,member_visible,cover_image,items_to_bring,precautions,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    values = [
-      id,
-      b.title,
-      b.slug,
-      b.event_type || 'その他',
-      b.description || '',
-      b.start_at,
-      b.end_at,
-      b.venue,
-      Number(b.capacity),
-      Number(b.price),
-      b.member_only ? 1 : 0,
-      b.registration_enabled ? 1 : 0,
-      b.waitlist_enabled ? 1 : 0,
-      b.publish_status || 'draft',
-      b.public_visible ? 1 : 0,
-      b.member_visible ? 1 : 0,
-      b.cover_image || null,
-      b.items_to_bring || null,
-      b.precautions || null,
-      now,
-      now,
-    ];
-  } else {
-    sql =
-      'INSERT INTO contents (id,type,title,slug,summary,body,tags,cover_image,audio,publish_status,public_visible,member_visible,published_at,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-    values = [
-      id,
-      b.type,
-      b.title,
-      b.slug,
-      b.summary || '',
-      b.body,
-      JSON.stringify(b.tags || []),
-      b.cover_image || null,
-      b.audio || null,
-      b.publish_status || 'draft',
-      b.public_visible ? 1 : 0,
-      b.member_visible ? 1 : 0,
-      b.publish_status === 'published' ? now : null,
-      now,
-      now,
-    ];
-  }
-  const statements = [
-    env.DB.prepare(sql).bind(...values),
-    env.DB.prepare(
-      'INSERT INTO audit_logs (id,actor,action,entity_type,entity_id,before,after,created_at) VALUES (?,?,?,?,?,?,?,?)',
-    ).bind(
-      crypto.randomUUID(),
-      actor.email,
-      `${entity}.created`,
-      entity,
-      id,
-      null,
-      JSON.stringify(b),
-      now,
-    ),
-  ];
-  if (entity === 'contents') {
-    statements.push(
-      env.DB.prepare(
-        'INSERT INTO content_placements (id,content_id,surface,position,featured,pinned,is_new) VALUES (?,?,?,?,?,?,?)',
-      ).bind(crypto.randomUUID(), id, 'public_home', 999, 0, 0, 1),
-      env.DB.prepare(
-        'INSERT INTO content_placements (id,content_id,surface,position,featured,pinned,is_new) VALUES (?,?,?,?,?,?,?)',
-      ).bind(crypto.randomUUID(), id, 'member_home', 999, 0, 0, 1),
-    );
-  }
-  await env.DB.batch(statements);
-  return Response.json({ id }, { status: 201 });
+  const allowed =
+    entity === 'events'
+      ? [
+          'title',
+          'slug',
+          'event_type',
+          'description',
+          'start_at',
+          'end_at',
+          'venue',
+          'capacity',
+          'price',
+          'member_only',
+          'registration_enabled',
+          'waitlist_enabled',
+          'publish_status',
+          'public_visible',
+          'member_visible',
+          'cover_image',
+          'items_to_bring',
+          'precautions',
+        ]
+      : [
+          'type',
+          'title',
+          'slug',
+          'summary',
+          'body',
+          'tags',
+          'cover_image',
+          'audio',
+          'publish_status',
+          'public_visible',
+          'member_visible',
+          'published_at',
+          'is_new',
+        ];
+  const payload = Object.fromEntries(
+    Object.entries(body).filter(([key]) => allowed.includes(key)),
+  );
+  const { data, error } = await actor.supabase
+    .from(table)
+    .insert(payload)
+    .select('id')
+    .single();
+  if (error) return Response.json({ error: error.message }, { status: 422 });
+  return Response.json(data, { status: 201 });
 }

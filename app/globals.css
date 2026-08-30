@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
 @import './admin.css';
 @import './admin-functional.css';
 @import './content.css';
@@ -10,7 +8,9 @@
 
 /* Reference direction: quiet ivory paper, fine rules and generous whitespace. */
 :root {
-  --font-serif-jp: var(--font-sans-jp);
+  --font-sans-jp: 'Yu Gothic', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --font-mincho-jp: 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-serif-jp: var(--font-mincho-jp);
 }
 #wine-ripple-app {
   position: fixed;

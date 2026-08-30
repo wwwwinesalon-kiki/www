@@ -1,111 +1,57 @@
-import { env } from 'cloudflare:workers';
+import { createClient } from '@/lib/supabase/server';
 import { nextApplicationStatus } from '@/lib/domain';
+
 export async function POST(req: Request) {
-  let b: Record<string, string>;
-  try {
-    b = await req.json();
-  } catch {
-    return Response.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
+  const body = (await req.json().catch(() => null)) as Record<
+    string,
+    string
+  > | null;
   if (
-    !b.eventId ||
-    !b.name ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.email || '')
+    !body?.eventId ||
+    !body.name ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email || '')
   )
     return Response.json(
       { error: '入力内容を確認してください' },
       { status: 422 },
     );
-  const prior = await env.DB.prepare(
-    "SELECT id FROM event_applications WHERE event_id=? AND lower(email)=lower(?) AND application_status!='cancelled' AND deleted_at IS NULL",
-  )
-    .bind(b.eventId, b.email)
-    .first();
-  if (prior)
-    return Response.json(
-      { error: 'このメールアドレスでは申込済みです' },
-      { status: 409 },
-    );
-  const event = await env.DB.prepare(
-    "SELECT title,capacity,waitlist_enabled,price FROM events WHERE id=? AND registration_enabled=1 AND publish_status='published' AND deleted_at IS NULL",
-  )
-    .bind(b.eventId)
-    .first<{
-      title: string;
-      capacity: number;
-      waitlist_enabled: number;
-      price: number;
-    }>();
-  if (!event)
+  const supabase = await createClient();
+  const { data: event } = await supabase
+    .from('events')
+    .select('capacity,waitlist_enabled,registration_enabled')
+    .eq('id', body.eventId)
+    .eq('publish_status', 'published')
+    .single();
+  if (!event?.registration_enabled)
     return Response.json({ error: '受付を終了しています' }, { status: 409 });
-  const count = await env.DB.prepare(
-    "SELECT COUNT(*) count FROM event_applications WHERE event_id=? AND application_status IN ('approved','pending','attended') AND deleted_at IS NULL",
-  )
-    .bind(b.eventId)
-    .first<{ count: number }>();
+  const { count } = await supabase
+    .from('event_applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', body.eventId)
+    .neq('application_status', 'cancelled');
   const status = nextApplicationStatus(
     event.capacity,
-    count?.count || 0,
-    Boolean(event.waitlist_enabled),
+    count || 0,
+    event.waitlist_enabled,
   );
   if (status === 'closed')
     return Response.json({ error: '満席です' }, { status: 409 });
-  const id = crypto.randomUUID(),
-    paymentId = crypto.randomUUID(),
-    now = new Date().toISOString(),
-    statements = [
-      env.DB.prepare(
-        'INSERT INTO event_applications (id,event_id,name,email,line_name,member_type,applied_at,application_status,payment_status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-      ).bind(
-        id,
-        b.eventId,
-        b.name,
-        b.email,
-        b.lineName || null,
-        b.memberType || 'guest',
-        now,
-        status,
-        'unpaid',
-        now,
-        now,
-      ),
-      env.DB.prepare(
-        'INSERT INTO event_payments (id,application_id,amount,status,created_at,updated_at) VALUES (?,?,?,?,?,?)',
-      ).bind(paymentId, id, event.price, 'unpaid', now, now),
-      env.DB.prepare(
-        'INSERT INTO audit_logs (id,actor,action,entity_type,entity_id,before,after,created_at) VALUES (?,?,?,?,?,?,?,?)',
-      ).bind(
-        crypto.randomUUID(),
-        'public-form',
-        'application.created',
-        'application',
-        id,
-        null,
-        JSON.stringify({ status }),
-        now,
-      ),
-      env.DB.prepare(
-        'INSERT INTO notifications (id,type,title,body,created_at) VALUES (?,?,?,?,?)',
-      ).bind(
-        crypto.randomUUID(),
-        'unpaid',
-        'イベント参加費が未入金です',
-        `${event.title} / ${b.name}`,
-        now,
-      ),
-    ];
-  if (status === 'waitlist')
-    statements.push(
-      env.DB.prepare(
-        'INSERT INTO notifications (id,type,title,body,created_at) VALUES (?,?,?,?,?)',
-      ).bind(
-        crypto.randomUUID(),
-        'waitlist',
-        'Waitlist申込が入りました',
-        `${event.title} / ${b.name}`,
-        now,
-      ),
-    );
-  await env.DB.batch(statements);
-  return Response.json({ id, status }, { status: 201 });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from('event_applications')
+    .insert({
+      event_id: body.eventId,
+      user_id: user?.id || null,
+      name: body.name,
+      email: body.email,
+      line_name: body.lineName || null,
+      note: body.note || null,
+      application_status: status,
+    })
+    .select('id')
+    .single();
+  if (error) return Response.json({ error: error.message }, { status: 422 });
+  return Response.json({ id: data.id, status }, { status: 201 });
 }

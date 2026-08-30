@@ -1,40 +1,26 @@
-import { env } from 'cloudflare:workers';
-import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const h = await headers();
-  const email =
-    h.get('cf-access-authenticated-user-email') ||
-    h.get('oai-authenticated-user-email') ||
-    (process.env.NODE_ENV !== 'production' ? 'owner@local.test' : '');
-  if (!email)
-    return (
-      <main className="access-denied">
-        <h1>Admin sign-in required</h1>
-        <p>管理者アカウントでサインインしてください。</p>
-        <a
-          className="button"
-          href="/signin-with-chatgpt?return_to=/admin"
-          target="_top"
-        >
-          管理者としてサインイン
-        </a>
-      </main>
-    );
-  const user = await env.DB.prepare(
-    'SELECT role FROM admin_users WHERE access_email=?',
-  )
-    .bind(email)
-    .first<{ role: string }>();
-  if (!user)
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/member/login?next=/admin');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  if (!profile || !['owner', 'editor', 'viewer'].includes(profile.role))
     return (
       <main className="access-denied">
         <h1>Access denied</h1>
-        <p>{email} は管理者として登録されていません。</p>
+        <p>このアカウントには管理画面の権限がありません</p>
       </main>
     );
   return children;
