@@ -1,0 +1,13 @@
+.git
+.next
+node_modules
+dist
+.vinext
+.wrangler
+package-stage*
+site-package*.tar.gz
+coverage
+work
+*.tsbuildinfo
+.env*
+!.env.example
