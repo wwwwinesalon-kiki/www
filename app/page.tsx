@@ -203,7 +203,7 @@ export default async function Home() {
             </div>
           </div>
         </article>
-        <a href={process.env.LINE_JOIN_URL || '/contact'} className="line-cta">
+        <a href="https://lin.ee/xWYPyBv" className="line-cta">
           <span className="line-cta-mark">LINE</span>
           <span className="line-cta-copy">
             <small>申込や詳細はこちら</small>

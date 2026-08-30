@@ -305,10 +305,10 @@
 .about-copy p { margin: 0; font-size: 13px; line-height: 2.05; letter-spacing: .035em; }
 .about-copy strong { color: #733b46; font-weight: 600; }
 .about-section { border-top: 1px solid rgba(109,55,64,.18); }
-.about-section-head { display: grid; grid-template-columns: 44px 110px 1fr; gap: 14px; align-items: baseline; margin-bottom: 66px; }
-.about-section-head span { font: 400 13px Georgia,serif; color: #a87b82; }
-.about-section-head p { margin: 0; font: 500 12px Georgia,serif; letter-spacing: .2em; color: #733b46; }
-.about-section-head h2 { margin: 0; font-family: var(--font-serif-jp); font-size: clamp(30px,4vw,52px); font-weight: 400; color: #6d3740; }
+.about-section-head { position: relative; display: block; margin-bottom: 66px; padding-left: 54px; }
+.about-section-head span { position: absolute; left: 0; top: 13px; font: 400 13px Georgia,serif; color: #a87b82; }
+.about-section-head p { margin: 0; font: 400 clamp(48px,7vw,88px)/1 Georgia,serif; letter-spacing: .08em; color: #733b46; }
+.about-section-head h2 { margin: 17px 0 0; font-family: var(--font-serif-jp); font-size: clamp(18px,2vw,25px); letter-spacing: .12em; font-weight: 400; color: #6d3740; }
 .about-lead-grid.reverse > img { order: 2; }
 .about-copy h3 { margin: 0 0 12px; font-family: var(--font-serif-jp); font-size: clamp(25px,3vw,39px); line-height: 1.6; font-weight: 400; color: #6d3740; }
 .about-copy ul { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px 24px; list-style: none; margin: 6px 0 0; padding: 20px 0; border-block: 1px solid rgba(109,55,64,.15); }
@@ -416,8 +416,10 @@
   .about-lead-grid { grid-template-columns: 1fr; gap: 35px; }
   .about-intro-grid img { grid-row: 1; }
   .about-lead-grid.reverse > img { order: 0; }
-  .about-section-head { grid-template-columns: 30px 84px 1fr; margin-bottom: 42px; }
-  .about-section-head h2 { font-size: 27px; }
+  .about-section-head { margin-bottom: 42px; padding-left: 31px; }
+  .about-section-head span { top: 8px; font-size: 10px; }
+  .about-section-head p { font-size: clamp(38px,13vw,58px); letter-spacing: .04em; }
+  .about-section-head h2 { margin-top: 12px; font-size: 17px; }
   .about-copy p { font-size: 11px; line-height: 1.9; }
   .about-copy ul { grid-template-columns: 1fr; }
   .partner-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }

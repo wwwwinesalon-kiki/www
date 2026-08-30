@@ -15,7 +15,7 @@ export default function Join() {
         </p>
         <a
           className="line-cta line-cta-inline"
-          href={process.env.LINE_JOIN_URL || '/contact'}
+          href="https://lin.ee/xWYPyBv"
         >
           <span className="line-cta-mark">LINE</span>
           <span className="line-cta-copy">

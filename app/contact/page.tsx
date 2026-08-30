@@ -9,10 +9,7 @@ export default function Contact() {
       <p>
         <a
           className="line-cta line-cta-inline"
-          href={
-            process.env.LINE_JOIN_URL ||
-            `mailto:${process.env.CONTACT_EMAIL || 'harusanx@gmail.com'}`
-          }
+          href="https://lin.ee/xWYPyBv"
         >
           <span className="line-cta-mark">LINE</span>
           <span className="line-cta-copy">
