@@ -41,3 +41,6 @@ next-env.d.ts
 /package-stage*/
 /site-package*.tar.gz
 /.wrangler-fresh/
+
+.vercel
+.env*
