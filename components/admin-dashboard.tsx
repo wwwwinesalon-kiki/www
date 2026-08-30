@@ -142,6 +142,7 @@ type Section =
   | 'contents'
   | 'pages'
   | 'analytics'
+  | 'manual'
   | 'settings'
   | 'logs';
 const empty: Data = {
@@ -166,6 +167,7 @@ const nav: [Section, string, typeof LayoutDashboard][] = [
   ['contents', 'Contents', BookOpen],
   ['pages', 'Library / Pages', BookOpen],
   ['analytics', 'Analytics', BarChart3],
+  ['manual', '操作説明書', BookOpen],
   ['settings', 'Settings', Settings],
   ['logs', 'Logs / Notifications', Bell],
 ];
@@ -333,6 +335,8 @@ function Module({
       return <Pages data={data} patch={patch} />;
     case 'analytics':
       return <Analytics data={data} />;
+    case 'manual':
+      return <Manual />;
     case 'settings':
       return <SettingsPage data={data} reload={reload} />;
     case 'logs':
@@ -648,7 +652,10 @@ function MemberEditor({
     const b = Object.fromEntries(new FormData(e.currentTarget));
     await patch('members', member.id, {
       ...b,
-          interest_categories: (typeof b.interest_categories==='string'?b.interest_categories:'')
+      interest_categories: (typeof b.interest_categories === 'string'
+        ? b.interest_categories
+        : ''
+      )
         .split(',')
         .map((x) => x.trim())
         .filter(Boolean),
@@ -1431,7 +1438,7 @@ function ContentEditor({
     const b = Object.fromEntries(new FormData(e.currentTarget));
     await patch('contents', content.id, {
       ...b,
-        tags: (typeof b.tags==='string'?b.tags:'')
+      tags: (typeof b.tags === 'string' ? b.tags : '')
         .split(',')
         .map((x) => x.trim())
         .filter(Boolean),
@@ -1738,6 +1745,89 @@ function Analytics({ data }: { data: Data }) {
         ) : (
           <Empty />
         )}
+      </section>
+    </>
+  );
+}
+function Manual() {
+  const groups = [
+    [
+      '最初に行うこと',
+      [
+        'Dashboardで未読通知・次回イベント・未決済件数を確認',
+        '左メニューから目的の管理画面へ移動',
+        '変更後は公開ページまたは会員ページで表示を確認',
+      ],
+    ],
+    [
+      'Members',
+      [
+        '検索と状態フィルターで会員を絞り込み',
+        '新規作成または行を開いて連絡先・状態・メモを更新',
+        'CSV出力は現在の会員一覧を保存',
+      ],
+    ],
+    [
+      'Events / Applications',
+      [
+        'Eventsで日程・会場・定員・公開範囲・申込可否を設定',
+        '複製は元イベントを残したまま下書きを作成',
+        'Applicationsで参加状態・決済状態・運営メモを更新',
+      ],
+    ],
+    [
+      'Payments',
+      [
+        '検索と状態フィルターで未決済を確認',
+        '入金確認後に決済状態を更新',
+        '外部決済サービスとの照合結果を基準に操作',
+      ],
+    ],
+    [
+      'Contents / Library',
+      [
+        'Contentsで記事種別・本文・画像・音声・公開範囲を設定',
+        'プレビューで内容を確認してからpublishedへ変更',
+        'Library / Pagesで表示順・Featured・Pin・Newを調整',
+      ],
+    ],
+    [
+      'Analytics / Settings',
+      [
+        'Analyticsは実際に取得できた閲覧・参加データを表示',
+        'Settingsでサイト名・連絡先・分類を管理',
+        'Member Password変更は全会員セッションを失効するため必要時のみ実行',
+      ],
+    ],
+    [
+      'Logs / Notifications',
+      [
+        '通知を確認して対応済みなら既読へ変更',
+        '監査ログで日時・操作者・操作対象を確認',
+        '不具合時は対象画面・操作時刻・表示文言を記録',
+      ],
+    ],
+  ];
+  return (
+    <>
+      <Heading title="操作説明書" desc="Wine Work Women 運営管理の基本手順" />
+      <section className="manual-grid">
+        {groups.map(([title, items]) => (
+          <article className="panel" key={title as string}>
+            <h2>{title as string}</h2>
+            <ol>
+              {(items as string[]).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </article>
+        ))}
+      </section>
+      <section className="panel manual-caution">
+        <h2>公開前チェック</h2>
+        <p>
+          公開範囲、日時、申込可否、リンク先、スマートフォン表示を確認してください。パスワード変更やアーカイブは影響範囲を確認してから実行します。
+        </p>
       </section>
     </>
   );

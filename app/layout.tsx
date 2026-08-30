@@ -1,14 +1,10 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_JP, Shippori_Mincho } from 'next/font/google';
+import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import AnalyticsTracker from '@/components/analytics-tracker';
+import WineRippleBackground from '@/components/wine-ripple-background';
 
 const sans = Noto_Sans_JP({ variable: '--font-sans-jp', subsets: ['latin'] });
-const serif = Shippori_Mincho({
-  variable: '--font-serif-jp',
-  subsets: ['latin'],
-  weight: ['500', '600'],
-});
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.SITE_URL || 'https://wine-work-women.example.com',
@@ -33,9 +29,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ja">
-      <body className={`${sans.variable} ${serif.variable}`}>
+      <body className={sans.variable}>
+        <WineRippleBackground />
         <AnalyticsTracker />
-        {children}
+        <div className="site-content">{children}</div>
       </body>
     </html>
   );
