@@ -17,6 +17,26 @@ const copy: Record<string, [string, string]> = {
   archive: ['ARCHIVE', 'これまでの物語をたどる'],
   account: ['ACCOUNT', '会員情報とお支払いについて'],
 };
+const memberFeatures = [
+  {
+    label: 'FIELD',
+    title: '余市の畑から届く声',
+    href: '/member/field',
+    text: '現地の写真と生産者へのヒアリングと音声',
+  },
+  {
+    label: 'NOMIKAI',
+    title: '次に一緒に飲む日',
+    href: '/member/events',
+    text: '初回は2026年10月31日 定員6名',
+  },
+  {
+    label: 'TABLE',
+    title: '日々の発行レシピ研究',
+    href: '/member/table',
+    text: '音声とレシピで家の食卓までつなぎます',
+  },
+];
 export default async function MemberPage({
   params,
 }: {
@@ -64,6 +84,44 @@ export default async function MemberPage({
     );
   }
   const [label, title] = copy[key] || ['MEMBER HOME', 'ワインの向こう側へ'];
+  if (!key) {
+    return (
+      <>
+        <SiteHeader member />
+        <main className="member-page">
+          <div className="member-hero">
+            <p className="eyebrow">{label}</p>
+            <h1>{title}</h1>
+            <p>女性とワインと楽しみ方をつなぐ会員だけの場所</p>
+          </div>
+          <section className="member-feature-grid" aria-label="会員コンテンツ">
+            {memberFeatures.map((feature) => (
+              <Link
+                href={feature.href}
+                key={feature.label}
+                className="member-feature-card"
+              >
+                <span>{feature.label}</span>
+                <h2>{feature.title}</h2>
+                <p>{feature.text}</p>
+                <b>見る →</b>
+              </Link>
+            ))}
+          </section>
+          <section className="member-program-note">
+            <p className="eyebrow">DAILY VOICE</p>
+            <h2>朝の声から広がるWWW</h2>
+            <p>
+              毎晩お届けする3つのテーマから翌朝の音声を選び
+              <br />
+              会員サイトとInstagramとThreadsへ展開します
+            </p>
+          </section>
+        </main>
+        <SiteFooter />
+      </>
+    );
+  }
   if (key === 'events') {
     const events = await publicEvents(true);
     return (
@@ -111,10 +169,12 @@ export default async function MemberPage({
           <section className="account-panel">
             <h2>会費・登録内容の確認</h2>
             <p>
-              会費のお支払いカード変更退会手続きは会費ペイで行います現在の会員サイトは共通ログインのため個人の氏名や決済履歴は表示しません
+              月額会費は3,300円（税込）です
+              <br />
+              登録内容やお支払いの確認は公式LINEからご案内します
             </p>
             <p>
-              登録状況が分からない場合は会費ペイに登録したお名前とメールアドレスを添えてお問い合わせください
+              登録状況が分からない場合は登録したお名前とメールアドレスを添えてお問い合わせください
             </p>
             <div className="legal-actions">
               <Link className="button" href="/contact">

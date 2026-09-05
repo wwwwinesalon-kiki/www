@@ -4,6 +4,110 @@
   color: #53645b;
   font-size: 11px;
 }
+
+.home-membership {
+  width: min(920px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 96px 0;
+  text-align: center;
+}
+.home-membership h2 {
+  font-size: clamp(28px, 4vw, 52px);
+  margin: 12px 0 20px;
+}
+.home-membership > p:not(.concept-kicker) {
+  line-height: 2;
+}
+.home-membership-grid,
+.member-feature-grid,
+.join-benefits > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 38px 0;
+}
+.home-membership-grid a,
+.member-feature-card,
+.join-benefits article {
+  border: 1px solid rgba(83, 34, 42, 0.18);
+  padding: 28px 22px;
+  background: rgba(255, 255, 255, 0.42);
+}
+.home-membership-grid span,
+.member-feature-card span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #7d2438;
+  margin-bottom: 10px;
+}
+.home-membership-grid strong {
+  font-size: 18px;
+}
+.member-feature-grid {
+  margin-top: 42px;
+}
+.member-feature-card {
+  color: inherit;
+  text-decoration: none;
+}
+.member-feature-card h2 {
+  font-size: 22px;
+  margin: 10px 0;
+}
+.member-feature-card p {
+  line-height: 1.8;
+}
+.member-feature-card b {
+  display: block;
+  margin-top: 20px;
+  color: #7d2438;
+}
+.member-program-note {
+  margin-top: 60px;
+  padding: 42px;
+  background: rgba(255, 255, 255, 0.45);
+}
+.member-program-note h2 {
+  margin: 10px 0 18px;
+}
+.join-page ol li span {
+  display: grid;
+  gap: 5px;
+}
+.join-page ol li small {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.join-benefits {
+  margin-top: 64px;
+}
+.join-benefits h2 {
+  font-size: clamp(24px, 3vw, 36px);
+}
+.join-benefits article strong {
+  color: #7d2438;
+  letter-spacing: 0.14em;
+}
+.join-benefits article p {
+  margin: 12px 0 0;
+  line-height: 1.7;
+}
+
+@media (max-width: 720px) {
+  .home-membership {
+    padding: 68px 0;
+  }
+  .home-membership-grid,
+  .member-feature-grid,
+  .join-benefits > div {
+    grid-template-columns: 1fr;
+  }
+  .member-program-note {
+    padding: 28px 22px;
+  }
+}
 .site-footer {
   background: #10382a;
   color: #fff;

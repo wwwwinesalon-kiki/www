@@ -42,6 +42,32 @@ export default async function Home() {
         <p>ワイン熱が上がってきた</p>
         <p>そんな女性の皆様に</p>
       </section>
+      <section className="home-membership" aria-labelledby="membership-title">
+        <p className="concept-kicker">WOMEN × WINE × HOW TO ENJOY</p>
+        <h2 id="membership-title">女性とワインと楽しみ方</h2>
+        <p>
+          余市ワインを入口に作り手と畑と食卓をつなぐ
+          <br />
+          月額3,300円の会員コミュニティです
+        </p>
+        <div className="home-membership-grid">
+          <Link href="/about">
+            <span>FIELD</span>
+            <strong>畑の今を知る</strong>
+          </Link>
+          <Link href="/about">
+            <span>NOMIKAI</span>
+            <strong>一緒に飲む</strong>
+          </Link>
+          <Link href="/about">
+            <span>TABLE</span>
+            <strong>家で味わう</strong>
+          </Link>
+        </div>
+        <Link href="/join" className="more-link">
+          WWWに参加する <b>→</b>
+        </Link>
+      </section>
       <section className="home-gallery" aria-label="WWWのギャラリー">
         {gallery.map(([src, alt, position], index) => (
           <div key={`${alt}-${index}`}>
