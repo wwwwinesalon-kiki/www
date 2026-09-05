@@ -5,6 +5,7 @@
 @import './reference-theme.css';
 @import './public-design.css';
 @import './enhancements.css';
+@import './gallery-polish.css';
 
 /* Reference direction: quiet ivory paper, fine rules and generous whitespace. */
 :root {

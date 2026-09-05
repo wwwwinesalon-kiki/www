@@ -1,0 +1,374 @@
+:root {
+  --gallery-putty: #cbc7bb;
+  --gallery-bone: #ebe8e1;
+  --gallery-chalk: #f2f0eb;
+  --gallery-ink: #24211f;
+  --gallery-graphite: #625e59;
+  --gallery-vellum: #d8d3c9;
+  --gallery-wine: #743744;
+  --gallery-card-radius: 9px;
+  --gallery-button-radius: 29px;
+}
+
+body {
+  color: var(--gallery-ink);
+  background: var(--gallery-putty);
+}
+
+.site-header {
+  height: 76px;
+  padding-inline: clamp(22px, 4vw, 64px);
+  background: color-mix(in srgb, var(--gallery-putty) 91%, transparent);
+  border-color: rgba(36, 33, 31, 0.16);
+  backdrop-filter: blur(14px);
+}
+
+.site-header .brand span,
+.site-footer .brand span,
+.home-hero h1 {
+  font-family: var(--font-mincho-jp), Georgia, serif !important;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+.site-header .brand span {
+  font-size: 31px;
+}
+
+.site-header nav {
+  font-family: var(--font-sans-jp), Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  gap: clamp(18px, 2.5vw, 38px);
+}
+
+.public-home,
+.about-page,
+.public-page,
+.event-detail,
+.join-page,
+.member-page,
+.story.public-story {
+  background: color-mix(in srgb, var(--gallery-putty) 76%, transparent);
+  color: var(--gallery-ink);
+}
+
+.home-hero h1 {
+  font-size: clamp(74px, 13vw, 180px);
+  line-height: 0.84;
+  color: var(--gallery-ink);
+  text-shadow: none;
+}
+
+.home-hero > img {
+  opacity: 0.45;
+  filter: grayscale(0.35) sepia(0.1) contrast(0.92);
+}
+
+.home-hero::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(203, 199, 187, 0.03),
+    rgba(203, 199, 187, 0.28)
+  );
+}
+
+.home-story {
+  min-height: 400px;
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.home-membership,
+.home-updates,
+.home-concept {
+  position: relative;
+}
+
+.home-membership {
+  width: min(1180px, 90vw);
+  padding-block: 132px;
+  border-block: 1px solid rgba(36, 33, 31, 0.18);
+}
+
+.home-membership h2,
+.home-updates > h2,
+.public-page > h1,
+.join-page h1,
+.event-detail > h1,
+.member-hero h1,
+.story h1,
+.about-intro h1 {
+  font-family: var(--font-mincho-jp), Georgia, serif;
+  color: var(--gallery-ink);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.home-membership h2 {
+  font-size: clamp(42px, 6vw, 82px);
+  line-height: 1.05;
+}
+
+.concept-kicker,
+.eyebrow,
+.update-label,
+.about-section-head span {
+  font-family: var(--font-sans-jp), Arial, sans-serif;
+  color: var(--gallery-graphite);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+}
+
+.home-membership-grid,
+.member-feature-grid,
+.join-benefits > div {
+  gap: 1px;
+  background: rgba(36, 33, 31, 0.2);
+  border: 1px solid rgba(36, 33, 31, 0.14);
+}
+
+.home-membership-grid a,
+.member-feature-card,
+.join-benefits article {
+  background: rgba(235, 232, 225, 0.88);
+  border: 0;
+  border-radius: 0;
+  padding: clamp(28px, 4vw, 48px);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.home-membership-grid a:hover,
+.home-membership-grid a:focus-visible,
+.member-feature-card:hover,
+.member-feature-card:focus-visible {
+  background: var(--gallery-ink);
+  color: white;
+}
+
+.home-gallery {
+  width: min(920px, 82vw);
+  gap: 8px;
+}
+
+.home-gallery > div,
+.home-concept article > img,
+.about-intro-grid img,
+.about-lead-grid > img,
+.partner-card img {
+  border-radius: var(--gallery-card-radius);
+}
+
+.home-concept {
+  width: min(1240px, 92vw);
+}
+
+.home-concept article {
+  gap: clamp(30px, 6vw, 92px);
+  margin-bottom: 132px;
+}
+
+.home-concept h2,
+.about-copy h3 {
+  color: var(--gallery-ink);
+  letter-spacing: -0.01em;
+}
+
+.home-concept h2 {
+  font-size: clamp(30px, 4vw, 52px);
+  line-height: 1.25;
+}
+
+.home-concept .concept-copy p,
+.home-concept .profile-copy p,
+.about-copy p,
+.public-page section p,
+.account-panel p {
+  color: var(--gallery-graphite);
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.home-updates {
+  width: min(1180px, 90vw);
+}
+
+.home-updates > h2 {
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 1;
+}
+
+.update-row {
+  min-height: 78px;
+  border-color: rgba(36, 33, 31, 0.18);
+}
+
+.update-row strong {
+  font-size: 15px;
+}
+
+.about-intro,
+.about-section {
+  width: min(1240px, 90vw);
+  padding-block: clamp(96px, 12vw, 168px);
+}
+
+.about-intro h1 {
+  font-size: clamp(56px, 8vw, 112px);
+  line-height: 1.08;
+}
+
+.about-section-head p {
+  font-family: var(--font-mincho-jp), Georgia, serif;
+  font-size: clamp(60px, 9vw, 124px);
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  color: var(--gallery-ink);
+}
+
+.about-section-head h2 {
+  color: var(--gallery-wine);
+  font-size: clamp(20px, 2vw, 28px);
+}
+
+.about-section,
+.about-copy ul,
+.partner-card,
+.about-copy blockquote,
+.account-panel {
+  border-color: rgba(36, 33, 31, 0.18);
+}
+
+.partner-grid {
+  gap: 1px;
+  padding: 1px;
+  background: rgba(36, 33, 31, 0.2);
+}
+
+.partner-card {
+  background: var(--gallery-bone);
+  border: 0;
+  box-shadow: none;
+}
+
+.partner-card:hover {
+  transform: translateY(-3px);
+  box-shadow: none;
+}
+
+.partner-card p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.join-page {
+  background: color-mix(in srgb, var(--gallery-putty) 82%, transparent);
+}
+
+.join-page h1,
+.public-page > h1,
+.member-hero h1 {
+  font-size: clamp(52px, 8vw, 108px);
+  line-height: 1.05;
+}
+
+.button,
+.line-cta,
+.wine-fill-button,
+.floating-join {
+  border-radius: var(--gallery-button-radius);
+}
+
+.line-cta,
+.floating-join,
+.wine-fill-button {
+  box-shadow: none;
+  border-color: rgba(116, 55, 68, 0.35);
+}
+
+.line-cta:hover,
+.line-cta:focus-visible {
+  box-shadow: none;
+}
+
+.site-footer {
+  background: var(--gallery-ink);
+  color: white;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.site-footer > p,
+.site-footer .brand span {
+  font-family: var(--font-mincho-jp), Georgia, serif;
+}
+
+@media (max-width: 760px) {
+  .site-header {
+    height: 70px;
+  }
+  .site-header .brand span {
+    font-size: 26px;
+  }
+  .home-hero h1 {
+    font-size: clamp(68px, 24vw, 108px);
+  }
+  .home-story {
+    min-height: 360px;
+    font-size: 14px;
+  }
+  .home-membership {
+    padding-block: 82px;
+  }
+  .home-membership h2,
+  .home-updates > h2 {
+    font-size: clamp(38px, 12vw, 58px);
+  }
+  .home-gallery {
+    width: 82vw;
+    gap: 5px;
+  }
+  .home-concept article {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    margin-bottom: 88px;
+  }
+  .home-concept article > div {
+    padding: 10px 2px;
+  }
+  .home-concept h2 {
+    font-size: 32px;
+  }
+  .home-concept .concept-copy p,
+  .home-concept .profile-copy p,
+  .about-copy p,
+  .public-page section p,
+  .account-panel p {
+    font-size: 16px;
+  }
+  .about-intro h1,
+  .join-page h1,
+  .public-page > h1,
+  .member-hero h1 {
+    font-size: clamp(44px, 14vw, 68px);
+  }
+  .about-section-head p {
+    font-size: clamp(52px, 17vw, 76px);
+  }
+  .partner-grid {
+    grid-template-columns: 1fr;
+  }
+  .partner-card p {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-gallery img,
+  .partner-card,
+  .home-membership-grid a,
+  .member-feature-card {
+    transition: none;
+  }
+}
