@@ -20,5 +20,13 @@ export async function updateSession(request: NextRequest) {
     },
   );
   await supabase.auth.getClaims();
+  if (
+    /^\/(member|admin|api\/member|api\/admin|api\/media)(\/|$)/.test(
+      request.nextUrl.pathname,
+    )
+  ) {
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+    response.headers.set('Referrer-Policy', 'no-referrer');
+  }
   return response;
 }

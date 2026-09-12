@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server';
 export async function POST(req: Request) {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  const res = NextResponse.redirect(new URL('/member/login', req.url), 303);
+  const res = NextResponse.redirect(
+    new URL('/member/login', process.env.NEXT_PUBLIC_SITE_URL || req.url),
+    303,
+  );
   return res;
 }

@@ -2,17 +2,11 @@
 /* eslint-disable react/react-compiler */
 import { useEffect, useState } from 'react';
 import {
-  BarChart3,
-  Bell,
-  BookOpen,
   CalendarDays,
   ChevronRight,
-  CircleDollarSign,
   FileText,
   LayoutDashboard,
   RefreshCw,
-  Settings,
-  Users,
 } from 'lucide-react';
 import type { PaymentStatus } from '@/lib/domain';
 import { paymentSummary } from '@/lib/domain';
@@ -159,17 +153,8 @@ const empty: Data = {
   adminUsers: [],
 };
 const nav: [Section, string, typeof LayoutDashboard][] = [
-  ['', 'Dashboard', LayoutDashboard],
-  ['members', 'Members', Users],
   ['events', 'Events', CalendarDays],
   ['applications', 'Applications', FileText],
-  ['payments', 'Payments', CircleDollarSign],
-  ['contents', 'Contents', BookOpen],
-  ['pages', 'Library / Pages', BookOpen],
-  ['analytics', 'Analytics', BarChart3],
-  ['manual', '操作説明書', BookOpen],
-  ['settings', 'Settings', Settings],
-  ['logs', 'Logs / Notifications', Bell],
 ];
 const yen = (n: number) =>
   new Intl.NumberFormat('ja-JP', {
@@ -235,7 +220,10 @@ export default function AdminDashboard({
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <button className="admin-brand nav-button" onClick={() => go('')}>
+        <button
+          className="admin-brand nav-button"
+          onClick={() => location.assign('/admin')}
+        >
           <b>WWW</b>
           <span>OPERATIONS</span>
         </button>
@@ -254,8 +242,8 @@ export default function AdminDashboard({
         <div className="admin-user">
           <span>AH</span>
           <div>
-            <b>akiyama haruto</b>
-            <small>Owner</small>
+            <b>既存イベント受付</b>
+            <small>記事管理へはWWWを選択</small>
           </div>
         </div>
       </aside>

@@ -1,124 +1,83 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { SiteFooter, SiteHeader } from '@/components/site-chrome';
+import { notFound } from 'next/navigation';
+import { SiteHeader, SiteFooter } from '@/components/site-chrome';
+import ArticleBody from '@/components/article-body';
+import MemberStatus from '@/components/member-status';
 import { contentBySlug, publicEvents, visibleContents } from '@/lib/data';
+import { memberAccess } from '@/lib/member-access';
+import { PRIMARY_CATEGORIES } from '@/lib/article';
 export const metadata: Metadata = {
-  title: 'Member Site',
+  title: '会員記事',
   robots: { index: false, follow: false },
 };
 export const dynamic = 'force-dynamic';
-const copy: Record<string, [string, string]> = {
-  people: ['PEOPLE', 'この人に会いたいから始まる物語'],
-  field: ['FIELD', '畑から届くいまだけの声'],
-  table: ['TABLE', 'ワインのある食卓をもっと自由に'],
-  news: ['NEWS', 'WWWからのお知らせ'],
-  events: ['EVENT', '次に会える場所'],
-  archive: ['ARCHIVE', 'これまでの物語をたどる'],
-  account: ['ACCOUNT', '会員情報とお支払いについて'],
-};
-const memberFeatures = [
-  {
-    label: 'FIELD',
-    title: '余市の畑から届く声',
-    href: '/member/field',
-    text: '現地の写真と生産者へのヒアリングと音声',
-  },
-  {
-    label: 'NOMIKAI',
-    title: '次に一緒に飲む日',
-    href: '/member/events',
-    text: '初回は2026年10月31日 定員6名',
-  },
-  {
-    label: 'TABLE',
-    title: '日々の発行レシピ研究',
-    href: '/member/table',
-    text: '音声とレシピで家の食卓までつなぎます',
-  },
-];
 export default async function MemberPage({
   params,
 }: {
   params: Promise<{ path?: string[] }>;
 }) {
-  const { path = [] } = await params,
-    key = path[0] || '';
-  if (path[1]) {
-    const selected = await contentBySlug(path[1], true);
-    if (!selected)
-      return (
-        <>
-          <SiteHeader member />
-          <main className="member-page">
-            <h1>コンテンツが見つかりません</h1>
-          </main>
-          <SiteFooter />
-        </>
-      );
+  const { path = [] } = await params;
+  const key = path[0] || '';
+  const access = await memberAccess();
+  if (key === 'account')
     return (
       <>
         <SiteHeader member />
-        <article className="story">
-          <p className="eyebrow">{selected.type}</p>
-          <h1>{selected.title}</h1>
-          <p className="lead">{selected.summary}</p>
-          {selected.cover_image && (
-            <Image
-              src={selected.cover_image}
-              alt=""
-              width={1200}
-              height={675}
-              unoptimized
-            />
-          )}
-          <div className="story-body">
-            {selected.body.split('\n').map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-          {selected.audio && <audio controls src={selected.audio} />}
-        </article>
-        <SiteFooter />
+        <main className="article-shell">
+          <h1>アカウントのご案内</h1>
+          <p>
+            月額会費は3,300円（税込）です
+            契約と支払方法の確認・退会は会費ペイが管理しています
+          </p>
+          <p>手続きが分からない場合は公式LINEへお問い合わせください</p>
+          <a href="https://lin.ee/xWYPyBv" className="button">
+            公式LINE
+          </a>
+          <p>
+            <Link href="/member/reset">パスワード再設定</Link>
+          </p>
+        </main>
       </>
     );
-  }
-  const [label, title] = copy[key] || ['MEMBER HOME', 'ワインの向こう側へ'];
-  if (!key) {
+  if (!access.entitled)
     return (
       <>
         <SiteHeader member />
-        <main className="member-page">
-          <div className="member-hero">
-            <p className="eyebrow">{label}</p>
-            <h1>{title}</h1>
-            <p>女性とワインと楽しみ方をつなぐ会員だけの場所</p>
-          </div>
-          <section className="member-feature-grid" aria-label="会員コンテンツ">
-            {memberFeatures.map((feature) => (
-              <Link
-                href={feature.href}
-                key={feature.label}
-                className="member-feature-card"
-              >
-                <span>{feature.label}</span>
-                <h2>{feature.title}</h2>
-                <p>{feature.text}</p>
-                <b>見る →</b>
-              </Link>
-            ))}
-          </section>
-          <section className="member-program-note">
-            <p className="eyebrow">DAILY VOICE</p>
-            <h2>朝の声から広がるWWW</h2>
-            <p>
-              毎晩お届けする3つのテーマから翌朝の音声を選び
-              <br />
-              会員サイトとInstagramとThreadsへ展開します
-            </p>
-          </section>
-        </main>
-        <SiteFooter />
+        <MemberStatus />
+        {access.editor && (
+          <p className="article-shell">
+            <Link href="/admin">記事管理・管理者プレビューへ</Link>
+          </p>
+        )}
+      </>
+    );
+  if (path.length > 2) notFound();
+  if (path[1]) {
+    const article = await contentBySlug(path[1], true);
+    if (!article) notFound();
+    return (
+      <>
+        <SiteHeader member />
+        <article className="article-shell">
+          <Link href="/member">← 記事一覧へ</Link>
+          <p className="eyebrow">{article.type}</p>
+          <h1>{article.title}</h1>
+          {article.cover_image && (
+            <Image
+              unoptimized
+              src={article.cover_image}
+              alt={article.cover_alt || article.title}
+              width={1200}
+              height={800}
+              className="article-cover"
+            />
+          )}
+          <ArticleBody body={article.body} format={article.body_format} />
+          <Link href="/member">← 記事一覧へ</Link>
+        </article>
+        <SiteFooter member />
       </>
     );
   }
@@ -127,100 +86,75 @@ export default async function MemberPage({
     return (
       <>
         <SiteHeader member />
-        <main className="member-page">
-          <div className="member-hero">
-            <p className="eyebrow">{label}</p>
-            <h1>{title}</h1>
-          </div>
-          <section className="content-grid">
-            {events.length ? (
-              events.map((item, i) => (
-                <Link
-                  key={item.id}
-                  href={`/events/${item.slug}`}
-                  className="content-card"
-                >
-                  <div className={`content-visual tone-${i % 4}`}>EVENT</div>
-                  <p className="eyebrow">EVENT</p>
-                  <h2>{item.title}</h2>
-                  <p>
-                    {item.start_at.slice(0, 10)} · {item.venue}
-                  </p>
-                </Link>
-              ))
-            ) : (
-              <p>公開中のイベントはありません</p>
-            )}
-          </section>
+        <main className="article-shell">
+          <h1>EVENT</h1>
+          <p>既存のイベント案内</p>
+          {events.length ? (
+            events.map((e) => (
+              <p key={e.id}>
+                <Link href={'/events/' + e.slug}>{e.title}</Link>
+              </p>
+            ))
+          ) : (
+            <p>公開中のイベントはありません</p>
+          )}
         </main>
-        <SiteFooter />
       </>
     );
   }
-  if (key === 'account') {
-    return (
-      <>
-        <SiteHeader member />
-        <main className="member-page">
-          <div className="member-hero">
-            <p className="eyebrow">{label}</p>
-            <h1>{title}</h1>
-          </div>
-          <section className="account-panel">
-            <h2>会費・登録内容の確認</h2>
-            <p>
-              月額会費は3,300円（税込）です
-              <br />
-              登録内容やお支払いの確認は公式LINEからご案内します
-            </p>
-            <p>
-              登録状況が分からない場合は登録したお名前とメールアドレスを添えてお問い合わせください
-            </p>
-            <div className="legal-actions">
-              <Link className="button" href="/contact">
-                お問い合わせ
-              </Link>
-            </div>
-          </section>
-        </main>
-        <SiteFooter />
-      </>
-    );
-  }
-  const type = key && key !== 'archive' ? key.toUpperCase() : undefined;
-  let contents = await visibleContents(true, type);
-  if (key === 'archive') contents = contents.filter((c) => !c.is_new);
+  const all = await visibleContents(true);
+  const categories = Array.from(
+    new Set([...PRIMARY_CATEGORIES, ...all.map((c) => c.type)]),
+  );
+  const selected = key && key !== 'archive' ? key.toUpperCase() : '';
+  const articles = selected ? all.filter((c) => c.type === selected) : all;
   return (
     <>
       <SiteHeader member />
-      <main className="member-page">
-        <div className="member-hero">
-          <p className="eyebrow">{label}</p>
-          <h1>{title}</h1>
-          <p>つくる人土地食卓をつなぐ会員だけの読みものと体験</p>
-        </div>
-        <section className="content-grid">
-          {contents.length ? (
-            contents.map((item, i) => (
+      <main className="article-shell">
+        <p className="eyebrow">WINE WELCOME WORLD</p>
+        <h1>ワインの楽しみ方が広がる読みもの</h1>
+        <nav aria-label="記事カテゴリ">
+          <Link href="/member" aria-current={!selected ? 'page' : undefined}>
+            すべて
+          </Link>
+          {categories.map((c) => (
+            <Link
+              key={c}
+              href={'/member/' + c.toLowerCase()}
+              aria-current={selected === c ? 'page' : undefined}
+            >
+              {c}
+            </Link>
+          ))}
+        </nav>
+        <section className="article-grid">
+          {articles.length ? (
+            articles.map((c) => (
               <Link
-                key={item.id}
-                href={`/member/${item.type.toLowerCase()}/${item.slug}`}
-                className="content-card"
+                prefetch={false}
+                href={'/member/' + c.type.toLowerCase() + '/' + c.slug}
+                key={c.id}
               >
-                <div className={`content-visual tone-${i % 4}`}>
-                  {item.type}
-                </div>
-                <p className="eyebrow">{item.type}</p>
-                <h2>{item.title}</h2>
-                <p>{item.summary}</p>
+                {c.cover_image && (
+                  <Image
+                    unoptimized
+                    src={c.cover_image}
+                    alt={c.cover_alt || c.title}
+                    width={600}
+                    height={400}
+                  />
+                )}
+                <p>{c.type}</p>
+                <h2>{c.title}</h2>
               </Link>
             ))
           ) : (
-            <p>コンテンツはありません</p>
+            <p>記事は準備中です 公開までお待ちください</p>
           )}
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter member />
     </>
   );
 }

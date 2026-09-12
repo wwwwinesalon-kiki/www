@@ -1,21 +1,25 @@
-# Wine Work Women Core
+# WWW / Wine Welcome World
 
-WWWのPublic Site、共通パスワード式Member Site、Admin Dashboard、D1 Core DB、R2 Media、Kaihipay/LINE Ops Bridgeを1つのCloudflare Worker互換アプリにまとめています。
+既存Next.js / React / TypeScript / Supabase構成を利用した 会員向けの記事閲覧と完成原稿の投稿システムです。認証は個別のSupabase Authアカウントです。共通パスワード方式やD1/R2の旧構成は現在の実装手順ではありません。
+
+仕様・コード構成・操作手順・検証の限界・DB移行/戻し方・LINEリンクは [引き継ぎ資料](docs/MINIMAL-WWW-HANDOFF.md) を参照してください。今回のブランチはレビュー用で本番未適用です。Kaihipay実接続は確認事項が揃うまで無効です。
 
 ## Local setup
 
-1. `.env.example`を`.env.local`へコピーし、秘密値を設定します。
-2. `npm run db:migrate:local` でD1 migrationを適用します。
-3. `npm run db:seed:local` で開発データを投入します。
-4. `npm run dev` で起動します。
+1. Node.js 22.13以上とChromeを用意し `npm ci --cache .cache/npm` を実行します。
+2. 本番から分離した確認には `npm run dev:review` を使います 3100/54329番ポートを使う模擬Auth/Storage + PostgreSQL RLS環境です。
+3. 実Supabaseで検証する場合は 別プロジェクトにmigrationを適用し `.env.example` の設定と実Auth/メール/Storageを確認します。
+4. 実開発環境は `npm run dev` です。既存会員の検証済み紐付け移行なしに本番DBへ新migrationを適用しないでください。
 
-プレビュー用Member Passwordは環境変数未設定時のみ `www-preview-2026` です。本番では必ず `MEMBER_PASSWORD_HASH`（SHA-256 hex）とランダムな `MEMBER_SESSION_SECRET` を設定してください。Adminは本番でCloudflare Accessを設定し、`cf-access-authenticated-user-email` と `admin_users` のRoleをサーバー側で検証します。
+本番用のキーやパスワードはコミットしません。テスト用資格情報はローカル模擬環境専用で 本番アカウントではありません。
 
 ## Data ownership
 
 - 月額契約・月額決済: 会費ペイ
-- 会員運営状態、Events、Applications、イベント入金、Contents、掲載状態: WWW Core D1
-- 画像・音声: R2（D1にはmetadataのみ）
+- 本人確認・ログイン: Supabase Auth
+- 記事・最小限の閲覧資格/連携記録・既存Events/Applications: Supabase PostgreSQL
+- 新規会員記事画像: Supabase private Storage
+- 公開紹介ページ: Studio 既存のVercel公開ページ/画像は保持
 
 ## Quality commands
 
@@ -23,5 +27,6 @@ WWWのPublic Site、共通パスワード式Member Site、Admin Dashboard、D1 C
 - `npm run lint`
 - `npm test`
 - `npm run build`
+- `npm run test:e2e`
 
-重要レコードは削除APIでも`deleted_at`を更新するSoft Deleteです。入金、会員状態、イベント、コンテンツ等の変更は`audit_logs`へ同一D1 batchで記録します。
+本番ビルドの分離ブラウザ検証ではビルド時にloopbackのテスト環境変数を指定し `WWW_REVIEW_PRODUCTION=1` でE2Eを実行します。詳細は引き継ぎ資料を参照してください。mainへのマージ/本番DB適用/公開は別途承認が必要です。

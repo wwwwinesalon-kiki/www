@@ -1,48 +1,56 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-export default function MemberLoginForm() {
-  const [state, setState] = useState<
-    'idle' | 'loading' | 'error' | 'registered'
-  >('idle');
-  const [register, setRegister] = useState(false);
+import { safeNext } from '@/lib/article';
+export default function MemberLoginForm({
+  next = '/member',
+  reset = false,
+}: {
+  next?: string;
+  reset?: boolean;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
   return (
     <form
       className="login-form"
       onSubmit={async (e) => {
         e.preventDefault();
-        setState('loading');
+        setBusy(true);
+        setMessage('');
         const form = new FormData(e.currentTarget);
-        const supabase = createClient();
-        const email = form.get('email');
-        const password = form.get('password');
-        if (typeof email !== 'string' || typeof password !== 'string')
-          return setState('error');
-        const name = form.get('name');
-        const { error } = register
-          ? await supabase.auth.signUp({
+        try {
+          const supabase = createClient();
+          const emailField = form.get('email');
+          const passwordField = form.get('password');
+          const email = typeof emailField === 'string' ? emailField : '';
+          if (reset) {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: location.origin + '/member/auth?next=/member/setup',
+            });
+            if (error) throw error;
+            setMessage(
+              '登録済みの場合は再設定の案内を送信します メールをご確認ください',
+            );
+          } else {
+            const { error } = await supabase.auth.signInWithPassword({
               email,
-              password,
-              options: { data: { name: typeof name === 'string' ? name : '' } },
-            })
-          : await supabase.auth.signInWithPassword({ email, password });
-        if (error) return setState('error');
-        if (register) return setState('registered');
-        location.href = '/member';
+              password: typeof passwordField === 'string' ? passwordField : '',
+            });
+            if (error) throw error;
+            location.assign(safeNext(next));
+          }
+        } catch {
+          setMessage(
+            reset
+              ? '送信できませんでした 少し待って再試行してください'
+              : 'ログインできませんでした メール確認とパスワードをご確認ください',
+          );
+        } finally {
+          setBusy(false);
+        }
       }}
     >
-      {register && (
-        <>
-          <label htmlFor="name">お名前</label>
-          <input
-            id="name"
-            name="name"
-            required
-            autoComplete="name"
-            placeholder="お名前"
-          />
-        </>
-      )}
       <label htmlFor="email">メールアドレス</label>
       <input
         id="email"
@@ -50,39 +58,23 @@ export default function MemberLoginForm() {
         type="email"
         required
         autoComplete="email"
-        placeholder="登録したメールアドレス"
       />
-      <label htmlFor="password">パスワード</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        required
-        minLength={8}
-        autoComplete="current-password"
-        placeholder="パスワードを入力"
-      />
-      <button className="button" disabled={state === 'loading'}>
-        {state === 'loading' ? '確認中…' : register ? '会員登録' : 'ログイン'}
-      </button>
-      {state === 'error' && (
-        <p role="alert">メールアドレスまたはパスワードを確認してください</p>
+      {!reset && (
+        <>
+          <label htmlFor="password">パスワード</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+          />
+        </>
       )}
-      {state === 'registered' && (
-        <output>
-          登録を受け付けましたメール確認と運営の承認後にログインできます
-        </output>
-      )}
-      <button
-        className="plain-action"
-        type="button"
-        onClick={() => {
-          setRegister(!register);
-          setState('idle');
-        }}
-      >
-        {register ? 'ログインへ戻る' : '初めての方はこちら'}
+      <button className="button" disabled={busy}>
+        {busy ? '確認中…' : reset ? '再設定メールを送る' : 'ログイン'}
       </button>
+      {message && <p role="status">{message}</p>}
     </form>
   );
 }

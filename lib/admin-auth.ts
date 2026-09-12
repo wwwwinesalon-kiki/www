@@ -3,8 +3,16 @@ import { createClient } from '@/lib/supabase/server';
 export async function requireAdmin(req: Request, write = false) {
   if (write) {
     const origin = req.headers.get('origin');
-    if (origin && new URL(origin).origin !== new URL(req.url).origin)
+    try {
+      if (
+        origin &&
+        new URL(origin).origin !==
+          new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin
+      )
+        return null;
+    } catch {
       return null;
+    }
   }
   const supabase = await createClient();
   const {

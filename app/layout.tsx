@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './articles.css';
 import AnalyticsTracker from '@/components/analytics-tracker';
 import WineRippleBackground from '@/components/wine-ripple-background';
 import JoinUsCta from '@/components/join-us-cta';
@@ -29,7 +30,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" data-scroll-behavior="smooth">
       <body>
         <WineRippleBackground />
         <AnalyticsTracker />

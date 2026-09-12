@@ -1,0 +1,232 @@
+.article-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 48px 24px 90px;
+  color: #542634;
+}
+.article-shell h1,
+.article-shell h2,
+.article-shell h3 {
+  font-family: 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  letter-spacing: 0.02em;
+}
+.article-shell h1 {
+  font-size: clamp(24px, 4vw, 40px);
+  line-height: 1.5;
+}
+.article-shell nav,
+.article-actions,
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+.article-shell button,
+.article-shell input,
+.article-shell select,
+.article-shell textarea {
+  font: inherit;
+}
+.article-shell button,
+.article-shell nav a,
+.article-actions a {
+  padding: 10px 18px;
+  min-height: 44px;
+  border: 1px solid #9d7e83;
+  background: #fffaf5;
+  color: #542634;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.article-shell button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.article-shell button:hover,
+.article-shell nav [aria-current='page'] {
+  background: #ead4d7;
+}
+.article-shell input,
+.article-shell select,
+.article-shell textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #bba9a5;
+  border-radius: 4px;
+  background: #fffdf9;
+}
+.article-shell label {
+  display: block;
+  margin: 20px 0 8px;
+}
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 32px;
+}
+.article-grid img {
+  width: 100%;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+}
+.article-grid h2 {
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.article-cover {
+  width: 100%;
+  height: auto;
+  max-height: 650px;
+  object-fit: contain;
+  margin: 24px 0;
+}
+.article-body,
+.article-editor {
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.article-body p,
+.article-editor p {
+  margin: 0 0 1.25em;
+}
+.article-body h2,
+.article-editor h2 {
+  font-size: 26px;
+  margin: 1.8em 0 0.6em;
+}
+.article-body h3,
+.article-editor h3 {
+  font-size: 21px;
+  margin: 1.4em 0 0.6em;
+}
+.article-body ul,
+.article-body ol,
+.article-editor ul,
+.article-editor ol {
+  padding-left: 1.5em;
+  list-style: revert;
+  margin: 1em 0;
+}
+.article-body img,
+.article-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+}
+.article-body a,
+.article-editor a {
+  text-decoration: underline;
+  color: #7c3142;
+}
+.article-body table,
+.article-editor table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 24px 0;
+}
+.article-body td,
+.article-body th,
+.article-editor td,
+.article-editor th {
+  padding: 10px;
+  border: 1px solid #bba9a5;
+  min-width: 100px;
+}
+.article-editor {
+  min-height: 380px;
+  padding: 24px;
+  background: #fffdf9;
+  border: 1px solid #bba9a5;
+  outline-offset: 4px;
+}
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  padding: 8px;
+  background: #f9f7f1;
+  z-index: 5;
+}
+.article-notice {
+  padding: 16px;
+  background: #efe2dc;
+  margin: 20px 0;
+}
+.article-shell [role='alert'] {
+  color: #92253d;
+  padding: 12px;
+  border: 1px solid #cba4aa;
+}
+.media-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+.media-list button {
+  flex: 0 0 140px;
+}
+.media-list img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+}
+.article-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid #d7c7c0;
+}
+.article-row a {
+  font-size: 20px;
+}
+.article-shell :focus-visible {
+  outline: 3px solid #9c5264;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .article-shell {
+    padding: 28px 18px 70px;
+  }
+  .article-body,
+  .article-editor {
+    font-size: 16px;
+  }
+  .article-editor {
+    padding: 16px;
+  }
+  .article-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .editor-toolbar {
+    gap: 6px;
+  }
+  .editor-toolbar button {
+    padding: 8px 10px;
+  }
+}
+.member-footer {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.member-footer > div:nth-of-type(2) {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.member-footer > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .member-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

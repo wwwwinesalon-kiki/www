@@ -39,7 +39,10 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
           <button className="plain-action">ログアウト</button>
         </form>
       ) : (
-        <Link href="/join" className="button compact header-join wine-fill-button">
+        <Link
+          href="/join"
+          className="button compact header-join wine-fill-button"
+        >
           <WineGlassIcon className="header-join-glass" />
           <span>JOIN US</span> <ArrowRight size={15} />
         </Link>
@@ -47,9 +50,9 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
     </header>
   );
 }
-export function SiteFooter() {
+export function SiteFooter({ member = false }: { member?: boolean }) {
   return (
-    <footer className="site-footer">
+    <footer className={'site-footer' + (member ? ' member-footer' : '')}>
       <div className="brand">
         <span>WWW</span>
         <small>WINE WORK WOMEN</small>

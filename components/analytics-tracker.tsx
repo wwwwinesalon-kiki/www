@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 export default function AnalyticsTracker() {
   useEffect(() => {
+    if (/^\/(member|admin)(\/|$)/.test(location.pathname)) return;
     let id = localStorage.getItem('www_anonymous_session');
     if (!id) {
       id = crypto.randomUUID();

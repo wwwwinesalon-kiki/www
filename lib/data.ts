@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { memberAccess } from '@/lib/member-access';
 
 export type EventView = {
   id: string;
@@ -29,9 +30,10 @@ export type ContentView = {
   slug: string;
   summary: string | null;
   body: string;
+  body_format?: string;
+  cover_alt?: string;
   tags: string | null;
   cover_image: string | null;
-  audio: string | null;
   public_visible: number;
   member_visible: number;
   publish_status: string;
@@ -69,11 +71,17 @@ export async function eventBySlug(slug: string, member = false) {
   return events.find((event) => event.slug === slug) || null;
 }
 export async function visibleContents(member = false, type?: string) {
+  if (member) {
+    const access = await memberAccess();
+    if (!access.user || !access.entitled) return [];
+  }
   const supabase = await createClient();
   const visibility = member ? 'member_visible' : 'public_visible';
   let query = supabase
     .from('contents')
-    .select('*')
+    .select(
+      'id,type,title,slug,summary,body,body_format,cover_alt,tags,cover_image,public_visible,member_visible,publish_status,published_at,is_new',
+    )
     .is('deleted_at', null)
     .is('archived_at', null)
     .eq('publish_status', 'published')
@@ -81,7 +89,10 @@ export async function visibleContents(member = false, type?: string) {
     .order('published_at', { ascending: false });
   if (type) query = query.eq('type', type);
   const { data, error } = await query;
-  if (error) return [];
+  if (error)
+    throw new Error(
+      '記事を取得できませんでした 時間をおいて再試行してください',
+    );
   return (data || []).map((content) => ({
     ...content,
     public_visible: Number(content.public_visible),

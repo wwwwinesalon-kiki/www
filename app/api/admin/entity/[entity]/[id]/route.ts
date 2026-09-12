@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/admin-auth';
+import { saveArticle } from '@/lib/article-write';
 
 const config = {
   events: {
@@ -57,17 +58,13 @@ export async function PATCH(
   const actor = await requireAdmin(req, true);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
   const { entity, id } = await params;
+  if (entity === 'contents') return saveArticle(req, actor, id);
+  if (entity === 'members')
+    return Response.json(
+      { error: '会員状態と権限の変更はこの画面では行いません' },
+      { status: 410 },
+    );
   const body = (await req.json()) as Record<string, unknown>;
-  if (entity === 'members') {
-    const { error } = await actor.supabase.rpc('admin_update_profile', {
-      target_id: id,
-      next_role: body.role || 'member',
-      next_status: body.status || 'pending',
-    });
-    return error
-      ? Response.json({ error: error.message }, { status: 422 })
-      : Response.json({ ok: true });
-  }
   const item = config[entity as keyof typeof config];
   if (!item) return Response.json({ error: 'Unknown entity' }, { status: 404 });
   const payload = Object.fromEntries(
@@ -103,7 +100,11 @@ export async function DELETE(
   const now = new Date().toISOString();
   const { error } = await actor.supabase
     .from(item.table)
-    .update({ archived_at: now, deleted_at: now, updated_at: now })
+    .update({
+      ...(entity === 'event_applications' ? {} : { archived_at: now }),
+      deleted_at: now,
+      updated_at: now,
+    })
     .eq('id', id);
   return error
     ? Response.json({ error: error.message }, { status: 422 })

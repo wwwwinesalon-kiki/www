@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { SiteFooter, SiteHeader } from '@/components/site-chrome';
 import { contentBySlug } from '@/lib/data';
+import ArticleBody from '@/components/article-body';
 export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
@@ -48,11 +49,7 @@ export default async function PublicStory({
             unoptimized
           />
         )}
-        <div className="story-body">
-          {c.body.split('\n').map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-        </div>
+        <ArticleBody body={c.body} format={c.body_format} />
       </article>
       <SiteFooter />
     </>

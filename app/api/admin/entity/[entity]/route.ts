@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { validateEvent } from '@/lib/domain';
+import { saveArticle } from '@/lib/article-write';
 
 const tables = {
   members: 'profiles',
@@ -38,6 +39,7 @@ export async function POST(
       { error: '会員はSupabase Authで招待してください' },
       { status: 422 },
     );
+  if (entity === 'contents') return saveArticle(req, actor);
   const table = tables[entity as keyof typeof tables];
   if (!table)
     return Response.json({ error: 'Unknown entity' }, { status: 404 });
