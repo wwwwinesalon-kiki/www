@@ -1,4 +1,5 @@
 import { SiteHeader, SiteFooter } from '@/components/site-chrome';
+import { MEMBERSHIP_SIGNUP_URL, MEMBERSHIP_TOTAL_LABEL } from '@/lib/membership-policy';
 export default function Join() {
   return (
     <>
@@ -11,15 +12,15 @@ export default function Join() {
           新しい出会いと
         </h1>
         <p>
-          月額3,300円（税込）でWWWのすべての体験へ
+          月額の支払総額は{MEMBERSHIP_TOTAL_LABEL}です
           <br />
-          まずは公式LINEからお申し込みください
+          イベント参加費はすべて別料金です
         </p>
-        <a className="line-cta line-cta-inline" href="https://lin.ee/xWYPyBv">
-          <span className="line-cta-mark">LINE</span>
+        <a className="line-cta line-cta-inline" href={MEMBERSHIP_SIGNUP_URL}>
+          <span className="line-cta-mark">JOIN</span>
           <span className="line-cta-copy">
             <small>入会手続きはこちら</small>
-            <strong>公式LINEを開く</strong>
+            <strong>会員登録へ進む</strong>
           </span>
           <span className="line-cta-arrow">→</span>
         </a>
@@ -27,23 +28,26 @@ export default function Join() {
           <li>
             <b>01</b>
             <span>
-              公式LINEを追加<small>活動内容と入会方法をご案内します</small>
+              会員登録とお支払い<small>申込フォームで手続きを行います</small>
             </span>
           </li>
           <li>
             <b>02</b>
             <span>
-              会員登録とお支払い
-              <small>案内に沿って登録を完了してください</small>
+              招待メールを確認
+              <small>支払い確認後に会員サイトへご案内します</small>
             </span>
           </li>
           <li>
             <b>03</b>
             <span>
-              Member Siteへ<small>確認後にログイン情報をお届けします</small>
+              Member Siteへ<small>ご自身でパスワードを設定してログインします</small>
             </span>
           </li>
         </ol>
+        <p>記事はお支払い済みの会費の対象月末まで閲覧できます</p>
+        <p>月末のご入会もその月の末日までです</p>
+        <p><a href="https://lin.ee/xWYPyBv">お問い合わせは公式LINEへ</a></p>
         <section
           className="join-benefits"
           aria-labelledby="join-benefits-title"
@@ -57,7 +61,7 @@ export default function Join() {
             </article>
             <article>
               <strong>NOMIKAI</strong>
-              <p>少人数のワイン勉強会へ参加</p>
+              <p>会員限定のワイン勉強会に申込 参加費は別料金</p>
             </article>
             <article>
               <strong>TABLE</strong>

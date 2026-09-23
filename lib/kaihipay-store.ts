@@ -31,6 +31,7 @@ export class SupabaseSyncStore implements SyncStore {
       p_member_id: n.memberId,
       p_allowed: s.allowed,
       p_verified_at: s.verifiedAt,
+      p_valid_from: s.validFrom,
       p_valid_until: s.validUntil,
     });
     if (error) throw new Error('apply_failed');

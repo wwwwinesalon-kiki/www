@@ -42,6 +42,7 @@ function harness() {
         memberId,
         allowed: true,
         verifiedAt: '2026-09-12T00:00:00Z',
+        validFrom: '2026-09-12T00:00:00Z',
         validUntil: '2026-09-13T00:00:00Z',
       };
     },
@@ -107,6 +108,7 @@ it('rejects an invalid access expiry without granting access', async () => {
     memberId,
     allowed: true,
     verifiedAt: '2026-09-12T00:00:00Z',
+    validFrom: '2026-09-12T00:00:00Z',
     validUntil: 'invalid',
   });
   expect(

@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SiteHeader, SiteFooter } from '@/components/site-chrome';
 import { eventBySlug } from '@/lib/data';
 import ApplicationForm from '@/components/application-form';
+import { memberAccess } from '@/lib/member-access';
+import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
@@ -36,6 +38,7 @@ export default async function EventDetail({
   const { slug } = await params,
     e = await eventBySlug(slug);
   if (!e) notFound();
+  const access = await memberAccess();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -95,7 +98,7 @@ export default async function EventDetail({
               <div>
                 <dt>CAPACITY</dt>
                 <dd>
-                  {e.applications}/{e.capacity}名
+                  {e.capacity}名
                 </dd>
               </div>
             </dl>
@@ -113,8 +116,10 @@ export default async function EventDetail({
               </>
             )}
           </article>
-          {e.registration_enabled ? (
+          {e.registration_enabled && access.entitled ? (
             <ApplicationForm eventId={e.id} />
+          ) : e.registration_enabled ? (
+            <p>お申し込みには会員ログインが必要です <Link href="/member/login">ログインする</Link></p>
           ) : (
             <p>現在受付を停止しています</p>
           )}

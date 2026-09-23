@@ -119,10 +119,10 @@ describe('real PostgreSQL RLS in isolated PGlite', () => {
       "insert into kaihipay_sync_events(event_id,provider_member_id) values('new','test-member'),('old','test-member')",
     );
     await db.query(
-      "select apply_kaihipay_snapshot('new','test-member',false,now(),null)",
+      "select apply_kaihipay_snapshot('new','test-member',false,now(),null,null)",
     );
     await db.query(
-      "select apply_kaihipay_snapshot('old','test-member',true,now()-interval '1 hour',now()+interval '1 day')",
+      "select apply_kaihipay_snapshot('old','test-member',true,now()-interval '1 hour',now()-interval '1 day',now()+interval '1 day')",
     );
     const r = await db.query<{ allowed: boolean }>(
       'select allowed from article_entitlements where user_id=$1',

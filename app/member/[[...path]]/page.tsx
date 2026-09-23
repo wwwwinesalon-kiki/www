@@ -8,6 +8,7 @@ import MemberStatus from '@/components/member-status';
 import { contentBySlug, publicEvents, visibleContents } from '@/lib/data';
 import { memberAccess } from '@/lib/member-access';
 import { PRIMARY_CATEGORIES } from '@/lib/article';
+import { MEMBERSHIP_TOTAL_LABEL } from '@/lib/membership-policy';
 export const metadata: Metadata = {
   title: '会員記事',
   robots: { index: false, follow: false },
@@ -28,9 +29,10 @@ export default async function MemberPage({
         <main className="article-shell">
           <h1>アカウントのご案内</h1>
           <p>
-            月額会費は3,300円（税込）です
+            月額の支払総額は{MEMBERSHIP_TOTAL_LABEL}です
             契約と支払方法の確認・退会は会費ペイが管理しています
           </p>
+          <p>記事の閲覧はお支払い済みの会費の対象月末までです イベント参加費は別料金です</p>
           <p>手続きが分からない場合は公式LINEへお問い合わせください</p>
           <a href="https://lin.ee/xWYPyBv" className="button">
             公式LINE

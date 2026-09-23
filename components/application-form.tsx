@@ -47,13 +47,6 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
         LINE表示名
         <input name="lineName" />
       </label>
-      <label>
-        会員区分
-        <select name="memberType">
-          <option value="member">WWW会員</option>
-          <option value="guest">一般</option>
-        </select>
-      </label>
       <button className="button" disabled={state === 'sending'}>
         {state === 'sending' ? '送信中…' : 'このイベントに申し込む'}
       </button>

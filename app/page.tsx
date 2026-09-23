@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import PublicMenu from '@/components/public-menu';
 import { publicEvents, visibleContents } from '@/lib/data';
+import { MEMBERSHIP_TOTAL_LABEL } from '@/lib/membership-policy';
 
 const gallery = [
   ['/images/www/20260624/9.jpg', '石蔵の入口から見えるワイン会', 'center'],
@@ -48,7 +49,7 @@ export default async function Home() {
         <p>
           余市ワインを入口に作り手と畑と食卓をつなぐ
           <br />
-          月額3,300円の会員コミュニティです
+          月額の支払総額{MEMBERSHIP_TOTAL_LABEL}の会員コミュニティです
         </p>
         <div className="home-membership-grid">
           <Link href="/about">

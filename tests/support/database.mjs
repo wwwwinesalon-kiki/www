@@ -35,6 +35,18 @@ export async function testDatabase() {
       'utf8',
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL('../../supabase/migrations/20260924000000_paid_month_access.sql', import.meta.url),
+      'utf8',
+    ),
+  );
+  await db.exec(
+    await readFile(
+      new URL('../../supabase/migrations/20260924000001_member_event_application.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   for (const [role, id] of Object.entries(ids)) {
     await db.query('insert into auth.users(id,email) values($1,$2)', [
       id,
@@ -44,7 +56,7 @@ export async function testDatabase() {
       await db.query('update profiles set role=$1 where id=$2', [role, id]);
   }
   await db.query(
-    "insert into article_entitlements(user_id,provider_member_id,allowed,verified_at,valid_until) values($1,'test-member',true,now(),now()+interval '1 day')",
+    "insert into article_entitlements(user_id,provider_member_id,allowed,verified_at,valid_from,valid_until) values($1,'test-member',true,now(),now()-interval '1 day',now()+interval '1 day')",
     [ids.member],
   );
   return db;

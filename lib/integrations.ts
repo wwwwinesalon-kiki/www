@@ -7,6 +7,7 @@ export type VerifiedSnapshot = {
   memberId: string;
   allowed: boolean;
   verifiedAt: string;
+  validFrom: string | null;
   validUntil: string | null;
 };
 export interface KaihipayAdapter {
@@ -33,9 +34,10 @@ export async function processNotice(
       snapshot.memberId !== notice.memberId ||
       !Number.isFinite(Date.parse(snapshot.verifiedAt)) ||
       (snapshot.allowed &&
-        (!snapshot.validUntil ||
+        (!snapshot.validFrom || !snapshot.validUntil ||
+          !Number.isFinite(Date.parse(snapshot.validFrom)) ||
           !Number.isFinite(Date.parse(snapshot.validUntil)) ||
-          Date.parse(snapshot.validUntil) <= Date.parse(snapshot.verifiedAt)))
+          Date.parse(snapshot.validUntil) <= Date.parse(snapshot.validFrom)))
     )
       throw new Error('invalid_snapshot');
     await store.apply(notice, snapshot);
