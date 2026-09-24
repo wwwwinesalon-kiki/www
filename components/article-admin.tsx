@@ -7,6 +7,7 @@ import { articleHtml, cleanArticle, PRIMARY_CATEGORIES } from '@/lib/article';
 type Article = {
   id: string;
   title: string;
+  summary?: string;
   type: string;
   body: string;
   body_format?: string;
@@ -55,6 +56,7 @@ export default function ArticleAdmin({
           <a href="/admin">記事一覧</a>
           <a href="/admin/events">既存イベント</a>
           <a href="/admin/applications">既存申込</a>
+          <a href="/admin/kaihipay">会費ペイ連携</a>
           <Link href="/member">会員サイト</Link>
           <a href="https://lin.ee/xWYPyBv">公式LINE</a>
         </nav>
@@ -122,6 +124,7 @@ function ArticleEditor({
   const [saved, setSaved] = useState(!!initial);
   const [version, setVersion] = useState(initial?.updated_at);
   const [title, setTitle] = useState(initial?.title || '');
+  const [summary, setSummary] = useState(initial?.summary || '');
   const [type, setType] = useState(initial?.type || 'TABLE');
   const [cover, setCover] = useState(initial?.cover_image || '');
   const [coverAlt, setCoverAlt] = useState(initial?.cover_alt || '');
@@ -224,6 +227,7 @@ function ArticleEditor({
           body: JSON.stringify({
             id,
             title,
+            summary,
             type,
             body,
             cover_image: cover || null,
@@ -268,6 +272,51 @@ function ArticleEditor({
         </p>
       )}
       <fieldset disabled={busy} style={{ border: 0, padding: 0, minWidth: 0 }}>
+        {!initial && (
+          <div className="article-notice">
+            <h3>投稿の型を選ぶ</h3>
+            <p>
+              型を選ぶとカテゴリと本文の見出しを用意します
+              文章は自由に書き換えられます
+            </p>
+            <div className="article-template-actions">
+              {(
+                [
+                  [
+                    'FIELD',
+                    '畑の記録',
+                    '<h2>今日の畑</h2><p>訪れた場所と日付</p><h2>作り手の声</h2><p>現地で聞いたこと</p><h2>音声・関連情報</h2><p>共有したいリンク</p>',
+                  ],
+                  [
+                    'TABLE',
+                    '日々の発行レシピ研究',
+                    '<h2>今日の一皿</h2><p>料理と季節のこと</p><h2>材料と作り方</h2><p>ここに記入</p><h2>ワインとの組み合わせ</h2><p>ここに記入</p>',
+                  ],
+                  [
+                    'PEOPLE',
+                    '作り手の話',
+                    '<h2>この人について</h2><p>紹介文</p><h2>10分インタビュー</h2><p>会話や音声へのリンク</p><h2>関連するワインと畑</h2><p>ここに記入</p>',
+                  ],
+                  ['NEWS', 'お知らせ', '<h2>お知らせ</h2><p>内容を記入</p>'],
+                ] as const
+              ).map(([category, label, body]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => {
+                    if (dirty && !confirm('入力中の本文を置き換えますか'))
+                      return;
+                    setType(category);
+                    if (editor.current) editor.current.innerHTML = body;
+                    mark();
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <label htmlFor="article-title">タイトル</label>
         <input
           id="article-title"
@@ -291,6 +340,18 @@ function ArticleEditor({
             <option key={c}>{c}</option>
           ))}
         </select>
+        <label htmlFor="article-summary">一覧に表示する概要</label>
+        <textarea
+          id="article-summary"
+          value={summary}
+          onChange={(e) => {
+            setSummary(e.target.value);
+            mark();
+          }}
+          maxLength={300}
+          rows={3}
+          placeholder="記事の内容を2行ほどで紹介"
+        />
         <p>メイン画像</p>
         {cover ? (
           <>

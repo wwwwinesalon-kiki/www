@@ -17,6 +17,7 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
       <nav aria-label={member ? '会員ナビゲーション' : 'メインナビゲーション'}>
         {member ? (
           <>
+            <Link href="/member">HOME</Link>
             <Link href="/member/people">PEOPLE</Link>
             <Link href="/member/field">FIELD</Link>
             <Link href="/member/table">TABLE</Link>
@@ -46,6 +47,18 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
           <WineGlassIcon className="header-join-glass" />
           <span>JOIN US</span> <ArrowRight size={15} />
         </Link>
+      )}
+      {member && (
+        <nav
+          className="member-bottom-nav"
+          aria-label="会員モバイルナビゲーション"
+        >
+          <Link href="/member">HOME</Link>
+          <Link href="/member/field">FIELD</Link>
+          <Link href="/member/table">TABLE</Link>
+          <Link href="/member/events">EVENT</Link>
+          <Link href="/member/account">ACCOUNT</Link>
+        </nav>
       )}
     </header>
   );

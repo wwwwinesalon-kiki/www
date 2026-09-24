@@ -31,7 +31,14 @@ export default async function Login({
         <p>
           <Link href="/member/reset">パスワードを忘れた方</Link>
         </p>
-        <p>初めての方は 入会後に届く初回設定メールをご確認ください</p>
+        <p>
+          初めての方は
+          会費ペイでのお支払い確認後に届く初回設定メールからパスワードを設定してください
+        </p>
+        <p>
+          案内メールが見当たらない場合は
+          迷惑メールを確認してから公式LINEへお問い合わせください
+        </p>
         <p>
           <a href="https://lin.ee/xWYPyBv">
             入会・初回案内のお問い合わせは公式LINEへ

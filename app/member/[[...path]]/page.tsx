@@ -8,6 +8,7 @@ import MemberStatus from '@/components/member-status';
 import { contentBySlug, publicEvents, visibleContents } from '@/lib/data';
 import { memberAccess } from '@/lib/member-access';
 import { PRIMARY_CATEGORIES } from '@/lib/article';
+import type { ContentView } from '@/lib/data';
 import { MEMBERSHIP_TOTAL_LABEL } from '@/lib/membership-policy';
 export const metadata: Metadata = {
   title: '会員記事',
@@ -32,7 +33,10 @@ export default async function MemberPage({
             月額の支払総額は{MEMBERSHIP_TOTAL_LABEL}です
             契約と支払方法の確認・退会は会費ペイが管理しています
           </p>
-          <p>記事の閲覧はお支払い済みの会費の対象月末までです イベント参加費は別料金です</p>
+          <p>
+            記事の閲覧はお支払い済みの会費の対象月末までです
+            イベント参加費は別料金です
+          </p>
           <p>手続きが分からない場合は公式LINEへお問い合わせください</p>
           <a href="https://lin.ee/xWYPyBv" className="button">
             公式LINE
@@ -89,13 +93,28 @@ export default async function MemberPage({
       <>
         <SiteHeader member />
         <main className="article-shell">
-          <h1>EVENT</h1>
-          <p>既存のイベント案内</p>
+          <p className="eyebrow">MEMBER / NOMIKAI</p>
+          <h1>イベントと飲み会</h1>
+          <p>
+            イベントは会費とは別料金です 詳細と申込方法は各案内をご確認ください
+          </p>
           {events.length ? (
             events.map((e) => (
-              <p key={e.id}>
-                <Link href={'/events/' + e.slug}>{e.title}</Link>
-              </p>
+              <article className="member-event" key={e.id}>
+                <p className="eyebrow">
+                  {new Date(e.start_at).toLocaleDateString('ja-JP', {
+                    timeZone: 'Asia/Tokyo',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </p>
+                <h2>
+                  <Link href={'/events/' + e.slug}>{e.title}</Link>
+                </h2>
+                <p>{e.venue}</p>
+                <Link href={'/events/' + e.slug}>詳細を見る →</Link>
+              </article>
             ))
           ) : (
             <p>公開中のイベントはありません</p>
@@ -109,54 +128,183 @@ export default async function MemberPage({
     new Set([...PRIMARY_CATEGORIES, ...all.map((c) => c.type)]),
   );
   const selected = key && key !== 'archive' ? key.toUpperCase() : '';
+  if (key && key !== 'archive' && !categories.includes(selected)) notFound();
   const articles = selected ? all.filter((c) => c.type === selected) : all;
+  const upcoming = !key
+    ? (await publicEvents(true))
+        .filter((event) => new Date(event.end_at).getTime() >= Date.now())
+        .slice(0, 2)
+    : [];
+  const sections = [
+    {
+      type: 'FIELD',
+      label: '畑のいまを知る',
+      description: '余市の畑から届く記録と作り手の声',
+    },
+    {
+      type: 'TABLE',
+      label: '家で楽しむ',
+      description: '日々の発行レシピ研究とワインのある食卓',
+    },
+    {
+      type: 'PEOPLE',
+      label: '作り手を知る',
+      description: '一本のワインの向こうにいる人たち',
+    },
+  ];
   return (
     <>
       <SiteHeader member />
-      <main className="article-shell">
-        <p className="eyebrow">WINE WELCOME WORLD</p>
-        <h1>ワインの楽しみ方が広がる読みもの</h1>
-        <nav aria-label="記事カテゴリ">
-          <Link href="/member" aria-current={!selected ? 'page' : undefined}>
-            すべて
-          </Link>
-          {categories.map((c) => (
-            <Link
-              key={c}
-              href={'/member/' + c.toLowerCase()}
-              aria-current={selected === c ? 'page' : undefined}
-            >
-              {c}
-            </Link>
-          ))}
-        </nav>
-        <section className="article-grid">
-          {articles.length ? (
-            articles.map((c) => (
-              <Link
-                prefetch={false}
-                href={'/member/' + c.type.toLowerCase() + '/' + c.slug}
-                key={c.id}
-              >
-                {c.cover_image && (
-                  <Image
-                    unoptimized
-                    src={c.cover_image}
-                    alt={c.cover_alt || c.title}
-                    width={600}
-                    height={400}
-                  />
-                )}
-                <p>{c.type}</p>
-                <h2>{c.title}</h2>
-              </Link>
-            ))
-          ) : (
-            <p>記事は準備中です 公開までお待ちください</p>
-          )}
+      <main className="article-shell member-portal">
+        <section className="member-welcome">
+          <p className="eyebrow">WWW / MEMBER</p>
+          <h1>
+            {selected
+              ? selected
+              : key === 'archive'
+                ? 'すべての読みもの'
+                : 'ワインのある日々へ'}
+          </h1>
+          <p>
+            {selected
+              ? '気になる記事から ゆっくりお楽しみください'
+              : '畑のこと 作り手のこと 食卓のこと　余市のワインをもっと身近に'}
+          </p>
         </section>
+        {!key && (
+          <>
+            <section className="member-block" aria-labelledby="latest-title">
+              <div className="member-section-heading">
+                <div>
+                  <p className="eyebrow">LATEST</p>
+                  <h2 id="latest-title">新しく届いた記事</h2>
+                </div>
+                <Link href="/member/archive">すべて見る →</Link>
+              </div>
+              <div className="member-card-grid">
+                {all.length ? (
+                  all
+                    .slice(0, 3)
+                    .map((c) => <MemberCard key={c.id} article={c} />)
+                ) : (
+                  <p className="member-empty">
+                    新しい記事を準備中です　公開されるとここに表示されます
+                  </p>
+                )}
+              </div>
+            </section>
+            <section className="member-block" aria-labelledby="explore-title">
+              <div className="member-section-heading">
+                <div>
+                  <p className="eyebrow">EXPLORE</p>
+                  <h2 id="explore-title">テーマから探す</h2>
+                </div>
+              </div>
+              <div className="member-category-grid">
+                {sections.map((section) => (
+                  <Link
+                    key={section.type}
+                    href={'/member/' + section.type.toLowerCase()}
+                    className="member-category"
+                  >
+                    <span>{section.type}</span>
+                    <strong>{section.label}</strong>
+                    <small>{section.description}</small>
+                    <em>記事を見る →</em>
+                  </Link>
+                ))}
+              </div>
+            </section>
+            <section
+              className="member-block member-nomikai"
+              aria-labelledby="event-title"
+            >
+              <div className="member-section-heading">
+                <div>
+                  <p className="eyebrow">NOMIKAI / EVENT</p>
+                  <h2 id="event-title">一緒に楽しむ</h2>
+                </div>
+                <Link href="/member/events">イベント一覧 →</Link>
+              </div>
+              {upcoming.length ? (
+                upcoming.map((event) => (
+                  <p key={event.id}>
+                    <Link href={'/events/' + event.slug}>{event.title} →</Link>
+                  </p>
+                ))
+              ) : (
+                <p>次の開催案内を準備中です</p>
+              )}
+              <small>参加費は月会費とは別料金です</small>
+            </section>
+          </>
+        )}
+        {key && (
+          <>
+            <nav className="member-filter" aria-label="記事カテゴリ">
+              <Link
+                href="/member/archive"
+                aria-current={key === 'archive' ? 'page' : undefined}
+              >
+                すべて
+              </Link>
+              {categories.map((c) => (
+                <Link
+                  key={c}
+                  href={'/member/' + c.toLowerCase()}
+                  aria-current={selected === c ? 'page' : undefined}
+                >
+                  {c}
+                </Link>
+              ))}
+            </nav>
+            <section className="member-card-grid" aria-label="記事一覧">
+              {articles.length ? (
+                articles.map((c) => <MemberCard key={c.id} article={c} />)
+              ) : (
+                <p className="member-empty">このテーマの記事は準備中です</p>
+              )}
+            </section>
+          </>
+        )}
       </main>
       <SiteFooter member />
     </>
+  );
+}
+
+function MemberCard({ article }: { article: ContentView }) {
+  return (
+    <Link
+      prefetch={false}
+      className="member-card"
+      href={'/member/' + article.type.toLowerCase() + '/' + article.slug}
+    >
+      {article.cover_image ? (
+        <Image
+          unoptimized
+          src={article.cover_image}
+          alt={article.cover_alt || article.title}
+          width={600}
+          height={400}
+        />
+      ) : (
+        <span className="member-card-placeholder">WWW</span>
+      )}
+      <span className="member-card-copy">
+        <small>
+          {article.type}
+          {article.published_at
+            ? ' / ' +
+              new Date(article.published_at).toLocaleDateString('ja-JP', {
+                timeZone: 'Asia/Tokyo',
+              })
+            : ''}
+        </small>
+        <strong>{article.title}</strong>
+        {article.summary && <span>{article.summary}</span>}
+        <em>読む →</em>
+      </span>
+    </Link>
   );
 }

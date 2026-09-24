@@ -59,6 +59,32 @@ describe('article safety', () => {
     expect(p).not.toHaveProperty('audio');
     expect(p).not.toHaveProperty('public_visible');
   });
+  it('stores the member-card summary without changing visibility', () => {
+    const p = articlePayload({
+      title: '畑の記録',
+      type: 'FIELD',
+      body: '<p>本文</p>',
+      summary: '余市の畑から届いた話',
+      publish_status: 'published',
+      member_visible: false,
+      public_visible: true,
+    });
+    expect(p.summary).toBe('余市の畑から届いた話');
+    expect(p.publish_status).toBe('published');
+    expect(p).not.toHaveProperty('member_visible');
+    expect(p).not.toHaveProperty('public_visible');
+  });
+  it('rejects overly long summaries', () => {
+    expect(() =>
+      articlePayload({
+        title: '記事',
+        type: 'TABLE',
+        body: '本文',
+        summary: '長'.repeat(301),
+        publish_status: 'draft',
+      }),
+    ).toThrow('概要は300文字以内');
+  });
   it('can remove a legacy cover without deleting the source', () =>
     expect(
       articlePayload(

@@ -107,6 +107,8 @@ export function articlePayload(
       : '';
   if (input.cover_image && !coverAlt)
     throw new Error('メイン画像の説明を入力してください');
+  const summary = typeof input.summary === 'string' ? input.summary.trim() : '';
+  if (summary.length > 300) throw new Error('概要は300文字以内にしてください');
   if (
     input.publish_status === 'published' &&
     !sanitizeHtml(body, { allowedTags: [], allowedAttributes: {} }).trim()
@@ -115,6 +117,7 @@ export function articlePayload(
   return {
     title,
     type,
+    summary,
     body,
     body_format: 'html',
     cover_image: input.cover_image ? cover || legacyCover : null,

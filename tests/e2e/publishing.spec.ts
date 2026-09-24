@@ -60,6 +60,12 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
   const member = await memberContext.newPage();
   await login(member, 'member');
   await expect(
+    member.getByRole('heading', { name: 'ワインのある日々へ' }),
+  ).toBeVisible();
+  await expect(
+    member.getByRole('link', { name: /畑のいまを知る/ }),
+  ).toBeVisible();
+  await expect(
     member.getByText('検証用 ワインの食卓', { exact: true }),
   ).toHaveCount(0);
   const previewPage = await page.context().newPage();

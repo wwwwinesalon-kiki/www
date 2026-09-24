@@ -4,6 +4,170 @@
   padding: 48px 24px 90px;
   color: #542634;
 }
+.member-portal {
+  max-width: 1180px;
+}
+.member-welcome {
+  padding: clamp(38px, 8vw, 96px) clamp(22px, 5vw, 70px);
+  background: linear-gradient(145deg, #fffdf9, #f5eee8);
+  border: 1px solid #e8dcd4;
+}
+.member-welcome h1 {
+  margin: 8px 0 16px;
+}
+.member-welcome p:last-child {
+  max-width: 48rem;
+  line-height: 1.9;
+}
+.member-block {
+  margin: 68px 0;
+}
+.member-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.member-section-heading h2 {
+  font-size: clamp(23px, 3vw, 32px);
+  margin: 4px 0 0;
+}
+.member-section-heading a,
+.member-event a {
+  color: #713246;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.member-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.member-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fffdf9;
+  border: 1px solid #e7dcd4;
+  color: #542634;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.member-card:hover,
+.member-category:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px #5b263316;
+}
+.member-card img,
+.member-card-placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+}
+.member-card-placeholder {
+  display: grid;
+  place-items: center;
+  color: #b69ba1;
+  background: linear-gradient(145deg, #f4ece7, #fffaf5);
+  font:
+    30px Georgia,
+    serif;
+  letter-spacing: 0.16em;
+}
+.member-card-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: start;
+  gap: 12px;
+  padding: 18px;
+}
+.member-card-copy small {
+  color: #8a6470;
+  letter-spacing: 0.1em;
+}
+.member-card-copy strong {
+  font:
+    23px/1.5 'Yu Mincho',
+    'Hiragino Mincho ProN',
+    serif;
+}
+.member-card-copy span {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.member-card-copy em,
+.member-category em {
+  margin-top: auto;
+  font-style: normal;
+  font-size: 13px;
+  border-bottom: 1px solid currentColor;
+}
+.member-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.member-category {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 190px;
+  padding: 24px;
+  color: #542634;
+  text-decoration: none;
+  background: #fbf6f1;
+  border: 1px solid #e7dcd4;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.member-category > span {
+  letter-spacing: 0.18em;
+  font-size: 12px;
+}
+.member-category strong {
+  font:
+    22px 'Yu Mincho',
+    'Hiragino Mincho ProN',
+    serif;
+}
+.member-category small {
+  line-height: 1.7;
+}
+.member-nomikai {
+  padding: 26px 32px;
+  border: 1px solid #e7dcd4;
+  background: #fffaf5;
+}
+.member-empty {
+  grid-column: 1/-1;
+  padding: 28px;
+  background: #fffaf5;
+  border: 1px solid #e7dcd4;
+}
+.member-filter {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 28px 0;
+}
+.member-event {
+  border-bottom: 1px solid #e7dcd4;
+  padding: 18px 0;
+}
+.member-bottom-nav {
+  display: none;
+}
+.article-template-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .article-shell h1,
 .article-shell h2,
 .article-shell h3 {
@@ -228,5 +392,53 @@
 @media (max-width: 760px) {
   .member-footer {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .member-card-grid,
+  .member-category-grid {
+    grid-template-columns: 1fr;
+  }
+  .member-portal {
+    padding-bottom: 108px;
+  }
+  .member-block {
+    margin: 42px 0;
+  }
+  .member-section-heading {
+    align-items: start;
+  }
+  .member-category {
+    min-height: 155px;
+  }
+  .site-header .member-bottom-nav {
+    display: flex;
+    position: fixed;
+    z-index: 60;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    justify-content: space-around;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 8px 4px max(8px, env(safe-area-inset-bottom));
+    background: #fffdf9f2;
+    border-top: 1px solid #dfd0ca;
+    backdrop-filter: blur(14px);
+  }
+  .site-header .member-bottom-nav a {
+    display: grid;
+    flex: 1 1 0;
+    place-items: center;
+    min-height: 44px;
+    min-width: 0;
+    padding: 8px 0;
+    font:
+      10px system-ui,
+      sans-serif;
+    letter-spacing: 0.04em;
+    color: #542634;
+    text-decoration: none;
   }
 }
