@@ -1,4 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
+test('Vercel entry opens the protected member entrance', async ({ page }) => {
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/member\/login\?next=/);
+  await expect(page.getByRole('heading', { name: 'おかえりなさい' })).toBeVisible();
+});
 async function login(page: Page, role: string, next = '/member') {
   await page.goto('/member/login?next=' + encodeURIComponent(next));
   await page
