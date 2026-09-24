@@ -19,10 +19,10 @@
 1. Supabase SQL Editorで `WWW-03-自動開通の準備.sql` 実行済
 2. `WWW-04-支払月の閲覧制限.sql` と `WWW-04B-会員限定イベント申込.sql` をこの順に実行
 3. Vercel www Productionへ `KAIHIPAY_API_TOKEN` `SUPABASE_SERVICE_ROLE_KEY` `CRON_SECRET` `NEXT_PUBLIC_SITE_URL` を設定
-4. `NEXT_PUBLIC_SITE_URL` は `https://www-one-smoky-15.vercel.app`
+4. `NEXT_PUBLIC_SITE_URL` は会員・管理画面の `https://www-plum-five.vercel.app` 公開案内サイトは `https://gray185185.studio.site`
 5. コースIDは自動照合 `KAIHIPAY_MEMBERSHIP_COURSE_ID` は任意 設定すると照合に使う
 6. コードを本番デプロイしたら `/admin/kaihipay` でコース確認と入金同期を一度実行し 本番ログとDBの結果を確認
-7. Vercel Hobbyでは毎日03:00 UTCに再照合 早めの開通はSupabase Cron / Vault / pg_netを設定し `WWW-05-5分間隔の同期.sql` を実行
+7. Vercel Hobbyでは毎日03:00 UTCに再照合 早めの開通はSupabase Cron / Vault / pg_netを設定し 新URLへ更新済みの `WWW-05-5分間隔の同期.sql` を実行
 
 資格情報はチャット Git ソースコードに貼り付けない
 

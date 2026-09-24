@@ -189,12 +189,12 @@ Supabase: 独立signUpを無効化し verified invitationを利用する設定�
 | 配置 | 表示名 | URL |
 |---|---|---|
 | LINE | 会員登録 | **未設定 実際の会費ペイ申込URLを確認してから設定** |
-| LINE | 会員サイト | https://www-one-smoky-15.vercel.app/member |
-| Studio | 会員ログイン | https://www-one-smoky-15.vercel.app/member/login |
+| LINE | 会員サイト | https://www-plum-five.vercel.app/member |
+| Studio | 会員ログイン | https://www-plum-five.vercel.app/member/login |
 | Studio | 公式LINE | https://lin.ee/xWYPyBv |
-| 運営専用 | 記事管理 | https://www-one-smoky-15.vercel.app/admin |
+| 運営専用 | 記事管理 | https://www-plum-five.vercel.app/admin |
 
-以上は既存本番ホストの導線先です このブランチの新機能が反映されたURLではありません。Studio/LINEの設定変更・メッセージ送信は実施していません。
+公開案内サイトは https://gray185185.studio.site/ です。会員・管理画面は上記Vercel URLを使用します。Studio/LINEのリンク設定変更・メッセージ送信は実施していません。
 
 ## 7. 残作業と理由
 
