@@ -160,8 +160,12 @@
   border-bottom: 1px solid #e7dcd4;
   padding: 18px 0;
 }
-.member-bottom-nav {
+.site-header .member-bottom-nav {
   display: none;
+}
+.site-header:has(.member-bottom-nav) {
+  /* A filtered header would pin its fixed mobile nav to the header, not the viewport. */
+  backdrop-filter: none;
 }
 .article-template-actions {
   display: flex;

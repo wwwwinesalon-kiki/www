@@ -3,7 +3,6 @@ import { validateEvent } from '@/lib/domain';
 import { saveArticle } from '@/lib/article-write';
 
 const tables = {
-  members: 'profiles',
   events: 'events',
   contents: 'contents',
 } as const;
@@ -15,6 +14,11 @@ export async function GET(
   const actor = await requireAdmin(req);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
   const { entity } = await params;
+  if (entity === 'members')
+    return Response.json(
+      { error: '会員情報は会費ペイで管理してください' },
+      { status: 410 },
+    );
   const table = tables[entity as keyof typeof tables];
   if (!table)
     return Response.json({ error: 'Unknown entity' }, { status: 404 });

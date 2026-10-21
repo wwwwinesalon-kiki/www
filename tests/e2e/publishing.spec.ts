@@ -22,7 +22,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await login(page, 'editor', '/admin');
-  await page.getByRole('link', { name: '新しい記事' }).click();
+  await page.getByRole('link', { name: '＋ 新規作成' }).click();
   await page
     .getByLabel('タイトル', { exact: true })
     .fill('検証用 ワインの食卓');
@@ -44,6 +44,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
         }),
       );
     });
+  await page.getByText('画像を追加・差し替え', { exact: true }).click();
   await page.getByLabel('アップロード画像の説明').fill('検証用の小さな画像');
   await page.getByLabel('画像ファイル', { exact: true }).setInputFiles({
     name: 'test.png',
@@ -70,6 +71,58 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
   await expect(
     member.getByRole('link', { name: /畑のいまを知る/ }),
   ).toBeVisible();
+  for (const width of [1280, 1024]) {
+    await member.setViewportSize({ width, height: 900 });
+    await expect(
+      member.getByRole('navigation', { name: '会員モバイルナビゲーション' }),
+    ).toBeHidden();
+    if (width === 1024) {
+      await member.screenshot({ path: 'test-results/member-portal-1024.png' });
+    }
+    const layout = await member.evaluate(() => ({
+      viewport: window.innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      overflowing: Array.from(document.body.querySelectorAll('*'))
+        .filter((node) => node.getBoundingClientRect().right > window.innerWidth + 1)
+        .slice(0, 8)
+        .map((node) => ({
+          tag: node.tagName,
+          className: String(node.className).slice(0, 100),
+          right: Math.round(node.getBoundingClientRect().right),
+        })),
+    }));
+    expect(
+      layout.scrollWidth <= layout.viewport + 1,
+      `会員ポータルが${width}pxで横にはみ出さない: ${JSON.stringify(layout)}`,
+    ).toBe(true);
+  }
+  await member.setViewportSize({ width: 1280, height: 900 });
+  await member.screenshot({
+    path: 'test-results/member-portal-desktop.png',
+  });
+  await member.setViewportSize({ width: 390, height: 844 });
+  const mobileNav = member.getByRole('navigation', {
+    name: '会員モバイルナビゲーション',
+  });
+  await expect(mobileNav).toBeVisible();
+  const mobileNavBox = await mobileNav.boundingBox();
+  expect(
+    mobileNavBox?.y,
+    '会員モバイルナビは画面下部に固定',
+  ).toBeGreaterThan(720);
+  expect(
+    (mobileNavBox?.y || 0) + (mobileNavBox?.height || 0),
+    '会員モバイルナビの下端は画面下端に接する',
+  ).toBeGreaterThanOrEqual(843);
+  expect(
+    await member.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1,
+    ),
+    '会員ポータルが390pxで横にはみ出さない',
+  ).toBe(true);
+  await member.screenshot({
+    path: 'test-results/member-portal-mobile.png',
+  });
   await expect(
     member.getByText('検証用 ワインの食卓', { exact: true }),
   ).toHaveCount(0);
@@ -180,7 +233,7 @@ test('failed save retains draft and warns before navigation', async ({
   page,
 }) => {
   await login(page, 'editor', '/admin');
-  await page.getByRole('link', { name: '新しい記事' }).click();
+  await page.getByRole('link', { name: '＋ 新規作成' }).click();
   await page.getByLabel('タイトル', { exact: true }).fill('失敗しても残る原稿');
   await page
     .getByRole('textbox', { name: '本文', exact: true })
@@ -198,7 +251,7 @@ test('failed save retains draft and warns before navigation', async ({
     page.getByRole('textbox', { name: '本文', exact: true }),
   ).toHaveText('この原稿は保持される');
   page.once('dialog', (d) => d.dismiss());
-  await page.getByRole('link', { name: '記事一覧', exact: true }).click();
+  await page.getByRole('link', { name: '← 記事一覧' }).click();
   await expect(page).toHaveURL(/contents\/new$/);
 });
 test('safe next, reset and verified initial setup (Auth transport simulated)', async ({

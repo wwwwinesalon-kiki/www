@@ -47,7 +47,7 @@ const config = {
   },
   event_applications: {
     table: 'event_applications',
-    fields: ['application_status', 'payment_status', 'note'],
+    fields: ['application_status'],
   },
 } as const;
 

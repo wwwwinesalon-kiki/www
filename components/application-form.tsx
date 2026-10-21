@@ -10,11 +10,10 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
       onSubmit={async (e) => {
         e.preventDefault();
         setState('sending');
-        const data = Object.fromEntries(new FormData(e.currentTarget));
         const res = await fetch('/api/applications', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ ...data, eventId }),
+          body: JSON.stringify({ eventId }),
         });
         if (res.ok) {
           const sessionId =
@@ -35,18 +34,6 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
       }}
     >
       <h2>参加を申し込む</h2>
-      <label>
-        お名前
-        <input name="name" required />
-      </label>
-      <label>
-        メールアドレス
-        <input name="email" type="email" required />
-      </label>
-      <label>
-        LINE表示名
-        <input name="lineName" />
-      </label>
       <button className="button" disabled={state === 'sending'}>
         {state === 'sending' ? '送信中…' : 'このイベントに申し込む'}
       </button>
@@ -55,7 +42,7 @@ export default function ApplicationForm({ eventId }: { eventId: string }) {
       )}
       {state === 'error' && (
         <p className="form-error" role="alert">
-          送信できませんでした内容は保持されていますもう一度お試しください
+          申込状況を確認してください
         </p>
       )}
     </form>

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import {
   CalendarDays,
-  ChevronRight,
   FileText,
   LayoutDashboard,
   RefreshCw,
@@ -49,15 +48,11 @@ type EventRow = {
 };
 type Application = {
   id: string;
-  name: string;
-  email: string;
-  member_type: string;
-  applied_at: string;
+  created_at: string;
   application_status: string;
-  payment_status: string;
   event_title: string;
   event_id: string;
-  notes: string | null;
+  member_number: string | null;
 };
 type Payment = {
   id: string;
@@ -153,8 +148,8 @@ const empty: Data = {
   adminUsers: [],
 };
 const nav: [Section, string, typeof LayoutDashboard][] = [
-  ['events', 'Events', CalendarDays],
-  ['applications', 'Applications', FileText],
+  ['events', 'イベント', CalendarDays],
+  ['applications', '申込', FileText],
 ];
 const yen = (n: number) =>
   new Intl.NumberFormat('ja-JP', {
@@ -220,14 +215,14 @@ export default function AdminDashboard({
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <button
-          className="admin-brand nav-button"
-          onClick={() => location.assign('/admin')}
-        >
+        <a className="admin-brand" href="/admin" aria-label="WWW 記事管理">
           <b>WWW</b>
-          <span>OPERATIONS</span>
-        </button>
-        <nav>
+        </a>
+        <nav aria-label="管理メニュー">
+          <a href="/admin">
+            <FileText size={18} />
+            記事
+          </a>
           {nav.map(([key, label, Icon]) => (
             <button
               key={key}
@@ -239,27 +234,20 @@ export default function AdminDashboard({
             </button>
           ))}
         </nav>
-        <div className="admin-user">
-          <span>AH</span>
-          <div>
-            <b>既存イベント受付</b>
-            <small>記事管理へはWWWを選択</small>
-          </div>
-        </div>
       </aside>
       <main className="admin-main">
         <header className="admin-top">
-          <div>
-            <p>WINE WORK WOMEN</p>
-            <b>{nav.find((n) => n[0] === active)?.[1]}</b>
-          </div>
+          <h1>{nav.find((n) => n[0] === active)?.[1] || '管理'}</h1>
           <div className="admin-actions">
             <button onClick={() => void load()} aria-label="再読み込み">
               <RefreshCw size={18} />
             </button>
-            <a href="/" target="_blank">
-              サイトを確認 <ChevronRight size={15} />
+            <a href="/member" target="_blank" rel="noopener noreferrer">
+              会員サイト ↗
             </a>
+            <form action="/api/member/logout" method="post">
+              <button type="submit">ログアウト</button>
+            </form>
           </div>
         </header>
         <div className="admin-content">
@@ -280,19 +268,15 @@ export default function AdminDashboard({
 }
 function Heading({
   title,
-  desc,
   action,
 }: {
   title: string;
-  desc: string;
+  desc?: string;
   action?: React.ReactNode;
 }) {
   return (
     <div className="page-heading">
-      <div>
-        <h1>{title}</h1>
-        <p>{desc}</p>
-      </div>
+      <h1>{title}</h1>
       {action}
     </div>
   );
@@ -334,153 +318,68 @@ function Module({
   }
 }
 function Dashboard({ data }: { data: Data }) {
-  const month = new Date().toISOString().slice(0, 7),
-    pv = data.analytics
-      .filter(
-        (a) => a.event_type === 'page_view' || a.event_type === 'content_view',
-      )
-      .reduce((n, a) => n + a.value, 0),
-    popular = [...data.analytics].sort((a, b) => b.value - a.value)[0];
-  const p = paymentSummary(data.payments),
-    active = data.members.filter((m) => m.status === 'active').length,
-    pause = data.members.filter((m) => m.status === 'pause').length,
-    next = data.events[0],
-    published = data.contents.filter((c) => c.status === 'published').length,
-    newMembers = data.members.filter((m) =>
-      m.created_at?.startsWith(month),
-    ).length,
-    churned = data.members.filter((m) => m.status === 'churned').length,
-    monthlyContents = data.contents.filter((c) =>
-      c.published_at?.startsWith(month),
-    ).length;
+  const published = data.contents.filter(
+    (c) => c.status === 'published',
+  ).length;
+  const drafts = data.contents.filter((c) => c.status !== 'published').length;
+  const pending = data.applications.filter(
+    (application) => application.application_status === 'pending',
+  ).length;
+  const nextEvent = data.events.find(
+    (event) =>
+      event.start_at && new Date(event.start_at).getTime() >= Date.now(),
+  );
   return (
     <>
-      <Heading
-        title="運営ダッシュボード"
-        desc={`${new Date().toLocaleDateString('ja-JP')}・D1の最新状況`}
-      />
-      {data.notifications.filter((n) => !n.read_at).length > 0 && (
-        <div className="alert-line">
-          <b>要対応 {data.notifications.filter((n) => !n.read_at).length}件</b>
-          <span>{data.notifications.find((n) => !n.read_at)?.title}</span>
-        </div>
-      )}
-      <section className="stats">
-        <Stat label="ACTIVE会員" value={String(active)} />
-        <Stat label="今月新規" value={String(newMembers)} />
-        <Stat label="PAUSE" value={String(pause)} />
-        <Stat label="退会" value={String(churned)} />
-        <Stat
-          label="未入金"
-          value={String(p.unpaidCount)}
-          sub={yen(p.outstanding)}
-        />
-        <Stat
-          label="今月公開Contents"
-          value={String(monthlyContents)}
-          sub={`全公開 ${published}`}
-        />
-        <Stat
-          label="主要記事PV"
-          value={String(pv)}
-          sub={popular?.path || 'データなし'}
-        />
-        <Stat label="人気Category" value={popular?.entity_id || '未計測'} />
-        <Stat label="会費売上" value="未計測" />
-        <Stat label="Event売上" value={yen(p.collected)} />
+      <section className="admin-quick-grid" aria-label="管理メニュー">
+        <a href="/admin">
+          <span>記事</span>
+          <strong>{published}</strong>
+          <small>公開 · 下書き {drafts}</small>
+        </a>
+        <a href="/admin/events">
+          <span>イベント</span>
+          <strong>{data.events.length}</strong>
+          <small>登録件数</small>
+        </a>
+        <a href="/admin/applications">
+          <span>申込</span>
+          <strong>{data.applications.length}</strong>
+          <small>保留 {pending}</small>
+        </a>
       </section>
-      <div className="dashboard-grid">
+      <div className="admin-quick-columns">
+        <section className="panel">
+          <div className="panel-head">
+            <h2>最近の記事</h2>
+            <a href="/admin">一覧 →</a>
+          </div>
+          {data.contents.slice(0, 5).map((content) => (
+            <div className="admin-quick-row" key={content.id}>
+              <span>{content.title}</span>
+              <small>
+                {content.status === 'published' ? '公開中' : '下書き'}
+              </small>
+            </div>
+          ))}
+          {data.contents.length === 0 && <Empty />}
+        </section>
         <section className="panel">
           <div className="panel-head">
             <h2>次回イベント</h2>
+            <a href="/admin/events">一覧 →</a>
           </div>
-          {next ? (
-            <div className="next-event">
-              <div className="date-tile">
-                <b>{next.date?.slice(-2)}</b>
-                <span>EVENT</span>
-              </div>
-              <div>
-                <h3>{next.title}</h3>
-                <p>
-                  {next.date} · {next.venue}
-                </p>
-                <div className="capacity">
-                  <i
-                    style={{
-                      width: `${Math.min(100, (next.applications / next.capacity) * 100)}%`,
-                    }}
-                  />
-                  <span>
-                    {next.applications} / {next.capacity}名
-                  </span>
-                </div>
-              </div>
+          {nextEvent ? (
+            <div className="admin-quick-event">
+              <strong>{nextEvent.title}</strong>
+              <time dateTime={nextEvent.start_at}>{nextEvent.date}</time>
+              <span>
+                {nextEvent.applications} / {nextEvent.capacity}件
+              </span>
             </div>
           ) : (
             <Empty />
           )}
-        </section>
-        <section className="panel">
-          <h2>売上状況</h2>
-          <div className="mini-bars">
-            <div>
-              <span>回収予定</span>
-              <b>{yen(p.expected)}</b>
-            </div>
-            <div>
-              <span>回収済</span>
-              <b>{yen(p.collected)}</b>
-            </div>
-            <div>
-              <span>回収率</span>
-              <b>{p.rate}%</b>
-            </div>
-          </div>
-        </section>
-      </div>
-      <section className="panel table-panel">
-        <table>
-          <TableHead labels={['未入金', 'イベント', '金額', '状態']} />
-          <tbody>
-            {data.payments
-              .filter((x) => x.status === 'unpaid')
-              .map((x) => (
-                <tr key={x.id}>
-                  <td>
-                    <b>{x.name}</b>
-                  </td>
-                  <td>{x.event}</td>
-                  <td>{yen(x.amount)}</td>
-                  <td>
-                    <Badge text="未入金" tone="warning" />
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </section>
-      <div className="dashboard-grid">
-        <section className="panel">
-          <h2>最近公開Content</h2>
-          {data.contents
-            .filter((c) => c.status === 'published')
-            .slice(0, 5)
-            .map((c) => (
-              <div className="placement-row" key={c.id}>
-                <b>{c.title}</b>
-                <span>{c.published_at?.slice(0, 10) || '公開日なし'}</span>
-              </div>
-            ))}
-        </section>
-        <section className="panel">
-          <h2>Notifications</h2>
-          {data.notifications.slice(0, 5).map((n) => (
-            <div className="placement-row" key={n.id}>
-              <b>{n.title}</b>
-              <span>{n.read_at ? '既読' : '未読'}</span>
-            </div>
-          ))}
         </section>
       </div>
     </>
@@ -751,15 +650,12 @@ function Events({
   );
   return (
     <>
-      <Heading
-        title="Events"
-        desc={`${data.events.length}件・公開と受付を即時反映`}
-        action={
-          <button className="admin-primary" onClick={() => setAdding(!adding)}>
-            ＋ イベントを作成
-          </button>
-        }
-      />
+      <div className="admin-section-actions">
+        <span>{data.events.length}件</span>
+        <button className="admin-primary" onClick={() => setAdding(!adding)}>
+          ＋ 新規作成
+        </button>
+      </div>
       {adding && (
         <CreateEvent
           done={async () => {
@@ -1035,36 +931,33 @@ function Applications({
 }) {
   const [q, setQ] = useState(''),
     [status, setStatus] = useState('all'),
-    [payment, setPayment] = useState('all'),
     [eventId, setEventId] = useState('all');
   const rows = data.applications.filter(
     (a) =>
       (status === 'all' || a.application_status === status) &&
-      (payment === 'all' || a.payment_status === payment) &&
       (eventId === 'all' || a.event_id === eventId) &&
-      (a.name + a.email + a.event_title)
+      (a.id + a.event_title + (a.member_number || ''))
         .toLowerCase()
         .includes(q.toLowerCase()),
   );
   return (
     <>
-      <Heading
-        title="Event Applications"
-        desc={`${data.applications.length}件の申込`}
-      />
+      <div className="admin-section-actions">
+        <span>{data.applications.length}件</span>
+      </div>
       <div className="toolbar">
         <input
           aria-label="申込検索"
-          placeholder="氏名・メール・イベント"
+          placeholder="会費ペイ番号・予約ID・イベントで検索"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
         <select
-          aria-label="申込Status Filter"
+          aria-label="申込状態で絞り込み"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
-          <option value="all">全Status</option>
+          <option value="all">全状態</option>
           {[
             'pending',
             'approved',
@@ -1077,18 +970,7 @@ function Applications({
           ))}
         </select>
         <select
-          aria-label="Payment Filter"
-          value={payment}
-          onChange={(e) => setPayment(e.target.value)}
-        >
-          <option value="all">全Payment</option>
-          <option>unpaid</option>
-          <option>paid</option>
-          <option>refunded</option>
-          <option>waived</option>
-        </select>
-        <select
-          aria-label="Event Filter"
+          aria-label="イベントで絞り込み"
           value={eventId}
           onChange={(e) => setEventId(e.target.value)}
         >
@@ -1100,42 +982,29 @@ function Applications({
           ))}
         </select>
       </div>
-      <section className="panel table-panel">
+      <section className="panel table-panel admin-applications-table">
         <table>
           <TableHead
-            labels={[
-              '参加者',
-              'Memo',
-              'イベント',
-              '申込日時',
-              '申込状態',
-              '支払い',
-              '当日',
-            ]}
+            labels={['会費ペイ番号', '予約ID', 'イベント', '申込日時', '状態']}
           />
           <tbody>
             {rows.map((a) => (
               <tr key={a.id}>
                 <td>
-                  <b>{a.name}</b>
-                  <small>{a.email}</small>
+                  {a.member_number ? <code>{a.member_number}</code> : '—'}
                 </td>
                 <td>
-                  <input
-                    aria-label={`${a.name} Memo`}
-                    defaultValue={a.notes || ''}
-                    onBlur={(e) =>
-                      void patch('event_applications', a.id, {
-                        notes: e.target.value,
-                      })
-                    }
-                  />
+                  <code title={a.id}>{a.id.slice(0, 8)}</code>
                 </td>
-                <td>{a.event_title}</td>
-                <td>{a.applied_at?.slice(0, 10)}</td>
+                <td>{a.event_title || 'イベント未設定'}</td>
+                <td>
+                  <time dateTime={a.created_at}>
+                    {a.created_at?.slice(0, 16).replace('T', ' ') || '—'}
+                  </time>
+                </td>
                 <td>
                   <select
-                    aria-label={`${a.name} 申込状態`}
+                    aria-label={`${a.id.slice(0, 8)} の申込状態`}
                     value={a.application_status}
                     onChange={(e) =>
                       void patch('event_applications', a.id, {
@@ -1150,24 +1019,6 @@ function Applications({
                     <option value="attended">出席</option>
                     <option value="no_show">No-show</option>
                   </select>
-                </td>
-                <td>
-                  <Badge
-                    text={a.payment_status === 'paid' ? '入金済み' : '未入金'}
-                    tone={a.payment_status === 'paid' ? 'success' : 'warning'}
-                  />
-                </td>
-                <td>
-                  <button
-                    className="small-button"
-                    onClick={() =>
-                      void patch('event_applications', a.id, {
-                        application_status: 'attended',
-                      })
-                    }
-                  >
-                    出席
-                  </button>
                 </td>
               </tr>
             ))}

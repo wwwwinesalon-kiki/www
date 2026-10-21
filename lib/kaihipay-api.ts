@@ -4,9 +4,6 @@ import type { Order } from './kaihipay-orders';
 type Customer = {
   customer_number?: unknown;
   mail?: unknown;
-  name?: unknown;
-  first_name?: unknown;
-  last_name?: unknown;
 };
 
 async function apiGet(path: string, token: string): Promise<unknown> {
@@ -53,7 +50,7 @@ export async function readAllOrders(token: string): Promise<Order[]> {
 }
 
 export async function readCustomer(token: string, customerNumber: string): Promise<{
-  number: string; email: string; name: string;
+  number: string; email: string;
 }> {
   if (!/^[\w-]{1,100}$/.test(customerNumber)) throw new Error('invalid_customer_number');
   const body = await apiGet(`/customers/${encodeURIComponent(customerNumber)}`, token);
@@ -62,7 +59,6 @@ export async function readCustomer(token: string, customerNumber: string): Promi
       typeof customer.mail !== 'string' ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.mail))
     throw new Error('kaihipay_customer_shape');
-  const name = typeof customer.name === 'string' ? customer.name :
-    [customer.last_name, customer.first_name].filter((x) => typeof x === 'string').join(' ');
-  return { number: customerNumber, email: customer.mail, name };
+  // The address is used only to send the account invitation. Names remain in Kaihipay.
+  return { number: customerNumber, email: customer.mail };
 }

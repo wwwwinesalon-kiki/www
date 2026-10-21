@@ -35,65 +35,67 @@ export default function KaihipayControl() {
     }
   }
   return (
-    <main style={{ maxWidth: 720, margin: '5rem auto', padding: '0 1.5rem' }}>
-      <p>
-        <Link href="/admin">管理画面へ戻る</Link>
-      </p>
-      <h1>会費ペイ連携</h1>
-      <p>入金済みの月額会費を照合し 会員の招待と閲覧期限を更新します</p>
-      <p>
-        初回はお支払いが確認された方だけにパスワード設定メールを送ります
-        LINEには個別の招待リンクやパスワードを貼らず
-        共通のログインページをご案内ください
-      </p>
-      <p>
-        <Link href="/member/login">会員ログインページを確認</Link>
-      </p>
-      <button
-        type="button"
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(
-              new URL('/member/login', location.origin).toString(),
-            );
-            setMessage('会員ログインURLをコピーしました');
-          } catch {
-            setMessage(
-              'コピーできませんでした 上のリンクを開いてURLをコピーしてください',
-            );
-          }
-        }}
-      >
-        LINE案内用のログインURLをコピー
-      </button>
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void run('/api/admin/kaihipay/check')}
-        >
-          接続とコースを確認
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void run('/api/admin/kaihipay/sync')}
-        >
-          入金同期を実行
-        </button>
+    <main className="kaihipay-admin">
+      <header className="kaihipay-admin-header">
+        <Link href="/admin" className="kaihipay-admin-brand">WWW</Link>
+        <nav aria-label="管理メニュー">
+          <Link href="/admin">記事</Link>
+          <Link href="/admin/events">イベント</Link>
+          <Link href="/admin/applications">申込</Link>
+          <span aria-current="page">会費ペイ</span>
+        </nav>
+        <Link href="/member" className="kaihipay-admin-member">会員サイト ↗</Link>
+      </header>
+      <div className="kaihipay-admin-content">
+        <div className="kaihipay-admin-toolbar">
+          <h1>会費ペイ連携</h1>
+          <div className="kaihipay-admin-actions">
+            <Link href="/member/login">ログイン画面 ↗</Link>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(
+                    new URL('/member/login', location.origin).toString(),
+                  );
+                  setMessage('ログインURLをコピーしました');
+                } catch {
+                  setMessage('コピーできませんでした');
+                }
+              }}
+            >
+              URLをコピー
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void run('/api/admin/kaihipay/check')}
+            >
+              接続確認
+            </button>
+            <button
+              type="button"
+              className="kaihipay-admin-primary"
+              disabled={busy}
+              onClick={() => void run('/api/admin/kaihipay/sync')}
+            >
+              入金同期
+            </button>
+          </div>
+        </div>
+        <output className="kaihipay-admin-status">{message}</output>
+        {courses.length > 0 && (
+          <ul className="kaihipay-admin-courses">
+            {courses.map((c) => (
+              <li key={c.id}>
+                <strong>{c.name}</strong>
+                <span>{c.billingType}</span>
+                <code>ID {c.id}</code>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-      <output style={{ display: 'block', marginTop: '1.5rem' }}>
-        {message}
-      </output>
-      {courses.length > 0 && (
-        <ul>
-          {courses.map((c) => (
-            <li key={c.id}>
-              {c.name} / {c.billingType} / ID {c.id}
-            </li>
-          ))}
-        </ul>
-      )}
     </main>
   );
 }

@@ -1,14 +1,10 @@
 import { requireAdmin } from '@/lib/admin-auth';
+import { storageService } from '@/lib/supabase/service';
 
 export async function GET(req: Request) {
   const actor = await requireAdmin(req);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
-  const [profiles, events, applications, contents] = await Promise.all([
-    actor.supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(500),
+  const [events, applications, contents] = await Promise.all([
     actor.supabase
       .from('events')
       .select('*,event_applications(count)')
@@ -16,7 +12,7 @@ export async function GET(req: Request) {
       .limit(300),
     actor.supabase
       .from('event_applications')
-      .select('*,events(title)')
+      .select('id,event_id,user_id,application_status,created_at,events(title)')
       .order('created_at', { ascending: false })
       .limit(500),
     actor.supabase
@@ -25,16 +21,21 @@ export async function GET(req: Request) {
       .order('updated_at', { ascending: false })
       .limit(500),
   ]);
-  const error =
-    profiles.error || events.error || applications.error || contents.error;
+  const error = events.error || applications.error || contents.error;
   if (error) return Response.json({ error: error.message }, { status: 500 });
+  const userIds = [...new Set((applications.data || [])
+    .map((application) => application.user_id)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0))];
+  const bindings = userIds.length
+    ? await storageService().from('article_entitlements')
+      .select('user_id,provider_member_id').in('user_id', userIds)
+    : { data: [], error: null };
+  if (bindings.error) return Response.json({ error: '会員番号の照合に失敗しました' }, { status: 500 });
+  const memberNumberByUserId = new Map(
+    (bindings.data || []).map((binding) => [binding.user_id, binding.provider_member_id]),
+  );
   return Response.json({
-    members: (profiles.data || []).map((p) => ({
-      ...p,
-      line: '',
-      joined: p.created_at,
-      source: 'Supabase Auth',
-    })),
+    members: [],
     events: (events.data || []).map((e) => ({
       ...e,
       date: e.start_at?.slice(0, 10),
@@ -42,9 +43,15 @@ export async function GET(req: Request) {
       applications: e.event_applications?.[0]?.count || 0,
     })),
     applications: (applications.data || []).map((a) => ({
-      ...a,
-      event_title: a.events?.title,
+      id: a.id,
+      event_id: a.event_id,
+      member_number: a.user_id ? memberNumberByUserId.get(a.user_id) || null : null,
+      application_status: a.application_status,
+      event_title: Array.isArray(a.events)
+        ? a.events[0]?.title
+        : (a.events as { title?: string } | null)?.title,
       applied_at: a.created_at,
+      created_at: a.created_at,
     })),
     payments: [],
     contents: (contents.data || []).map((c) => ({
@@ -58,8 +65,6 @@ export async function GET(req: Request) {
     logs: [],
     analytics: [],
     settings: {},
-    adminUsers: (profiles.data || [])
-      .filter((p) => p.role !== 'member')
-      .map((p) => ({ role: p.role, access_email: p.email })),
+    adminUsers: [],
   });
 }

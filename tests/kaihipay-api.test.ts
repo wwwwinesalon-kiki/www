@@ -28,6 +28,6 @@ it('reads invoices and exact customer identity without accepting mismatched numb
     .mockResolvedValueOnce(Response.json({response:{data:{customer_number:'c1',mail:'person@example.test',name:'Wine'}}}));
   vi.stubGlobal('fetch',fetcher);
   expect(await readAllOrders('private-token')).toHaveLength(1);
-  expect(await readCustomer('private-token','c1')).toEqual({number:'c1',email:'person@example.test',name:'Wine'});
+  expect(await readCustomer('private-token','c1')).toEqual({number:'c1',email:'person@example.test'});
   expect(fetcher.mock.calls[1][0]).toBe('https://api.kaihipay.jp/v1/customers/c1');
 });

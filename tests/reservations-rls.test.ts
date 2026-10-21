@@ -25,7 +25,7 @@ it('accepts only paid members and serializes capacity into waitlist', async () =
     "select * from apply_to_member_event($1,'Pending','p@example.test','','')",[eventId],
   ))).rejects.toThrow('membership_required');
   const first = await asRole(db,'authenticated',ids.member,tx => tx.query<{application_status:string}>(
-    "select * from apply_to_member_event($1,'Member','m@example.test','','')",[eventId],
+    "select * from apply_to_member_event($1,'Member','m@example.test','LINEsecret','notesecret')",[eventId],
   ));
   expect(first.rows[0].application_status).toBe('pending');
   await expect(asRole(db,'authenticated',ids.member,tx => tx.query(
@@ -37,4 +37,12 @@ it('accepts only paid members and serializes capacity into waitlist', async () =
     "select * from apply_to_member_event($1,'Second','s@example.test','','')",[eventId],
   ));
   expect(second.rows[0].application_status).toBe('waitlist');
+  const stored = await db.query<{name:string;email:string;line_name:string|null;note:string|null}>(
+    'select name,email,line_name,note from event_applications where event_id=$1',[eventId],
+  );
+  expect(stored.rows).toHaveLength(2);
+  for (const row of stored.rows) expect(row).toMatchObject({
+    name: 'WWW会員', email: 'not-collected@example.invalid',
+    line_name: null, note: null,
+  });
 });

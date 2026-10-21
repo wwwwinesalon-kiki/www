@@ -1,0 +1,522 @@
+/* Member pages keep the public site's ivory and wine palette while putting reading first. */
+body:has(.member-portal) .site-header {
+  height: 66px;
+  border-bottom-color: #bfa3a5;
+  background: #fcf9f4f5;
+}
+
+body:has(.member-portal) .site-header .brand span {
+  color: #542332;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+body:has(.member-portal) .site-header nav:not(.member-bottom-nav) {
+  gap: clamp(12px, 2vw, 32px);
+  color: #542332;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+body:has(.member-portal) .site-header nav:not(.member-bottom-nav) a:hover {
+  color: #9b5763;
+}
+
+.member-portal {
+  --member-ink: #542332;
+  --member-muted: #795e63;
+  --member-rule: #dccac3;
+  --member-paper: #fbf8f2;
+  max-width: none;
+  padding: 0 0 76px;
+  background:
+    radial-gradient(circle at 2% 49%, #c27c7812, transparent 21rem),
+    radial-gradient(circle at 96% 77%, #bd776d0d, transparent 22rem),
+    var(--member-paper);
+  color: var(--member-ink);
+}
+
+.member-portal .eyebrow,
+.member-article-page .eyebrow {
+  color: #75404d;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+}
+
+.member-portal .member-welcome {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: clamp(260px, 28vw, 390px);
+  margin: 0;
+  padding: 48px max(5vw, calc((100vw - 1390px) / 2));
+  overflow: hidden;
+  border: 0;
+  border-bottom: 1px solid #d9c7bf;
+  background: #f8f3eb;
+}
+
+.member-portal .member-welcome-art {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: url('/images/www/landscape.webp') center 57% / cover no-repeat;
+  opacity: 0.46;
+}
+
+.member-portal .member-welcome::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #fbf8f2 0%,
+    #fbf8f2e8 33%,
+    #fbf8f294 67%,
+    #fbf8f233 100%
+  );
+}
+
+.member-portal .member-welcome-copy {
+  width: min(100%, 780px);
+}
+
+.member-portal .member-welcome h1 {
+  margin: 12px 0 10px;
+  color: #491d2c;
+  font-size: clamp(42px, 6.5vw, 82px);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.035em;
+}
+
+.member-portal .member-welcome p:last-child {
+  margin: 0;
+  max-width: 42rem;
+  color: #5c4c4b;
+  font-family: var(--font-mincho-jp);
+  font-size: clamp(14px, 1.35vw, 18px);
+  line-height: 1.85;
+}
+
+.member-portal .member-welcome-list {
+  min-height: 235px;
+}
+
+.member-portal .member-welcome-list h1 {
+  font-size: clamp(38px, 5vw, 62px);
+}
+
+.member-portal-content {
+  width: min(1390px, calc(100% - clamp(36px, 10vw, 160px)));
+  margin: 0 auto;
+}
+
+.member-portal .member-block {
+  margin: clamp(54px, 6vw, 86px) 0;
+}
+
+.member-portal .member-section-heading {
+  display: flex;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.member-portal .member-section-heading > div {
+  flex: 0 0 auto;
+}
+
+.member-portal .member-section-heading .eyebrow {
+  margin: 0 0 5px;
+}
+
+.member-portal .member-section-heading h2 {
+  margin: 0;
+  color: #542332;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.member-portal .member-section-heading::after {
+  content: '';
+  flex: 1 1 auto;
+  align-self: end;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--member-rule);
+}
+
+.member-portal .member-text-link {
+  order: 2;
+  flex: 0 0 auto;
+  padding: 10px 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.member-portal .member-text-link span {
+  margin-left: 8px;
+  transition: margin-left 0.2s ease;
+}
+
+.member-portal .member-text-link:hover span {
+  margin-left: 14px;
+}
+
+.member-portal .member-card-grid {
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.member-portal .member-card {
+  background: #fffdfa;
+  border-color: #e7ddd5;
+  box-shadow: 0 6px 28px #4e27200a;
+}
+
+.member-portal .member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 38px #4e27201c;
+}
+
+.member-portal .member-card img,
+.member-portal .member-card-placeholder {
+  aspect-ratio: 16 / 9;
+}
+
+.member-portal .member-card-copy {
+  gap: 10px;
+  padding: clamp(18px, 2vw, 26px);
+}
+
+.member-portal .member-card-copy small {
+  color: #7d4d57;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.19em;
+}
+
+.member-portal .member-card-copy strong {
+  color: #49212c;
+  font-size: clamp(19px, 1.65vw, 24px);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.member-portal .member-card-copy > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #645756;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.member-portal .member-card-copy em {
+  display: flex;
+  justify-content: space-between;
+  align-self: stretch;
+  padding-top: 12px;
+  border-top: 1px solid #e9dcd5;
+  border-bottom: 0;
+  color: #6d3342;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.member-portal .member-category-grid {
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.member-portal .member-category {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(175px, 16vw, 230px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d8c6bd;
+  background: #f8f0e9;
+}
+
+.member-portal .member-category-art {
+  position: absolute;
+  z-index: -2;
+  inset: 0 0 0 32%;
+}
+
+.member-portal .member-category-art img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.member-portal .member-category:hover .member-category-art img {
+  transform: scale(1.05);
+}
+
+.member-portal .member-category::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #fffdf9 0%,
+    #fffdf9f2 36%,
+    #fffdf9a8 67%,
+    #fffdf920 100%
+  );
+}
+
+.member-portal .member-category-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: clamp(18px, 2.3vw, 32px);
+}
+
+.member-portal .member-category-copy > span {
+  font-family: Georgia, serif;
+  font-size: clamp(23px, 2.6vw, 36px);
+  letter-spacing: 0.18em;
+}
+
+.member-portal .member-category-copy strong {
+  font-size: clamp(14px, 1.25vw, 18px);
+  font-weight: 400;
+}
+
+.member-portal .member-category-copy small {
+  max-width: 16rem;
+  color: #5f5250;
+  font-size: 11px;
+}
+
+.member-portal .member-category-copy em {
+  display: grid;
+  place-items: center;
+  align-self: flex-end;
+  width: 36px;
+  height: 36px;
+  margin: auto 0 0;
+  border: 1px solid #b7969a;
+  background: #fffaf4e6;
+  font-size: 17px;
+}
+
+.member-portal .member-nomikai {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.8fr) auto;
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  min-height: 245px;
+  padding: clamp(24px, 3vw, 42px);
+  overflow: hidden;
+  background: #f9f4ee;
+  border: 1px solid #dbc9c1;
+}
+
+.member-portal .member-nomikai-copy {
+  z-index: 1;
+}
+
+.member-portal .member-nomikai h2 {
+  margin: 4px 0 8px;
+  color: #542332;
+  font-family: Georgia, serif;
+  font-size: clamp(30px, 3.3vw, 48px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.member-portal .member-nomikai-lead,
+.member-portal .member-nomikai-status {
+  margin: 8px 0;
+  line-height: 1.7;
+}
+
+.member-portal .member-nomikai small {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--member-muted);
+}
+
+.member-portal .member-upcoming-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.member-portal .member-upcoming-list a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.member-portal .member-nomikai-art {
+  position: relative;
+  align-self: stretch;
+  min-height: 180px;
+  margin: calc(-1 * clamp(24px, 3vw, 42px)) 0;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 30%,
+    #000 88%,
+    transparent
+  );
+}
+
+.member-portal .member-nomikai-art img {
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.member-portal .member-nomikai-action {
+  z-index: 1;
+}
+
+.member-portal .member-nomikai-action a {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid #9e6b75;
+  background: #fffaf5e8;
+  color: #542332;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.member-portal .member-nomikai-action a:hover {
+  background: #f0dadd;
+}
+
+.member-portal .member-filter {
+  margin: 36px 0 30px;
+  gap: 8px;
+}
+
+.member-portal .member-filter a {
+  min-width: 86px;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+
+.member-portal .member-filter [aria-current='page'] {
+  color: #fffdfa;
+  background: #683847;
+}
+
+.member-article-page {
+  width: min(100%, 940px);
+  padding-top: 64px;
+  color: #542332;
+}
+
+.member-story .member-back-link {
+  display: inline-flex;
+  margin: 0 0 30px;
+  color: #713e4b;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.member-article-page h1 {
+  font-weight: 400;
+}
+
+@media (max-width: 1020px) {
+  .member-portal .member-nomikai {
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.8fr);
+  }
+  .member-portal .member-nomikai-action {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  body:has(.member-portal) .site-header {
+    height: 66px;
+  }
+  .member-portal {
+    padding-bottom: 108px;
+  }
+  .member-portal .member-welcome {
+    min-height: 275px;
+    padding: 42px 24px;
+  }
+  .member-portal .member-welcome-list {
+    min-height: 205px;
+  }
+  .member-portal .member-welcome h1 {
+    font-size: clamp(36px, 9vw, 52px);
+  }
+  .member-portal .member-welcome p:last-child {
+    font-size: 14px;
+  }
+  .member-portal-content {
+    width: calc(100% - 36px);
+  }
+  .member-portal .member-block {
+    margin: 48px 0;
+  }
+  .member-portal .member-section-heading {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .member-portal .member-section-heading::after {
+    order: 1;
+    flex-basis: 100%;
+    margin-bottom: 0;
+  }
+  .member-portal .member-text-link {
+    margin-left: auto;
+  }
+  .member-portal .member-card-grid,
+  .member-portal .member-category-grid {
+    grid-template-columns: 1fr;
+  }
+  .member-portal .member-category {
+    min-height: 175px;
+  }
+  .member-portal .member-nomikai {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .member-portal .member-nomikai-art {
+    min-height: 150px;
+    margin: 0 -24px;
+    mask-image: linear-gradient(0deg, #000, #000);
+  }
+  .member-portal .member-nomikai-action {
+    grid-column: auto;
+  }
+  .member-portal .member-nomikai-action a {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .member-article-page {
+    padding-top: 40px;
+    padding-bottom: 112px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-portal .member-card,
+  .member-portal .member-category,
+  .member-portal .member-category-art img,
+  .member-portal .member-text-link span {
+    transition: none;
+  }
+}

@@ -66,6 +66,13 @@ export async function publicEvents(member = false) {
     member_visible: Number(event.member_visible),
   })) as EventView[];
 }
+export async function upcomingMemberEvents(limit = 2) {
+  const events = await publicEvents(true);
+  const now = Date.now();
+  return events
+    .filter((event) => new Date(event.end_at).getTime() >= now)
+    .slice(0, limit);
+}
 export async function eventBySlug(slug: string, member = false) {
   const events = await publicEvents(member);
   return events.find((event) => event.slug === slug) || null;

@@ -18,12 +18,9 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
         {member ? (
           <>
             <Link href="/member">HOME</Link>
-            <Link href="/member/people">PEOPLE</Link>
             <Link href="/member/field">FIELD</Link>
             <Link href="/member/table">TABLE</Link>
-            <Link href="/member/news">NEWS</Link>
             <Link href="/member/events">EVENT</Link>
-            <Link href="/member/archive">ARCHIVE</Link>
             <Link href="/member/account">ACCOUNT</Link>
           </>
         ) : (

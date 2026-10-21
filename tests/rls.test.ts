@@ -13,6 +13,17 @@ afterAll(async () => {
   await db?.close();
 });
 describe('real PostgreSQL RLS in isolated PGlite', () => {
+  it('keeps profile contact fields outside authenticated reads', async () => {
+    const visible = await asRole(db, 'authenticated', ids.member, (tx) =>
+      tx.query('select id,role,status from profiles where id=$1', [ids.member]),
+    );
+    expect(visible.rows).toHaveLength(1);
+    await expect(
+      asRole(db, 'authenticated', ids.member, (tx) =>
+        tx.query('select email,name,kaihipay_customer_id from profiles where id=$1', [ids.member]),
+      ),
+    ).rejects.toThrow();
+  });
   it('denies anonymous and unentitled direct SQL body reads', async () => {
     for (const [role, id] of [
       ['anon', ''],

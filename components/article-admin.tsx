@@ -29,6 +29,9 @@ export default function ArticleAdmin({
 }) {
   const [rows, setRows] = useState<Article[] | null>(null);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+  const [publishStatus, setPublishStatus] = useState('all');
   useEffect(() => {
     let live = true;
     fetch('/api/admin/entity/contents', { cache: 'no-store' })
@@ -47,68 +50,158 @@ export default function ArticleAdmin({
     };
   }, []);
   const selected = rows?.find((c) => c.id === id);
+  const availableRows = (rows || []).filter(
+    (c) =>
+      !c.deleted_at &&
+      !c.archived_at &&
+      (canEdit || c.publish_status === 'published'),
+  );
+  const filteredRows = availableRows.filter((c) => {
+    const matchesText = `${c.title} ${c.summary || ''} ${c.type}`
+      .toLocaleLowerCase('ja-JP')
+      .includes(query.trim().toLocaleLowerCase('ja-JP'));
+    return (
+      matchesText &&
+      (category === 'all' || c.type === category) &&
+      (publishStatus === 'all' || c.publish_status === publishStatus)
+    );
+  });
+  const categories = Array.from(
+    new Set(availableRows.map((c) => c.type)),
+  ).sort();
   return (
-    <main className="article-shell">
-      <header>
-        <p className="eyebrow">WWW / WINE WELCOME WORLD</p>
-        <h1>記事管理</h1>
-        <nav>
-          <a href="/admin">記事一覧</a>
-          <a href="/admin/events">既存イベント</a>
-          <a href="/admin/applications">既存申込</a>
-          <a href="/admin/kaihipay">会費ペイ連携</a>
-          <Link href="/member">会員サイト</Link>
-          <a href="https://lin.ee/xWYPyBv">公式LINE</a>
+    <main className="article-shell admin-article-shell">
+      <h1 className="admin-visually-hidden">記事管理</h1>
+      <header className="admin-article-header">
+        <Link
+          className="admin-article-brand"
+          href="/admin"
+          aria-label="WWW 記事管理"
+        >
+          WWW
+        </Link>
+        <nav aria-label="管理メニュー">
+          <Link href="/admin" aria-current={!id ? 'page' : undefined}>
+            記事
+          </Link>
+          <Link href="/admin/events">イベント</Link>
+          <Link href="/admin/applications">申込</Link>
+          <Link href="/admin/kaihipay">会費ペイ</Link>
         </nav>
-        <form action="/api/member/logout" method="post">
-          <button>ログアウト</button>
-        </form>
+        <div className="admin-article-utility">
+          <Link href="/member" target="_blank" rel="noopener noreferrer">
+            会員サイト ↗
+          </Link>
+          <form action="/api/member/logout" method="post">
+            <button type="submit">ログアウト</button>
+          </form>
+        </div>
       </header>
-      {error && (
-        <p role="alert">
-          {error} <button onClick={() => location.reload()}>再読み込み</button>
-        </p>
-      )}
-      {!rows && !error && <p role="status">記事を読み込んでいます</p>}
-      {rows && !id && (
-        <>
-          <p>完成した原稿と画像を貼り付け 下書きで確認してから公開します</p>
-          {canEdit && (
-            <a className="button" href="/admin/contents/new">
-              新しい記事
-            </a>
-          )}
-          {!canEdit && (
-            <p>閲覧用の管理アカウントです 下書きと編集は表示しません</p>
-          )}
-          {rows
-            .filter((c) => !c.deleted_at && !c.archived_at)
-            .map((c) => (
-              <div className="article-row" key={c.id}>
-                <div>
-                  <small>
-                    {c.type} ·{' '}
-                    {c.publish_status === 'published' ? '公開' : '下書き'}
-                    {c.public_visible ? ' · 既存の一般公開記事' : ''}
-                  </small>
-                  <h2>{c.title}</h2>
-                </div>
-                {canEdit && <a href={'/admin/contents/' + c.id}>編集する</a>}
-              </div>
-            ))}
-          {rows.length === 0 && <p>記事はまだありません</p>}
-        </>
-      )}
-      {rows && id && canEdit && (id === 'new' || selected) && (
-        <ArticleEditor
-          key={id}
-          initial={selected}
-          categories={Array.from(
-            new Set([...PRIMARY_CATEGORIES, ...rows.map((r) => r.type)]),
-          )}
-        />
-      )}
-      {rows && id && id !== 'new' && !selected && <p>記事が見つかりません</p>}
+      <div className="admin-article-content">
+        {error && (
+          <p role="alert" className="admin-article-feedback">
+            {error}{' '}
+            <button onClick={() => location.reload()}>再読み込み</button>
+          </p>
+        )}
+        {!rows && !error && <output>読み込み中…</output>}
+        {rows && !id && (
+          <section aria-label="記事一覧">
+            <div className="admin-article-listbar">
+              <span className="admin-article-count">
+                記事 {availableRows.length}件
+              </span>
+              {canEdit && (
+                <Link
+                  className="admin-article-primary"
+                  href="/admin/contents/new"
+                >
+                  ＋ 新規作成
+                </Link>
+              )}
+            </div>
+            <div className="admin-article-filters">
+              <input
+                type="search"
+                aria-label="記事を検索"
+                placeholder="記事を検索"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+              <select
+                aria-label="カテゴリで絞り込み"
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                <option value="all">全カテゴリ</option>
+                {categories.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+              {canEdit && (
+                <select
+                  aria-label="公開状態で絞り込み"
+                  value={publishStatus}
+                  onChange={(event) => setPublishStatus(event.target.value)}
+                >
+                  <option value="all">全状態</option>
+                  <option value="published">公開中</option>
+                  <option value="draft">下書き</option>
+                </select>
+              )}
+            </div>
+            <ul className="admin-article-list">
+              {filteredRows.map((c) => (
+                <li className="admin-article-item" key={c.id}>
+                  <div className="admin-article-item-main">
+                    <strong>{c.title || '無題の記事'}</strong>
+                    <span>
+                      {c.type}
+                      {c.public_visible ? ' · 一般公開' : ''}
+                    </span>
+                  </div>
+                  <span
+                    className={`admin-article-status ${c.publish_status === 'published' ? 'is-published' : ''}`}
+                  >
+                    {c.publish_status === 'published' ? '公開中' : '下書き'}
+                  </span>
+                  <time dateTime={c.updated_at}>
+                    {c.updated_at?.slice(0, 10) || '—'}
+                  </time>
+                  {canEdit && (
+                    <Link
+                      className="admin-article-edit-link"
+                      href={'/admin/contents/' + c.id}
+                    >
+                      編集 <span aria-hidden>→</span>
+                    </Link>
+                  )}
+                </li>
+              ))}
+              {filteredRows.length === 0 && (
+                <li className="admin-article-empty">
+                  {availableRows.length === 0
+                    ? '記事はまだありません'
+                    : '該当する記事がありません'}
+                </li>
+              )}
+            </ul>
+          </section>
+        )}
+        {rows && id && canEdit && (id === 'new' || selected) && (
+          <ArticleEditor
+            key={id}
+            initial={selected}
+            categories={Array.from(
+              new Set([...PRIMARY_CATEGORIES, ...rows.map((r) => r.type)]),
+            )}
+          />
+        )}
+        {rows && id && !canEdit && <p role="alert">編集権限がありません</p>}
+        {rows && id && id !== 'new' && !selected && <p>記事が見つかりません</p>}
+      </div>
     </main>
   );
 }
@@ -259,26 +352,30 @@ function ArticleEditor({
     }
   }
   return (
-    <section>
-      <h2>{initial ? '記事の編集' : '新しい記事'}</h2>
-      <p>
-        {status === 'published' ? '公開中' : '下書き'}
-        {dirty ? ' · 未保存の変更があります' : ''}
-      </p>
+    <section className="admin-article-workspace">
+      <h2 className="admin-visually-hidden">
+        {initial ? '記事の編集' : '新しい記事'}
+      </h2>
+      <div className="admin-article-editor-head">
+        <Link href="/admin" className="admin-article-back">
+          ← 記事一覧
+        </Link>
+        <span
+          className={`admin-article-status ${status === 'published' ? 'is-published' : ''}`}
+        >
+          {status === 'published' ? '公開中' : '下書き'}
+        </span>
+        {dirty && <span className="admin-article-dirty">未保存</span>}
+      </div>
       {initial?.public_visible && (
         <p className="article-notice">
-          既存の一般公開記事です 公開範囲は保持します
-          新規の非公開画像は追加できません
+          一般公開記事 · 公開範囲は変更されません
         </p>
       )}
-      <fieldset disabled={busy} style={{ border: 0, padding: 0, minWidth: 0 }}>
+      <fieldset disabled={busy} className="admin-article-fieldset">
         {!initial && (
-          <div className="article-notice">
-            <h3>投稿の型を選ぶ</h3>
-            <p>
-              型を選ぶとカテゴリと本文の見出しを用意します
-              文章は自由に書き換えられます
-            </p>
+          <div className="admin-article-templates">
+            <h2>テンプレート</h2>
             <div className="article-template-actions">
               {(
                 [
@@ -320,6 +417,7 @@ function ArticleEditor({
         <label htmlFor="article-title">タイトル</label>
         <input
           id="article-title"
+          placeholder="記事のタイトル"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -340,7 +438,7 @@ function ArticleEditor({
             <option key={c}>{c}</option>
           ))}
         </select>
-        <label htmlFor="article-summary">一覧に表示する概要</label>
+        <label htmlFor="article-summary">概要</label>
         <textarea
           id="article-summary"
           value={summary}
@@ -352,7 +450,7 @@ function ArticleEditor({
           rows={3}
           placeholder="記事の内容を2行ほどで紹介"
         />
-        <p>メイン画像</p>
+        <p className="admin-article-field-label">メイン画像</p>
         {cover ? (
           <>
             <Image
@@ -377,7 +475,7 @@ function ArticleEditor({
         ) : (
           <p>画像は未設定です</p>
         )}
-        <label htmlFor="cover-alt">メイン画像の説明</label>
+        <label htmlFor="cover-alt">画像の説明</label>
         <input
           id="cover-alt"
           value={coverAlt}
@@ -387,9 +485,9 @@ function ArticleEditor({
           }}
           maxLength={500}
         />
-        <div className="article-notice">
-          <h3>画像の追加・差し替え</h3>
-          <p>JPEG PNG WebP / 最大3MB この記事で使用する画像だけを保存します</p>
+        <details className="admin-article-media">
+          <summary>画像を追加・差し替え</summary>
+          <small>JPEG / PNG / WebP · 最大3MB</small>
           <label htmlFor="image-target">画像を入れる場所</label>
           <select
             id="image-target"
@@ -458,7 +556,7 @@ function ArticleEditor({
               </button>
             ))}
           </div>
-        </div>
+        </details>
       </fieldset>
       <p id="body-label">本文</p>
       <div className="editor-toolbar" role="toolbar" aria-label="本文の書式">
@@ -519,10 +617,6 @@ function ArticleEditor({
           );
         }}
       />
-      <p>
-        見出し・太字・箇条書き・リンクを整えられます
-        外部画像や埋め込みは除外されるため 画像は上から追加してください
-      </p>
       <div className="article-actions">
         <button disabled={busy} onClick={() => save('draft')}>
           {status === 'published' ? '公開を取り下げて保存' : '下書き保存'}

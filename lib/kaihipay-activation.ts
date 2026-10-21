@@ -1,6 +1,7 @@
 import 'server-only';
 import { storageService } from './supabase/service';
 import { readAllOrders, readCustomer, resolveMembershipCourseId } from './kaihipay-api';
+import { readAuthEmailIndex } from './auth-email-index';
 import { paidAccessWindow, paidServiceMonths } from './kaihipay-orders';
 import { SupabaseInvitationStore, SupabaseSyncStore } from './kaihipay-store';
 import { inviteOnce, processNotice, type KaihipayAdapter, type VerifiedSnapshot } from './integrations';
@@ -36,6 +37,7 @@ export async function activateFromKaihipay(): Promise<{
   const invitations = new SupabaseInvitationStore(db);
   const now = new Date();
   let updated = 0, review = 0;
+  let knownEmails: Set<string> | null = null;
 
   for (const number of customers) {
     try {
@@ -53,11 +55,9 @@ export async function activateFromKaihipay(): Promise<{
         if (!userId && job) { review++; continue; }
         if (!userId) {
           const customer = await readCustomer(token, number);
-          const { data: sameEmail, error: emailError } = await db.from('profiles')
-            .select('id').ilike('email', customer.email.replaceAll('%','\\%').replaceAll('_','\\_'))
-            .limit(1);
-          if (emailError) throw new Error(genericError);
-          if (sameEmail?.length) {
+          knownEmails ??= await readAuthEmailIndex(db);
+          const normalizedEmail = customer.email.trim().toLowerCase();
+          if (knownEmails.has(normalizedEmail)) {
             await db.from('kaihipay_invitation_jobs').insert({provider_member_id:number,status:'review'});
             review++; continue;
           }
@@ -66,27 +66,19 @@ export async function activateFromKaihipay(): Promise<{
             async (email) => {
               const { data, error } = await db.auth.admin.inviteUserByEmail(email, {
                 redirectTo: new URL('/member/auth?next=/member/setup', site).toString(),
-                data: { name: customer.name },
               });
               if (error || !data.user) throw new Error('invite_failed');
               return { userId:data.user.id };
             },
           );
           if (result !== 'sent') { review++; continue; }
+          knownEmails.add(normalizedEmail);
           const { data: sentJob } = await db.from('kaihipay_invitation_jobs')
             .select('user_id').eq('provider_member_id',number).single();
           userId = sentJob?.user_id || null;
         }
         if (!userId) throw new Error(genericError);
-        const { data: profile, error: profileError } = await db.from('profiles')
-          .select('kaihipay_customer_id').eq('id',userId).single();
-        if (profileError || (profile.kaihipay_customer_id && profile.kaihipay_customer_id !== number))
-          throw new Error(genericError);
-        if (!profile.kaihipay_customer_id) {
-          const { error } = await db.from('profiles').update({kaihipay_customer_id:number})
-            .eq('id',userId).is('kaihipay_customer_id',null);
-          if (error) throw new Error(genericError);
-        }
+        // article_entitlements is the only WWW-side Kaihipay identity binding.
         const { error } = await db.from('article_entitlements').insert({
           user_id:userId,provider_member_id:number,allowed:false,
         });

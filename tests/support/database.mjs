@@ -47,6 +47,12 @@ export async function testDatabase() {
       'utf8',
     ),
   );
+  await db.exec(
+    await readFile(
+      new URL('../../supabase/migrations/20261022000000_profile_data_minimization.sql', import.meta.url),
+      'utf8',
+    ),
+  );
   for (const [role, id] of Object.entries(ids)) {
     await db.query('insert into auth.users(id,email) values($1,$2)', [
       id,
