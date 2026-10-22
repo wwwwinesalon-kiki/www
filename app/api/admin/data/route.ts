@@ -1,9 +1,49 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { storageService } from '@/lib/supabase/service';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
 
 export async function GET(req: Request) {
   const actor = await requireAdmin(req);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
+  if (isNeonBackend()) {
+    const sql = neonSql();
+    const result = await Promise.all([
+      sql`select e.*,
+        (select count(*)::integer from public.event_applications a
+          where a.event_id=e.id and a.deleted_at is null
+            and a.application_status <> 'cancelled') as applications
+        from public.events e order by e.start_at limit 300`,
+      sql`select a.id,a.event_id,a.application_status,a.created_at,
+          e.title as event_title,t.provider_member_id as member_number
+        from public.event_applications a
+        join public.events e on e.id=a.event_id
+        left join public.article_entitlements t on t.user_id=a.user_id
+        order by a.created_at desc limit 500`,
+      sql`select * from public.contents order by updated_at desc limit 500`,
+    ]);
+    const [events, applications, contents] = result as unknown as Record<string, unknown>[][];
+    return Response.json({
+      members: [],
+      events: events.map((e) => ({
+        ...e,
+        date: e.start_at instanceof Date || typeof e.start_at === 'string'
+          ? new Date(e.start_at).toISOString().slice(0, 10)
+          : null,
+        status: e.publish_status,
+      })),
+      applications: applications.map((a) => ({
+        ...a, applied_at: a.created_at,
+      })),
+      payments: [],
+      contents: contents.map((c) => ({
+        ...c,
+        publicVisible: c.public_visible,
+        memberVisible: c.member_visible,
+        status: c.publish_status,
+      })),
+      placements: [], notifications: [], logs: [], analytics: [], settings: {}, adminUsers: [],
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
+  }
   const [events, applications, contents] = await Promise.all([
     actor.supabase
       .from('events')

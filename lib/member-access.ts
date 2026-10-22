@@ -1,7 +1,26 @@
 import { createClient } from '@/lib/supabase/server';
 import { cache } from 'react';
+import { isNeonBackend } from '@/lib/neon/db';
+import { neonSessionUser } from '@/lib/neon/auth';
+import { linkedNeonIdentity } from '@/lib/neon/identity';
+import { legacySupabaseUnavailable } from '@/lib/neon/legacy-guard';
 
 export const memberAccess = cache(async function memberAccess() {
+  if (isNeonBackend()) {
+    const authUser = await neonSessionUser();
+    const identity = await linkedNeonIdentity(authUser);
+    return {
+      supabase: legacySupabaseUnavailable(),
+      user: authUser
+        ? {
+            id: identity?.profileId || authUser.id,
+            email: authUser.email,
+          }
+        : null,
+      entitled: identity?.entitled === true,
+      editor: identity?.role === 'owner' || identity?.role === 'editor',
+    };
+  }
   const supabase = await createClient();
   const {
     data: { user },

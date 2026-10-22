@@ -1,6 +1,8 @@
 import { afterEach, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ access: vi.fn() }));
 vi.mock('@/lib/member-access', () => ({ memberAccess: mocks.access }));
+vi.mock('@/lib/neon/db', () => ({ isNeonBackend: () => false, neonSql: vi.fn() }));
+vi.mock('@/lib/neon/auth', () => ({ neonSessionUser: vi.fn() }));
 import { POST } from '../app/api/applications/route';
 
 afterEach(() => vi.resetAllMocks());

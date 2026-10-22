@@ -11,13 +11,16 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params,
-    e = await eventBySlug(slug);
+  const { slug } = await params;
+  const access = await memberAccess();
+  const e = await eventBySlug(slug) ||
+    (access.entitled ? await eventBySlug(slug, true) : null);
   if (!e) return {};
   const description = `${e.start_at.slice(0, 10)} ${e.venue}で開催するWWWイベント`;
   return {
     title: e.title,
     description,
+    robots: e.public_visible ? undefined : { index: false, follow: false },
     openGraph: {
       title: e.title,
       description,
@@ -35,10 +38,11 @@ export default async function EventDetail({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params,
-    e = await eventBySlug(slug);
-  if (!e) notFound();
+  const { slug } = await params;
   const access = await memberAccess();
+  const e = await eventBySlug(slug) ||
+    (access.entitled ? await eventBySlug(slug, true) : null);
+  if (!e) notFound();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',

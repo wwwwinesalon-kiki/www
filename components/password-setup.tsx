@@ -1,7 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-export default function PasswordSetup() {
+import { neonAuthClient } from '@/lib/neon/auth-client';
+export default function PasswordSetup({
+  provider = 'supabase',
+  token,
+}: {
+  provider?: 'supabase' | 'neon';
+  token?: string;
+}) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   return (
@@ -16,9 +23,17 @@ export default function PasswordSetup() {
           return setMessage('確認用パスワードが一致しません');
         setBusy(true);
         try {
-          const { error } = await createClient().auth.updateUser({ password });
+          if (provider === 'neon' && !token)
+            throw new Error('Password reset token is missing');
+          const { error } =
+            provider === 'neon'
+              ? await neonAuthClient.resetPassword({
+                  newPassword: password,
+                  token: token!,
+                })
+              : await createClient().auth.updateUser({ password });
           if (error) throw error;
-          location.assign('/member');
+          location.assign(provider === 'neon' ? '/member/login' : '/member');
         } catch {
           setMessage(
             '設定できませんでした 案内メールを開き直すか 再設定をお試しください',

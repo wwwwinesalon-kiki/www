@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { safeNext } from '@/lib/article';
+import { isNeonBackend } from '@/lib/neon/db';
+import { neonSessionUser } from '@/lib/neon/auth';
 export const dynamic = 'force-dynamic';
 export default async function ProtectedMemberLayout({
   children,
@@ -9,10 +11,9 @@ export default async function ProtectedMemberLayout({
   children: React.ReactNode;
   params: Promise<{ path?: string[] }>;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = isNeonBackend()
+    ? await neonSessionUser()
+    : (await (await createClient()).auth.getUser()).data.user;
   if (!user) {
     const { path = [] } = await params;
     redirect(

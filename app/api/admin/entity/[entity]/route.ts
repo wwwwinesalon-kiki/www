@@ -1,6 +1,8 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { validateEvent } from '@/lib/domain';
 import { saveArticle } from '@/lib/article-write';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
+import { neonInsert } from '@/lib/neon/crud';
 
 const tables = {
   events: 'events',
@@ -22,6 +24,15 @@ export async function GET(
   const table = tables[entity as keyof typeof tables];
   if (!table)
     return Response.json({ error: 'Unknown entity' }, { status: 404 });
+  if (isNeonBackend()) {
+    const data = await neonSql().query(
+      `select *, updated_at::text as updated_at_version from public.${table} order by created_at desc limit 200`,
+    ) as Record<string, unknown>[];
+    if (table === 'contents') {
+      for (const row of data) row.updated_at = row.updated_at_version;
+    }
+    return Response.json(data, { headers: { 'Cache-Control': 'private, no-store' } });
+  }
   const { data, error } = await actor.supabase
     .from(table)
     .select('*')
@@ -40,7 +51,7 @@ export async function POST(
   const { entity } = await params;
   if (entity === 'members')
     return Response.json(
-      { error: '会員はSupabase Authで招待してください' },
+      { error: '会員情報は会費ペイで管理してください' },
       { status: 422 },
     );
   if (entity === 'contents') return saveArticle(req, actor);
@@ -100,6 +111,14 @@ export async function POST(
   const payload = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key)),
   );
+  if (isNeonBackend()) {
+    try {
+      const data = await neonInsert(table, payload, allowed);
+      return Response.json({ id: data?.id }, { status: 201 });
+    } catch {
+      return Response.json({ error: '保存できませんでした 入力を確認してください' }, { status: 422 });
+    }
+  }
   const { data, error } = await actor.supabase
     .from(table)
     .insert(payload)

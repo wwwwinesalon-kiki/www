@@ -1,6 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
-import { resolveMembershipCourseId, readAllOrders, readCustomer } from '../lib/kaihipay-api';
+import {
+  resolveMembershipCourseId,
+  resolveMembershipCourseIdWithFee,
+  readAllOrders,
+  readCustomer,
+} from '../lib/kaihipay-api';
 afterEach(() => vi.unstubAllGlobals());
 
 it('selects the unique monthly WWW course with 3,300 yen recurring fee', async () => {
@@ -20,6 +25,17 @@ it('rejects ambiguous course names and fee mismatches', async () => {
     {id:2,name:'www月額費用',billing_type:'monthly',recuring_fee:3300},
   ]}})));
   await expect(resolveMembershipCourseId('private-token')).rejects.toThrow('kaihipay_membership_course_ambiguous');
+});
+
+it('requires a confirmed Neon course ID and exact live recurring fee', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => Response.json({ response: { data: [
+    { id: 7, name: 'www月額費用', billing_type: 'monthly', recuring_fee: 3410 },
+  ] } })));
+  expect(await resolveMembershipCourseIdWithFee('private-token', '7', 3410)).toBe(7);
+  await expect(resolveMembershipCourseIdWithFee('private-token', '7', 3300))
+    .rejects.toThrow('kaihipay_membership_course_ambiguous');
+  await expect(resolveMembershipCourseIdWithFee('private-token', '8', 3410))
+    .rejects.toThrow('kaihipay_membership_course_ambiguous');
 });
 
 it('reads invoices and exact customer identity without accepting mismatched numbers', async () => {

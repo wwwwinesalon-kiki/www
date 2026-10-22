@@ -6,7 +6,20 @@ import {
   safeNext,
 } from '../lib/article';
 import { checkImage } from '../lib/image-upload';
+import { articleImagePath, safeArticleImagePath } from '../lib/neon/storage';
 describe('article safety', () => {
+  it('keeps existing private object keys when moving article images', () => {
+    const articleId = '11111111-1111-4111-8111-111111111111';
+    const mediaId = '22222222-2222-4222-8222-222222222222';
+    expect(articleImagePath(articleId, mediaId)).toBe(
+      `${articleId}/${mediaId}`,
+    );
+    expect(() => articleImagePath(articleId, '../outside')).toThrow();
+    expect(safeArticleImagePath('articles/private/test.webp')).toBe(
+      'articles/private/test.webp',
+    );
+    expect(() => safeArticleImagePath('../outside.webp')).toThrow();
+  });
   it('removes executable markup and remote tracking images', () => {
     const html = cleanArticle(
       '<h2>見出し</h2><script>alert(1)</script><img src="https://evil.invalid/x" onerror="alert(1)"><a href="javascript:alert(1)">危険</a><table><tr><td>表</td></tr></table>',

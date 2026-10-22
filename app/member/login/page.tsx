@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import MemberLoginForm from '@/components/member-login-form';
 import { safeNext } from '@/lib/article';
+import { isNeonBackend } from '@/lib/neon/db';
 export const metadata: Metadata = {
   title: 'Member Login',
   robots: { index: false, follow: false },
@@ -27,14 +28,30 @@ export default async function Login({
             案内リンクが無効か期限切れです 再設定メールをお申し込みください
           </p>
         )}
-        <MemberLoginForm next={safeNext(query.next)} />
+        <MemberLoginForm
+          next={safeNext(query.next)}
+          provider={isNeonBackend() ? 'neon' : 'supabase'}
+        />
         <p>
           <Link href="/member/reset">パスワードを忘れた方</Link>
         </p>
-        <p>
-          初めての方は
-          会費ペイでのお支払い確認後に届く初回設定メールからパスワードを設定してください
-        </p>
+        {isNeonBackend() && (
+          <p>
+            <Link href="/member/register">
+              会費ペイで登録済みの方はこちらからアカウントを作成
+            </Link>
+          </p>
+        )}
+        {isNeonBackend() ? (
+          <p>
+            会費ペイで登録した方は同じメールアドレスで会員アカウントを作成してください
+          </p>
+        ) : (
+          <p>
+            初めての方は
+            会費ペイでのお支払い確認後に届く初回設定メールからパスワードを設定してください
+          </p>
+        )}
         <p>
           案内メールが見当たらない場合は
           迷惑メールを確認してから公式LINEへお問い合わせください

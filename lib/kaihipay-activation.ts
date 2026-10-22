@@ -5,6 +5,8 @@ import { readAuthEmailIndex } from './auth-email-index';
 import { paidAccessWindow, paidServiceMonths } from './kaihipay-orders';
 import { SupabaseInvitationStore, SupabaseSyncStore } from './kaihipay-store';
 import { inviteOnce, processNotice, type KaihipayAdapter, type VerifiedSnapshot } from './integrations';
+import { isNeonBackend } from './neon/db';
+import { activateNeonFromKaihipay } from './neon/kaihipay';
 
 const genericError = 'kaihipay_activation_failed';
 function requiredSetting(name: string): string {
@@ -16,6 +18,7 @@ function requiredSetting(name: string): string {
 export async function activateFromKaihipay(): Promise<{
   scanned: number; updated: number; review: number;
 }> {
+  if (isNeonBackend()) return activateNeonFromKaihipay();
   const token = requiredSetting('KAIHIPAY_API_TOKEN');
   const courseId = await resolveMembershipCourseId(token,process.env.KAIHIPAY_MEMBERSHIP_COURSE_ID);
   const site = new URL(requiredSetting('NEXT_PUBLIC_SITE_URL'));

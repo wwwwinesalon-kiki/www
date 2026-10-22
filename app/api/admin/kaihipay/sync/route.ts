@@ -9,8 +9,8 @@ export async function POST(req:Request) {
   if (!actor || actor.role!=='owner')
     return Response.json({error:'Forbidden'},{status:403,headers});
   try {
-    if (new URL(req.headers.get('origin') || '').origin !==
-        new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin)
+    const origin = req.headers.get('origin');
+    if (!origin || new URL(origin).origin !== new URL(req.url).origin)
       return Response.json({error:'Forbidden'},{status:403,headers});
   } catch {
     return Response.json({error:'Forbidden'},{status:403,headers});

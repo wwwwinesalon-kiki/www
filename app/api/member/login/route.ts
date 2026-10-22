@@ -1,6 +1,6 @@
 export async function POST() {
   return Response.json(
-    { error: 'Supabase Authを使用してください' },
+    { error: '会員ログイン画面からお進みください' },
     { status: 410 },
   );
 }

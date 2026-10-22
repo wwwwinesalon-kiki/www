@@ -1,5 +1,7 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { saveArticle } from '@/lib/article-write';
+import { isNeonBackend } from '@/lib/neon/db';
+import { neonArchive, neonPatch } from '@/lib/neon/crud';
 
 const config = {
   events: {
@@ -74,6 +76,16 @@ export async function PATCH(
   );
   if (!Object.keys(payload).length)
     return Response.json({ error: 'No valid fields' }, { status: 422 });
+  if (isNeonBackend()) {
+    try {
+      const row = await neonPatch(item.table, id, payload, item.fields);
+      return row
+        ? Response.json({ ok: true })
+        : Response.json({ error: 'Not found' }, { status: 404 });
+    } catch {
+      return Response.json({ error: '更新できませんでした 入力を確認してください' }, { status: 422 });
+    }
+  }
   const { error } = await actor.supabase
     .from(item.table)
     .update({ ...payload, updated_at: new Date().toISOString() })
@@ -92,11 +104,21 @@ export async function DELETE(
   const { entity, id } = await params;
   if (entity === 'members')
     return Response.json(
-      { error: '会員削除はSupabase Authで実行してください' },
+      { error: '会員情報は会費ペイで管理してください' },
       { status: 422 },
     );
   const item = config[entity as keyof typeof config];
   if (!item) return Response.json({ error: 'Unknown entity' }, { status: 404 });
+  if (isNeonBackend()) {
+    try {
+      const rows = await neonArchive(item.table, id) as unknown as Array<{ id: string }>;
+      return rows.length
+        ? Response.json({ ok: true })
+        : Response.json({ error: 'Not found' }, { status: 404 });
+    } catch {
+      return Response.json({ error: '削除できませんでした' }, { status: 422 });
+    }
+  }
   const now = new Date().toISOString();
   const { error } = await actor.supabase
     .from(item.table)

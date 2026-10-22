@@ -1,12 +1,38 @@
+import { createHash } from 'node:crypto';
 import { requireAdmin } from '@/lib/admin-auth';
 import { UUID, MAX_IMAGE_BYTES } from '@/lib/article';
 import { checkImage } from '@/lib/image-upload';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
+import {
+  articleImagePath,
+  deleteArticleImage,
+  getArticleImage,
+  putArticleImage,
+} from '@/lib/neon/storage';
+
 export async function GET(req: Request) {
   const actor = await requireAdmin(req, true);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
   const id = new URL(req.url).searchParams.get('article');
   if (!UUID.test(id || ''))
     return Response.json({ error: '記事IDが必要です' }, { status: 422 });
+  if (isNeonBackend()) {
+    try {
+      const rows = await neonSql()`
+        select id, alt from article_media
+        where article_id = ${id}::uuid
+        order by created_at desc
+      `;
+      return Response.json(rows, {
+        headers: { 'Cache-Control': 'private, no-store' },
+      });
+    } catch {
+      return Response.json(
+        { error: '画像一覧を取得できません 保存先の設定を確認してください' },
+        { status: 503 },
+      );
+    }
+  }
   const { data, error } = await actor.supabase
     .from('article_media')
     .select('id,alt')
@@ -24,7 +50,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const actor = await requireAdmin(req, true);
   if (!actor) return Response.json({ error: 'Forbidden' }, { status: 403 });
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY)
+  if (!isNeonBackend() && !process.env.SUPABASE_SERVICE_ROLE_KEY)
     return Response.json(
       { error: '画像配信のサーバー設定が未完了です' },
       { status: 503 },
@@ -53,7 +79,81 @@ export async function POST(req: Request) {
     if (!checkImage(bytes, file.type))
       throw new Error('JPEG PNG WebPの画像を選択してください');
     const id = crypto.randomUUID();
-    const objectPath = articleId + '/' + id;
+    const objectPath = articleImagePath(articleId, id);
+    if (isNeonBackend()) {
+      let uploaded = false;
+      try {
+        await putArticleImage(objectPath, bytes, file.type);
+        uploaded = true;
+        const copiedBytes = await getArticleImage(objectPath);
+        const sha256 = createHash('sha256').update(bytes).digest('hex');
+        if (
+          !copiedBytes ||
+          createHash('sha256').update(copiedBytes).digest('hex') !== sha256
+        )
+          throw new Error('画像の検証に失敗しました');
+        try {
+          await neonSql()`
+            with inserted as (
+              insert into article_media
+                (id, article_id, object_path, alt, mime_type, size_bytes)
+              values
+                (${id}::uuid, ${articleId}::uuid, ${objectPath}, ${alt},
+                  ${file.type}, ${file.size})
+              returning id, object_path
+            )
+            insert into www_media_migration_status
+              (media_id, target_object_key, sha256, verified_at)
+            select id, object_path, ${sha256}, now() from inserted
+          `;
+        } catch {
+          try {
+            await deleteArticleImage(objectPath);
+          } catch {
+            return Response.json(
+              {
+                error:
+                  '画像の登録に失敗しました 保存先ID ' +
+                  objectPath +
+                  ' を管理者へお知らせください',
+              },
+              { status: 503 },
+            );
+          }
+          return Response.json(
+            { error: '画像の登録に失敗しました 原稿は保持されています' },
+            { status: 503 },
+          );
+        }
+      } catch {
+        if (uploaded) {
+          try {
+            await deleteArticleImage(objectPath);
+          } catch {
+            return Response.json(
+              {
+                error:
+                  '画像の検証に失敗しました 保存先ID ' +
+                  objectPath +
+                  ' を管理者へお知らせください',
+              },
+              { status: 503 },
+            );
+          }
+        }
+        return Response.json(
+          {
+            error:
+              '画像を保存できませんでした Neonの非公開Storage設定を確認してください',
+          },
+          { status: 503 },
+        );
+      }
+      return Response.json(
+        { id, alt, url: '/api/media/' + id },
+        { status: 201, headers: { 'Cache-Control': 'private, no-store' } },
+      );
+    }
     const { error: uploadError } = await actor.supabase.storage
       .from('www-article-images')
       .upload(objectPath, bytes, { contentType: file.type, upsert: false });

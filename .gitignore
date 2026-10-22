@@ -31,6 +31,7 @@ yarn-error.log*
 
 # local environment
 .env*
+/migration-backups/
 !.env.example
 *.tsbuildinfo
 

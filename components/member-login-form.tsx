@@ -2,12 +2,15 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { safeNext } from '@/lib/article';
+import { neonAuthClient } from '@/lib/neon/auth-client';
 export default function MemberLoginForm({
   next = '/member',
   reset = false,
+  provider = 'supabase',
 }: {
   next?: string;
   reset?: boolean;
+  provider?: 'supabase' | 'neon';
 }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -20,24 +23,51 @@ export default function MemberLoginForm({
         setMessage('');
         const form = new FormData(e.currentTarget);
         try {
-          const supabase = createClient();
           const emailField = form.get('email');
           const passwordField = form.get('password');
-          const email = typeof emailField === 'string' ? emailField : '';
+          const email =
+            typeof emailField === 'string'
+              ? emailField.trim().toLowerCase()
+              : '';
           if (reset) {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-              redirectTo: location.origin + '/member/auth?next=/member/setup',
-            });
+            const { error } =
+              provider === 'neon'
+                ? await neonAuthClient.requestPasswordReset({
+                    email,
+                    redirectTo: location.origin + '/member/setup',
+                  })
+                : await createClient().auth.resetPasswordForEmail(email, {
+                    redirectTo:
+                      location.origin + '/member/auth?next=/member/setup',
+                  });
             if (error) throw error;
             setMessage(
               '登録済みの場合は再設定の案内を送信します メールをご確認ください',
             );
           } else {
-            const { error } = await supabase.auth.signInWithPassword({
-              email,
-              password: typeof passwordField === 'string' ? passwordField : '',
-            });
+            const password =
+              typeof passwordField === 'string' ? passwordField : '';
+            const { error } =
+              provider === 'neon'
+                ? await neonAuthClient.signIn.email({ email, password })
+                : await createClient().auth.signInWithPassword({
+                    email,
+                    password,
+                  });
             if (error) throw error;
+            if (provider === 'neon') {
+              // A failed or still-pending claim never grants article access.
+              // The member page will show the pending state after sign-in.
+              try {
+                await fetch('/api/member/claim', {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  cache: 'no-store',
+                });
+              } catch {
+                // Authentication remains valid; membership stays unclaimed.
+              }
+            }
             location.assign(safeNext(next));
           }
         } catch {

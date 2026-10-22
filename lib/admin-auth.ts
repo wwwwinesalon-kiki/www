@@ -1,18 +1,32 @@
 import type { AdminRole } from './auth';
 import { createClient } from '@/lib/supabase/server';
+import { isNeonBackend } from '@/lib/neon/db';
+import { linkedNeonIdentity } from '@/lib/neon/identity';
+import { legacySupabaseUnavailable } from '@/lib/neon/legacy-guard';
 export async function requireAdmin(req: Request, write = false) {
   if (write) {
     const origin = req.headers.get('origin');
     try {
-      if (
-        origin &&
-        new URL(origin).origin !==
-          new URL(process.env.NEXT_PUBLIC_SITE_URL || req.url).origin
-      )
+      if (origin && new URL(origin).origin !== new URL(req.url).origin)
         return null;
     } catch {
       return null;
     }
+  }
+  if (isNeonBackend()) {
+    const identity = await linkedNeonIdentity();
+    if (
+      !identity ||
+      identity.role === 'member' ||
+      (write && identity.role === 'viewer')
+    )
+      return null;
+    return {
+      email: identity.email,
+      role: identity.role,
+      userId: identity.profileId,
+      supabase: legacySupabaseUnavailable(),
+    };
   }
   const supabase = await createClient();
   const {

@@ -1,20 +1,33 @@
 import { createClient } from '@/lib/supabase/server';
 import PasswordSetup from '@/components/password-setup';
 import Link from 'next/link';
+import { isNeonBackend } from '@/lib/neon/db';
 export const dynamic = 'force-dynamic';
-export default async function Setup() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default async function Setup({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
+  const neon = isNeonBackend();
+  const token = neon ? (await searchParams).token : undefined;
+  const user = neon
+    ? null
+    : (await (await createClient()).auth.getUser()).data.user;
   return (
     <main className="login-page">
       <div className="login-box">
         <h1>初回設定・パスワード設定</h1>
-        {user ? (
+        {(neon ? Boolean(token) : Boolean(user)) ? (
           <>
-            <p>メールの本人確認が完了しました パスワードを設定してください</p>
-            <PasswordSetup />
+            <p>
+              {neon
+                ? '案内リンクから新しいパスワードを設定してください'
+                : 'メールの本人確認が完了しました パスワードを設定してください'}
+            </p>
+            <PasswordSetup
+              provider={neon ? 'neon' : 'supabase'}
+              token={token}
+            />
           </>
         ) : (
           <>

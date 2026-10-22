@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ArticleBody from '@/components/article-body';
 import { memberAccess } from '@/lib/member-access';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
+import { UUID } from '@/lib/article';
 export const dynamic = 'force-dynamic';
 export default async function Preview({
   params,
@@ -11,12 +13,17 @@ export default async function Preview({
   const access = await memberAccess();
   if (!access.editor) notFound();
   const { id } = await params;
-  const { data: c, error } = await access.supabase
-    .from('contents')
-    .select('*')
-    .eq('id', id)
-    .is('deleted_at', null)
-    .single();
+  if (!UUID.test(id)) notFound();
+  const { data: c, error } = isNeonBackend()
+    ? { data: ((await neonSql()`select * from public.contents
+        where id=${id}::uuid and deleted_at is null limit 1`) as unknown as Record<string, string>[])[0],
+        error: null }
+    : await access.supabase
+        .from('contents')
+        .select('*')
+        .eq('id', id)
+        .is('deleted_at', null)
+        .single();
   if (error || !c) notFound();
   return (
     <article className="article-shell">

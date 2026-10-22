@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { storageService } from '@/lib/supabase/service';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,24 @@ export async function GET(req: Request) {
     return Response.json({ error: 'Forbidden' }, { status: 403, headers });
 
   try {
+    if (isNeonBackend()) {
+      const sql = neonSql();
+      const [invitations, syncEvents] = await Promise.all([
+        sql`select provider_member_id,status from public.kaihipay_invitation_jobs
+          where status in ('review','sending') order by created_at desc limit 50`,
+        sql`select distinct provider_member_id from public.kaihipay_sync_events
+          where error_code is not null and processed_at is null
+          order by provider_member_id limit 50`,
+      ]);
+      return Response.json({
+        invitations: (invitations as unknown as Array<{ provider_member_id: string; status: string }>).map((row) => ({
+          memberId: row.provider_member_id, status: row.status,
+        })),
+        sync: (syncEvents as unknown as Array<{ provider_member_id: string }>).map((row) => ({
+          memberId: row.provider_member_id,
+        })),
+      }, { headers });
+    }
     const db = storageService();
     const [invitations, syncEvents] = await Promise.all([
       db.from('kaihipay_invitation_jobs')

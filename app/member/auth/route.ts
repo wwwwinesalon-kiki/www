@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { safeNext } from '@/lib/article';
+import { isNeonBackend } from '@/lib/neon/db';
 export async function GET(req: Request) {
   const url = new URL(req.url);
+  if (isNeonBackend()) {
+    return NextResponse.redirect(
+      new URL('/member/login?error=link', url.origin),
+    );
+  }
   const supabase = await createClient();
   const code = url.searchParams.get('code');
   const token_hash = url.searchParams.get('token_hash');
