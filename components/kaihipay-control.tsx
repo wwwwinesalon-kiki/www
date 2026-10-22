@@ -1,12 +1,48 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 type Course = { id: number; name: string; billingType: string };
+type Issues = {
+  invitations: { memberId: string; status: string }[];
+  sync: { memberId: string }[];
+};
+
+async function readIssues(signal?: AbortSignal): Promise<Issues> {
+  const response = await fetch('/api/admin/kaihipay/issues', {
+    cache: 'no-store', signal,
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || '処理状況を取得できませんでした');
+  return data as Issues;
+}
+
 export default function KaihipayControl() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [courses, setCourses] = useState<Course[]>([]);
+  const [issues, setIssues] = useState<Issues | null>(null);
+  const [issuesError, setIssuesError] = useState('');
+  useEffect(() => {
+    const controller = new AbortController();
+    void readIssues(controller.signal)
+      .then((data) => setIssues(data))
+      .catch((error) => {
+        if (!controller.signal.aborted)
+          setIssuesError(error instanceof Error ? error.message : '処理状況を取得できませんでした');
+      });
+    return () => controller.abort();
+  }, []);
+
+  async function refreshIssues() {
+    try {
+      setIssues(await readIssues());
+      setIssuesError('');
+    } catch (error) {
+      setIssuesError(error instanceof Error ? error.message : '処理状況を取得できませんでした');
+    }
+  }
+
   async function run(path: string) {
     setBusy(true);
     setMessage('確認中です');
@@ -25,6 +61,7 @@ export default function KaihipayControl() {
         setMessage(
           `確認対象 ${data.scanned}件 更新 ${data.updated}件 要確認 ${data.review}件`,
         );
+        await refreshIssues();
       }
     } catch (error) {
       setMessage(
@@ -95,6 +132,34 @@ export default function KaihipayControl() {
             ))}
           </ul>
         )}
+        <section className="kaihipay-admin-issues" aria-labelledby="kaihipay-issues-title">
+          <div className="kaihipay-admin-issues-heading">
+            <h2 id="kaihipay-issues-title">要確認</h2>
+            <button type="button" disabled={busy} onClick={() => void refreshIssues()}>更新</button>
+          </div>
+          {issuesError && <p role="alert">{issuesError}</p>}
+          {issues && issues.invitations.length === 0 && issues.sync.length === 0 &&
+            <p>現在 要確認の処理はありません</p>}
+          {issues && (issues.invitations.length > 0 || issues.sync.length > 0) && (
+            <>
+              <p>会員番号を会費ペイで照合してください 招待結果が不明な場合は自動再送しません</p>
+              <ul>
+                {issues.invitations.map((item) => (
+                  <li key={`invite-${item.memberId}`}>
+                    <span>招待 {item.status === 'sending' ? '送信確認中' : '要確認'}</span>
+                    <code>会員番号 {item.memberId}</code>
+                  </li>
+                ))}
+                {issues.sync.map((item) => (
+                  <li key={`sync-${item.memberId}`}>
+                    <span>同期 要確認</span>
+                    <code>会員番号 {item.memberId}</code>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
       </div>
     </main>
   );

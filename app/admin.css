@@ -1342,6 +1342,47 @@
   margin-left: auto;
   color: #6a5d60;
 }
+.kaihipay-admin-issues {
+  margin-top: 28px;
+  border-top: 1px solid #e6dfda;
+  padding-top: 20px;
+  font-size: 13px;
+}
+.kaihipay-admin-issues-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kaihipay-admin-issues h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.kaihipay-admin-issues button {
+  min-height: 38px;
+  border: 1px solid #d7cac7;
+  border-radius: 6px;
+  background: #fffdfa;
+  padding: 0 14px;
+  cursor: pointer;
+}
+.kaihipay-admin-issues ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kaihipay-admin-issues li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 12px 16px;
+  border: 1px solid #e6dfda;
+  background: #fffdfa;
+}
+.kaihipay-admin-issues code {
+  color: #694757;
+}
 @media (max-width: 760px) {
   .kaihipay-admin-header {
     flex-wrap: wrap;
