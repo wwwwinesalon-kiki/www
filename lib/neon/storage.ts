@@ -13,9 +13,9 @@ let client: S3Client | undefined;
 
 function storageConfig() {
   const endpoint = process.env.AWS_ENDPOINT_URL_S3;
-  const region = process.env.AWS_REGION;
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = process.env.NEON_S3_REGION || process.env.AWS_REGION;
+  const accessKeyId = process.env.NEON_S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.NEON_S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
   const bucket = process.env.NEON_ARTICLE_BUCKET || 'www-article-images';
   if (!endpoint || !region || !accessKeyId || !secretAccessKey)
     throw new Error('Neon画像保存先の設定が未完了です');

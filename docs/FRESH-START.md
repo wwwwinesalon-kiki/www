@@ -51,6 +51,8 @@ commit;
 
 ## ホスト設定と公開前検証
 
+Netlify では `AWS_REGION`・`AWS_ACCESS_KEY_ID`・`AWS_SECRET_ACCESS_KEY` が予約名のため、Neon Storage の値は `NEON_S3_REGION`・`NEON_S3_ACCESS_KEY_ID`・`NEON_S3_SECRET_ACCESS_KEY` に設定する。
+
 Netlify の Production 側で `.env.example` のうち Neon / Auth / S3 / 会費ペイ用の値を設定し、`BACKEND_PROVIDER=neon` とする。新規構築では `NEXT_PUBLIC_SUPABASE_*`・`SUPABASE_SERVICE_ROLE_KEY`・`MIGRATION_SUPABASE_URL` は不要。`NEXT_PUBLIC_SITE_URL` には Studio LP ではなく会員サイトの Netlify URL を入れ、Neon Auth の許可 origin / callback も同じ URL にする。Preview には本番の DB・秘密鍵を渡さない。
 
 GitHub の作業ブランチを Netlify で検証する。GitHub App 接続が難しい場合は、認証済み Netlify CLI の手動デプロイでも検証できるが、継続的な更新には GitHub 連携を後で整える。会員サイトはサーバー処理が必要なので、単なる静的ファイルのアップロードでは動かない。
