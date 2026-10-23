@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
       ![
         '/member/login',
         '/member/register',
+        '/member/verify',
         '/member/reset',
         '/member/setup',
         '/member/auth',

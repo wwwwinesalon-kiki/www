@@ -6,7 +6,6 @@ import { neonAuthClient } from '@/lib/neon/auth-client';
 export default function MemberRegisterForm() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [complete, setComplete] = useState(false);
 
   return (
     <form
@@ -33,10 +32,7 @@ export default function MemberRegisterForm() {
             callbackURL: new URL('/member/login', location.origin).toString(),
           });
           if (error) throw error;
-          setComplete(true);
-          setMessage(
-            '確認メールをご確認ください メール認証後にログインできます',
-          );
+          location.assign(`/member/verify?email=${encodeURIComponent(email)}`);
         } catch {
           setMessage('登録できませんでした 内容を確認して再試行してください');
         } finally {
@@ -51,7 +47,7 @@ export default function MemberRegisterForm() {
         type="email"
         autoComplete="email"
         required
-        disabled={busy || complete}
+        disabled={busy}
       />
       <label htmlFor="register-password">パスワード</label>
       <input
@@ -61,7 +57,7 @@ export default function MemberRegisterForm() {
         autoComplete="new-password"
         minLength={12}
         required
-        disabled={busy || complete}
+        disabled={busy}
       />
       <label htmlFor="register-confirmation">確認用パスワード</label>
       <input
@@ -71,15 +67,13 @@ export default function MemberRegisterForm() {
         autoComplete="new-password"
         minLength={12}
         required
-        disabled={busy || complete}
+        disabled={busy}
       />
       <p>12文字以上で設定してください</p>
-      {!complete && (
-        <button className="button" disabled={busy}>
-          {busy ? '登録中…' : 'アカウントを作成'}
-        </button>
-      )}
-      {message && <p role={complete ? 'status' : 'alert'}>{message}</p>}
+      <button className="button" disabled={busy}>
+        {busy ? '登録中…' : 'アカウントを作成'}
+      </button>
+      {message && <p role="alert">{message}</p>}
     </form>
   );
 }

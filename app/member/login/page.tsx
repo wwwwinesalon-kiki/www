@@ -36,11 +36,14 @@ export default async function Login({
           <Link href="/member/reset">パスワードを忘れた方</Link>
         </p>
         {isNeonBackend() && (
-          <p>
-            <Link href="/member/register">
-              会費ペイで登録済みの方はこちらからアカウントを作成
-            </Link>
-          </p>
+          <>
+            <p><Link href="/member/verify">確認コードを入力する</Link></p>
+            <p>
+              <Link href="/member/register">
+                会費ペイで登録済みの方はこちらからアカウントを作成
+              </Link>
+            </p>
+          </>
         )}
         {isNeonBackend() ? (
           <p>
