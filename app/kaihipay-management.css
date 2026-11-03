@@ -1,0 +1,38 @@
+.kaihipay-management {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 20px;
+  margin: 0 0 22px;
+  border: 1px solid #dfe5df;
+  border-radius: 8px;
+  background: #f6f8f5;
+  color: #344b40;
+  font-family: var(--font-sans-jp);
+}
+.kaihipay-management dl { display: grid; gap: 8px; margin: 0; font-size: 12px; }
+.kaihipay-management dl > div { display: flex; align-items: baseline; gap: 18px; }
+.kaihipay-management dt { flex: 0 0 84px; font-weight: 600; }
+.kaihipay-management dd { margin: 0; line-height: 1.6; }
+.kaihipay-management > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #c4d0c7;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.kaihipay-management > a:hover { background: #eaf0e9; }
+.kaihipay-management > a:focus-visible { outline: 2px solid #36644c; outline-offset: 3px; }
+@media (max-width: 700px) {
+  .kaihipay-management { align-items: stretch; flex-direction: column; padding: 16px; gap: 14px; }
+  .kaihipay-management dl > div { flex-direction: column; gap: 2px; }
+  .kaihipay-management dt { flex-basis: auto; }
+}

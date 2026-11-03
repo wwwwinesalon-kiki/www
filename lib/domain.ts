@@ -91,6 +91,8 @@ export function validateEvent(input: {
   if (
     !input.startAt ||
     !input.endAt ||
+    !Number.isFinite(Date.parse(input.startAt)) ||
+    !Number.isFinite(Date.parse(input.endAt)) ||
     new Date(input.startAt) >= new Date(input.endAt)
   )
     errors.dates = '終了日時は開始日時より後にしてください';

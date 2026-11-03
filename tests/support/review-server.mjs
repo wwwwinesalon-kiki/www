@@ -192,7 +192,15 @@ async function handle(req, res) {
     if (req.method === 'GET' || req.method === 'HEAD') {
       const selection = url.searchParams.get('select') || '*';
       const columns =
-        selection === '*' ? '*' : selection.split(',').map(safeName).join(',');
+        path === 'events' && selection === '*,event_applications(count)'
+          ? "events.*, (select json_build_array(json_build_object('count', count(*))) from event_applications a where a.event_id=events.id) as event_applications"
+          : path === 'event_applications' &&
+              selection ===
+                'id,event_id,user_id,application_status,created_at,events(title)'
+            ? "id,event_id,user_id,application_status,created_at,(select json_build_object('title',e.title) from events e where e.id=event_applications.event_id) as events"
+            : selection === '*'
+              ? '*'
+              : selection.split(',').map(safeName).join(',');
       sql = 'select ' + columns + ' from ' + table + where;
       if (url.searchParams.has('order')) {
         sql +=

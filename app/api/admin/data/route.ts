@@ -12,14 +12,14 @@ export async function GET(req: Request) {
         (select count(*)::integer from public.event_applications a
           where a.event_id=e.id and a.deleted_at is null
             and a.application_status <> 'cancelled') as applications
-        from public.events e order by e.start_at limit 300`,
+        from public.events e where e.deleted_at is null and e.archived_at is null order by e.start_at limit 300`,
       sql`select a.id,a.event_id,a.application_status,a.created_at,
           e.title as event_title,t.provider_member_id as member_number
         from public.event_applications a
         join public.events e on e.id=a.event_id
         left join public.article_entitlements t on t.user_id=a.user_id
-        order by a.created_at desc limit 500`,
-      sql`select * from public.contents order by updated_at desc limit 500`,
+        where a.deleted_at is null order by a.created_at desc limit 500`,
+      sql`select * from public.contents where deleted_at is null and archived_at is null order by updated_at desc limit 500`,
     ]);
     const [events, applications, contents] = result as unknown as Record<string, unknown>[][];
     return Response.json({
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
       events: events.map((e) => ({
         ...e,
         date: e.start_at instanceof Date || typeof e.start_at === 'string'
-          ? new Date(e.start_at).toISOString().slice(0, 10)
+          ? new Date(new Date(e.start_at).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10)
           : null,
         status: e.publish_status,
       })),
@@ -48,16 +48,21 @@ export async function GET(req: Request) {
     actor.supabase
       .from('events')
       .select('*,event_applications(count)')
+      .is('deleted_at', null)
+      .is('archived_at', null)
       .order('start_at')
       .limit(300),
     actor.supabase
       .from('event_applications')
       .select('id,event_id,user_id,application_status,created_at,events(title)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(500),
     actor.supabase
       .from('contents')
       .select('*')
+      .is('deleted_at', null)
+      .is('archived_at', null)
       .order('updated_at', { ascending: false })
       .limit(500),
   ]);
@@ -78,7 +83,7 @@ export async function GET(req: Request) {
     members: [],
     events: (events.data || []).map((e) => ({
       ...e,
-      date: e.start_at?.slice(0, 10),
+      date: e.start_at ? new Date(new Date(e.start_at).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10) : null,
       status: e.publish_status,
       applications: e.event_applications?.[0]?.count || 0,
     })),

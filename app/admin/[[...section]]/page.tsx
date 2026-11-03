@@ -17,11 +17,18 @@ export default async function AdminPage({
   if (isNeonBackend()) {
     const identity = await linkedNeonIdentity();
     if (section?.[0] === 'events' || section?.[0] === 'applications')
-      return <AdminDashboard section={section[0]} />;
-    return <ArticleAdmin
-      id={section?.[0] === 'contents' ? section[1] : undefined}
-      canEdit={identity?.role === 'owner' || identity?.role === 'editor'}
-    />;
+      return (
+        <AdminDashboard
+          section={section[0]}
+          canEdit={identity?.role === 'owner' || identity?.role === 'editor'}
+        />
+      );
+    return (
+      <ArticleAdmin
+        id={section?.[0] === 'contents' ? section[1] : undefined}
+        canEdit={identity?.role === 'owner' || identity?.role === 'editor'}
+      />
+    );
   }
   const supabase = await createClient();
   const {
@@ -33,7 +40,12 @@ export default async function AdminPage({
     .eq('id', user?.id || '')
     .single();
   if (section?.[0] === 'events' || section?.[0] === 'applications')
-    return <AdminDashboard section={section[0]} />;
+    return (
+      <AdminDashboard
+        section={section[0]}
+        canEdit={['owner', 'editor'].includes(profile?.role)}
+      />
+    );
   return (
     <ArticleAdmin
       id={section?.[0] === 'contents' ? section[1] : undefined}

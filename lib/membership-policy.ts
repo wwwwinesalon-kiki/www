@@ -2,6 +2,9 @@
 export const MEMBERSHIP_TOTAL_LABEL = '3,410円';
 export const MEMBERSHIP_SIGNUP_URL =
   'https://www.kaihipay.jp/forms?form_code=3006100915631325&auth_key=m3HzQrPumGCgBzkE';
+// Merchant management entry supplied by the operator; this is not the signup form.
+export const KAIHIPAY_ADMIN_URL =
+  'https://www.kaihipay.jp/admin/top?system_code=9824098600477842';
 
 // Exclusive end: the first instant of the following month in Japan.
 // Call only with a verified monthly fee's service month, never an event payment.

@@ -58,7 +58,7 @@ export async function neonArchive(table: NeonTable, id: string) {
       where id=${id}::uuid returning id`;
   }
   if (table === 'events') {
-    return sql`update public.events set archived_at=now(),deleted_at=now(),updated_at=now()
+    return sql`update public.events set archived_at=now(),deleted_at=now(),updated_at=now(),publish_status='draft',public_visible=false,member_visible=false,registration_enabled=false
       where id=${id}::uuid returning id`;
   }
   return sql`update public.contents set archived_at=now(),deleted_at=now(),updated_at=now()

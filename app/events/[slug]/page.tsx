@@ -6,6 +6,11 @@ import ApplicationForm from '@/components/application-form';
 import { memberAccess } from '@/lib/member-access';
 import Link from 'next/link';
 export const dynamic = 'force-dynamic';
+const eventDate = (value: string, withTime = false) =>
+  new Date(value).toLocaleString('ja-JP', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: 'numeric', day: 'numeric',
+    ...(withTime ? { hour: '2-digit', minute: '2-digit' } as const : {}),
+  });
 export async function generateMetadata({
   params,
 }: {
@@ -14,9 +19,9 @@ export async function generateMetadata({
   const { slug } = await params;
   const access = await memberAccess();
   const e = await eventBySlug(slug) ||
-    (access.entitled ? await eventBySlug(slug, true) : null);
+    (access.entitled || access.editor ? await eventBySlug(slug, true) : null);
   if (!e) return {};
-  const description = `${e.start_at.slice(0, 10)} ${e.venue}で開催するWWWイベント`;
+  const description = `${eventDate(e.start_at)} ${e.venue}で開催するWWWイベント`;
   return {
     title: e.title,
     description,
@@ -41,7 +46,7 @@ export default async function EventDetail({
   const { slug } = await params;
   const access = await memberAccess();
   const e = await eventBySlug(slug) ||
-    (access.entitled ? await eventBySlug(slug, true) : null);
+    (access.entitled || access.editor ? await eventBySlug(slug, true) : null);
   if (!e) notFound();
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -87,8 +92,7 @@ export default async function EventDetail({
               <div>
                 <dt>DATE</dt>
                 <dd>
-                  {e.start_at.slice(0, 16).replace('T', ' ')}–
-                  {e.end_at.slice(11, 16)}
+                  {eventDate(e.start_at, true)}–{eventDate(e.end_at, true)}（日本時間）
                 </dd>
               </div>
               <div>

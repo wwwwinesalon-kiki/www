@@ -25,7 +25,7 @@ type Ripple = {
 
 export default function WineRippleBackground() {
   const pathname = usePathname();
-  const disabled = /^\/(member|admin)(\/|$)/.test(pathname);
+  const disabled = /^\/admin(\/|$)/.test(pathname);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     if (disabled) return;

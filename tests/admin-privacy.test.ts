@@ -16,6 +16,7 @@ it('does not expose customer records or application contact/payment fields', asy
     select: (columns: string) => {
       selected.set(table, columns);
       return {
+        is() { return this; },
         order: () => ({
           limit: async () => ({
             data: table === 'event_applications'

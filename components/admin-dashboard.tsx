@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import type { PaymentStatus } from '@/lib/domain';
 import { paymentSummary } from '@/lib/domain';
+import EventAdmin from '@/components/event-admin';
+import KaihipayManagementLinks from '@/components/kaihipay-management-links';
+import '@/app/event-editor.css';
 
 type Member = {
   id: string;
@@ -162,14 +165,17 @@ const settingText = (v: unknown, fallback: string) =>
 
 export default function AdminDashboard({
   section = '' as Section,
+  canEdit = false,
 }: {
   section?: string;
+  canEdit?: boolean;
 }) {
   const [active, setActive] = useState<Section>(
       (nav.some((n) => n[0] === section) ? section : '') as Section,
     ),
     [data, setData] = useState<Data>(empty),
     [loading, setLoading] = useState(true),
+    [loaded, setLoaded] = useState(false),
     [error, setError] = useState('');
   const load = async () => {
     setLoading(true);
@@ -178,6 +184,7 @@ export default function AdminDashboard({
       const r = await fetch('/api/admin/data', { cache: 'no-store' });
       if (!r.ok) throw new Error(`データ取得に失敗しました (${r.status})`);
       setData((await r.json()) as Data);
+      setLoaded(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'データ取得に失敗しました');
     } finally {
@@ -258,8 +265,14 @@ export default function AdminDashboard({
               <button onClick={() => void load()}>再試行</button>
             </div>
           )}
-          {!loading && (
-            <Module section={active} data={data} patch={patch} reload={load} />
+          {loaded && (
+            <Module
+              section={active}
+              data={data}
+              patch={patch}
+              reload={load}
+              canEdit={canEdit}
+            />
           )}
         </div>
       </main>
@@ -286,19 +299,23 @@ function Module({
   data,
   patch,
   reload,
+  canEdit,
 }: {
   section: Section;
   data: Data;
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
   reload: () => Promise<void>;
+  canEdit: boolean;
 }) {
   switch (section) {
     case 'members':
       return <Members data={data} patch={patch} reload={reload} />;
     case 'events':
-      return <Events data={data} patch={patch} reload={reload} />;
+      return (
+        <Events data={data} patch={patch} reload={reload} canEdit={canEdit} />
+      );
     case 'applications':
-      return <Applications data={data} patch={patch} />;
+      return <Applications data={data} patch={patch} canEdit={canEdit} />;
     case 'payments':
       return <Payments data={data} patch={patch} />;
     case 'contents':
@@ -635,299 +652,24 @@ function CreateMember({ done }: { done: () => Promise<void> }) {
 }
 function Events({
   data,
-  patch,
   reload,
+  canEdit,
 }: {
   data: Data;
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
   reload: () => Promise<void>;
+  canEdit: boolean;
 }) {
-  const [adding, setAdding] = useState(false),
-    [selected, setSelected] = useState<string | null>(null),
-    [q, setQ] = useState('');
-  const rows = data.events.filter((e) =>
-    (e.title + e.venue).toLowerCase().includes(q.toLowerCase()),
-  );
-  return (
-    <>
-      <div className="admin-section-actions">
-        <span>{data.events.length}件</span>
-        <button className="admin-primary" onClick={() => setAdding(!adding)}>
-          ＋ 新規作成
-        </button>
-      </div>
-      {adding && (
-        <CreateEvent
-          done={async () => {
-            setAdding(false);
-            await reload();
-          }}
-        />
-      )}
-      <div className="toolbar">
-        <input
-          aria-label="イベント検索"
-          placeholder="イベント名・会場で検索"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-      <section className="panel table-panel">
-        <table>
-          <TableHead
-            labels={[
-              'イベント',
-              '日程 / 会場',
-              '申込',
-              '価格',
-              'Public',
-              'Member',
-              '受付',
-              'Waitlist',
-              '操作',
-            ]}
-          />
-          <tbody>
-            {rows.map((e) => (
-              <tr key={e.id}>
-                <td>
-                  <b>{e.title}</b>
-                  <small>{e.slug}</small>
-                </td>
-                <td>
-                  {e.date}
-                  <small>{e.venue}</small>
-                </td>
-                <td>
-                  {e.applications} / {e.capacity}
-                </td>
-                <td>{yen(e.price)}</td>
-                <td>
-                  <Switch
-                    checked={e.status === 'published'}
-                    label={`${e.title} 公開`}
-                    change={(v) =>
-                      patch('events', e.id, {
-                        publish_status: v ? 'published' : 'draft',
-                        public_visible: v,
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <Switch
-                    checked={Boolean(e.member_visible)}
-                    label={`${e.title} Member`}
-                    change={(v) => patch('events', e.id, { member_visible: v })}
-                  />
-                </td>
-                <td>
-                  <Switch
-                    checked={Boolean(e.registration_enabled)}
-                    label={`${e.title} 受付`}
-                    change={(v) =>
-                      patch('events', e.id, { registration_enabled: v })
-                    }
-                  />
-                </td>
-                <td>
-                  <Switch
-                    checked={Boolean(e.waitlist_enabled)}
-                    label={`${e.title} Waitlist`}
-                    change={(v) =>
-                      patch('events', e.id, { waitlist_enabled: v })
-                    }
-                  />
-                </td>
-                <td>
-                  <button
-                    className="small-button"
-                    onClick={() => setSelected(selected === e.id ? null : e.id)}
-                  >
-                    Detail / Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-      {selected && (
-        <EventEditor
-          event={data.events.find((e) => e.id === selected)!}
-          patch={patch}
-          reload={reload}
-        />
-      )}
-    </>
-  );
-}
-function CreateEvent({ done }: { done: () => Promise<void> }) {
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const b = Object.fromEntries(new FormData(e.currentTarget));
-    const r = await fetch('/api/admin/entity/events', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        ...b,
-        capacity: Number(b.capacity),
-        price: Number(b.price),
-        registration_enabled: true,
-        waitlist_enabled: true,
-      }),
-    });
-    if (r.ok) await done();
-  };
-  return (
-    <form className="panel quick-form wide" onSubmit={submit}>
-      <input name="title" placeholder="イベント名" required />
-      <input name="slug" placeholder="slug" required />
-      <input name="start_at" type="datetime-local" required />
-      <input name="end_at" type="datetime-local" required />
-      <input name="venue" placeholder="会場" required />
-      <input name="event_type" placeholder="イベント種別" />
-      <input
-        name="capacity"
-        type="number"
-        min="1"
-        placeholder="定員"
-        required
-      />
-      <input name="price" type="number" min="0" placeholder="価格" required />
-      <textarea name="description" placeholder="説明" />
-      <input name="items_to_bring" placeholder="持ち物" />
-      <input name="precautions" placeholder="注意事項" />
-      <button className="admin-primary">下書き保存</button>
-    </form>
-  );
-}
-function EventEditor({
-  event,
-  patch,
-  reload,
-}: {
-  event: EventRow;
-  patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
-  reload: () => Promise<void>;
-}) {
-  const [message, setMessage] = useState('');
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setMessage('保存中…');
-    const b = Object.fromEntries(new FormData(e.currentTarget));
-    await patch('events', event.id, {
-      ...b,
-      capacity: Number(b.capacity),
-      price: Number(b.price),
-    });
-    setMessage('保存しました');
-  };
-  const duplicate = async () => {
-    const body = {
-      ...event,
-      title: `${event.title} Copy`,
-      slug: `${event.slug}-copy-${Date.now()}`,
-      publish_status: 'draft',
-      public_visible: false,
-      member_visible: false,
-    };
-    const r = await fetch('/api/admin/entity/events', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    setMessage(r.ok ? '複製しました' : '複製できませんでした');
-    if (r.ok) await reload();
-  };
-  const archive = async () => {
-    if (!confirm('このEventをArchiveしますか？')) return;
-    await patch('events', event.id, {
-      archived_at: new Date().toISOString(),
-      publish_status: 'archived',
-      public_visible: false,
-      member_visible: false,
-      registration_enabled: false,
-    });
-    setMessage('Archiveしました');
-  };
-  return (
-    <form className="panel settings-form" onSubmit={submit}>
-      <h2>{event.title} / Detail</h2>
-      <label>
-        Event名
-        <input name="title" defaultValue={event.title} />
-      </label>
-      <label>
-        Slug
-        <input name="slug" defaultValue={event.slug} />
-      </label>
-      <label>
-        Type
-        <input name="event_type" defaultValue={event.event_type} />
-      </label>
-      <label>
-        開始
-        <input name="start_at" defaultValue={event.start_at} />
-      </label>
-      <label>
-        終了
-        <input name="end_at" defaultValue={event.end_at} />
-      </label>
-      <label>
-        会場
-        <input name="venue" defaultValue={event.venue} />
-      </label>
-      <label>
-        定員
-        <input name="capacity" type="number" defaultValue={event.capacity} />
-      </label>
-      <label>
-        参加費
-        <input name="price" type="number" defaultValue={event.price} />
-      </label>
-      <label>
-        説明
-        <textarea name="description" defaultValue={event.description || ''} />
-      </label>
-      <label>
-        持ち物
-        <textarea
-          name="items_to_bring"
-          defaultValue={event.items_to_bring || ''}
-        />
-      </label>
-      <label>
-        注意事項
-        <textarea name="precautions" defaultValue={event.precautions || ''} />
-      </label>
-      <div>
-        <button className="admin-primary">保存</button>
-        <button
-          type="button"
-          className="small-button"
-          onClick={() => void duplicate()}
-        >
-          複製
-        </button>
-        <button
-          type="button"
-          className="small-button"
-          onClick={() => void archive()}
-        >
-          Archive
-        </button>
-      </div>
-      <output>{message}</output>
-    </form>
-  );
+  return <EventAdmin events={data.events} reload={reload} canEdit={canEdit} />;
 }
 function Applications({
   data,
   patch,
+  canEdit,
 }: {
   data: Data;
   patch: (e: string, id: string, b: Record<string, unknown>) => Promise<void>;
+  canEdit: boolean;
 }) {
   const [q, setQ] = useState(''),
     [status, setStatus] = useState('all'),
@@ -942,6 +684,7 @@ function Applications({
   );
   return (
     <>
+      <KaihipayManagementLinks />
       <div className="admin-section-actions">
         <span>{data.applications.length}件</span>
       </div>
@@ -1005,6 +748,7 @@ function Applications({
                 <td>
                   <select
                     aria-label={`${a.id.slice(0, 8)} の申込状態`}
+                    disabled={!canEdit}
                     value={a.application_status}
                     onChange={(e) =>
                       void patch('event_applications', a.id, {

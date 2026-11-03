@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import KaihipayManagementLinks from '@/components/kaihipay-management-links';
 
 type Course = { id: number; name: string; billingType: string };
 type Issues = {
@@ -84,6 +85,7 @@ export default function KaihipayControl() {
         <Link href="/member" className="kaihipay-admin-member">会員サイト ↗</Link>
       </header>
       <div className="kaihipay-admin-content">
+        <KaihipayManagementLinks />
         <div className="kaihipay-admin-toolbar">
           <h1>会費ペイ連携</h1>
           <div className="kaihipay-admin-actions">

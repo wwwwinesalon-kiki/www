@@ -1,5 +1,5 @@
 import { requireAdmin } from '@/lib/admin-auth';
-import { validateEvent } from '@/lib/domain';
+import { eventWritePayload } from '@/lib/event-write';
 import { saveArticle } from '@/lib/article-write';
 import { isNeonBackend, neonSql } from '@/lib/neon/db';
 import { neonInsert } from '@/lib/neon/crud';
@@ -26,7 +26,7 @@ export async function GET(
     return Response.json({ error: 'Unknown entity' }, { status: 404 });
   if (isNeonBackend()) {
     const data = await neonSql().query(
-      `select *, updated_at::text as updated_at_version from public.${table} order by created_at desc limit 200`,
+      `select *, updated_at::text as updated_at_version from public.${table} where deleted_at is null and archived_at is null order by created_at desc limit 200`,
     ) as Record<string, unknown>[];
     if (table === 'contents') {
       for (const row of data) row.updated_at = row.updated_at_version;
@@ -36,6 +36,8 @@ export async function GET(
   const { data, error } = await actor.supabase
     .from(table)
     .select('*')
+    .is('deleted_at', null)
+    .is('archived_at', null)
     .order('created_at', { ascending: false })
     .limit(200);
   if (error) return Response.json({ error: error.message }, { status: 500 });
@@ -58,18 +60,12 @@ export async function POST(
   const table = tables[entity as keyof typeof tables];
   if (!table)
     return Response.json({ error: 'Unknown entity' }, { status: 404 });
-  const body = (await req.json()) as Record<string, unknown>;
+  let body = (await req.json()) as Record<string, unknown>;
   if (entity === 'events') {
-    const text = (value: unknown) => (typeof value === 'string' ? value : '');
-    const errors = validateEvent({
-      slug: text(body.slug),
-      capacity: Number(body.capacity),
-      price: Number(body.price),
-      startAt: text(body.start_at),
-      endAt: text(body.end_at),
-    });
+    const { payload, errors } = eventWritePayload(body);
     if (Object.keys(errors).length)
       return Response.json({ errors }, { status: 422 });
+    body = payload;
   }
   const allowed =
     entity === 'events'

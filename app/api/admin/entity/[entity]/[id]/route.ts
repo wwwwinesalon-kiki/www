@@ -1,7 +1,8 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { saveArticle } from '@/lib/article-write';
-import { isNeonBackend } from '@/lib/neon/db';
+import { isNeonBackend, neonSql } from '@/lib/neon/db';
 import { neonArchive, neonPatch } from '@/lib/neon/crud';
+import { eventWritePayload } from '@/lib/event-write';
 
 const config = {
   events: {
@@ -69,13 +70,22 @@ export async function PATCH(
   const body = (await req.json()) as Record<string, unknown>;
   const item = config[entity as keyof typeof config];
   if (!item) return Response.json({ error: 'Unknown entity' }, { status: 404 });
-  const payload = Object.fromEntries(
+  let payload = Object.fromEntries(
     Object.entries(body).filter(([key]) =>
       (item.fields as readonly string[]).includes(key),
     ),
   );
   if (!Object.keys(payload).length)
     return Response.json({ error: 'No valid fields' }, { status: 422 });
+  if (entity === 'events') {
+    const existing = isNeonBackend()
+      ? ((await neonSql()`select * from public.events where id=${id}::uuid and deleted_at is null and archived_at is null limit 1`) as Record<string, unknown>[])[0]
+      : (await actor.supabase.from('events').select('*').eq('id', id).is('deleted_at', null).is('archived_at', null).single()).data;
+    if (!existing) return Response.json({ error: 'イベントが見つかりません' }, { status: 404 });
+    const checked = eventWritePayload(payload, existing);
+    if (Object.keys(checked.errors).length) return Response.json({ errors: checked.errors }, { status: 422 });
+    payload = checked.payload;
+  }
   if (isNeonBackend()) {
     try {
       const row = await neonPatch(item.table, id, payload, item.fields);
@@ -124,6 +134,10 @@ export async function DELETE(
     .from(item.table)
     .update({
       ...(entity === 'event_applications' ? {} : { archived_at: now }),
+      ...(entity === 'events' ? {
+        publish_status: 'draft', public_visible: false, member_visible: false,
+        registration_enabled: false,
+      } : {}),
       deleted_at: now,
       updated_at: now,
     })

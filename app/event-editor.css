@@ -1,0 +1,124 @@
+.event-editor {
+  padding: 24px;
+  margin: 20px 0;
+  border-color: #d8c3c1;
+}
+.event-editor-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.event-editor-heading h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.event-editor-heading > button {
+  margin-left: auto;
+}
+.event-editor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.event-editor-fields > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+}
+.event-editor-fields input:not([type='checkbox']),
+.event-editor-fields textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d8d0cb;
+  border-radius: 5px;
+  padding: 10px 12px;
+  background: #fffdfb;
+}
+.event-editor-fields small {
+  color: #877570;
+}
+.event-editor-wide {
+  grid-column: 1 / -1;
+}
+.event-editor-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  padding: 16px 0;
+}
+.event-editor-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.event-editor-options input {
+  width: 18px;
+  height: 18px;
+  accent-color: #692f41;
+}
+.event-editor-actions {
+  position: sticky;
+  bottom: 80px;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  margin-top: 18px;
+  border: 1px solid #e3d6d0;
+  border-radius: 7px;
+  background: #fffdfaf7;
+  box-shadow: 0 4px 18px #38212510;
+}
+.event-editor-actions button,
+.event-delete-confirm button {
+  min-height: 44px;
+  padding: 10px 16px;
+}
+.event-editor-actions a {
+  font-size: 12px;
+}
+.event-editor-actions .event-editor-delete {
+  margin-left: auto;
+  color: #a23b43;
+  border-color: #d9a4a7;
+}
+.event-delete-confirm {
+  padding: 18px;
+  background: #fff1ed;
+  border: 1px solid #d9a4a7;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+.event-delete-confirm p {
+  margin: 0 0 14px;
+  line-height: 1.8;
+}
+.event-delete-confirm button {
+  margin-right: 10px;
+}
+@media (max-width: 680px) {
+  .event-editor {
+    padding: 18px;
+  }
+  .event-editor-fields {
+    grid-template-columns: 1fr;
+  }
+  .event-editor-actions {
+    padding: 12px;
+    gap: 10px;
+  }
+  .event-editor-actions .event-editor-delete {
+    margin-left: 0;
+  }
+  .event-editor-heading {
+    flex-wrap: wrap;
+  }
+}
