@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/admin-auth';
 import { readKaihipayCourses } from '@/lib/kaihipay-read';
+import { sameAppOrigin } from '@/lib/request-origin';
 
 export const runtime = 'nodejs';
 const headers = { 'Cache-Control': 'private, no-store' };
@@ -9,11 +10,7 @@ export async function POST(req: Request) {
   const actor = await requireAdmin(req, true);
   if (!actor || actor.role !== 'owner')
     return Response.json({ error: 'Forbidden' }, { status: 403, headers });
-  try {
-    if (new URL(req.headers.get('origin') || '').origin !==
-        new URL(req.url).origin)
-      return Response.json({ error: 'Forbidden' }, { status: 403, headers });
-  } catch {
+  if (!sameAppOrigin(req)) {
     return Response.json({ error: 'Forbidden' }, { status: 403, headers });
   }
   if (!process.env.KAIHIPAY_API_TOKEN?.trim())

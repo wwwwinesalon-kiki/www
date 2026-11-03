@@ -3,15 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { isNeonBackend } from '@/lib/neon/db';
 import { linkedNeonIdentity } from '@/lib/neon/identity';
 import { legacySupabaseUnavailable } from '@/lib/neon/legacy-guard';
+import { sameAppOrigin } from './request-origin';
 export async function requireAdmin(req: Request, write = false) {
   if (write) {
-    const origin = req.headers.get('origin');
-    try {
-      if (origin && new URL(origin).origin !== new URL(req.url).origin)
-        return null;
-    } catch {
-      return null;
-    }
+    if (!['GET', 'HEAD'].includes(req.method) && !sameAppOrigin(req)) return null;
   }
   if (isNeonBackend()) {
     const identity = await linkedNeonIdentity();

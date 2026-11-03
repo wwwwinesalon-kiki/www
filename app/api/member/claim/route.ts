@@ -1,5 +1,6 @@
 import { isNeonBackend, neonSql } from '@/lib/neon/db';
 import { neonSessionUser } from '@/lib/neon/auth';
+import { sameAppOrigin } from '@/lib/request-origin';
 import {
   authoritativeSnapshot,
   discoverPaidClaimByEmail,
@@ -14,12 +15,7 @@ const headers = { 'Cache-Control': 'private, no-store' };
 /** Claim a paid month using only a verified Neon session, never a supplied ID. */
 export async function POST(request: Request) {
   if (!isNeonBackend()) return Response.json({ error: 'Not Found' }, { status: 404, headers });
-  try {
-    const origin = request.headers.get('origin');
-    if (!origin || new URL(origin).origin !== new URL(request.url).origin) {
-      return Response.json({ error: 'Forbidden' }, { status: 403, headers });
-    }
-  } catch {
+  if (!sameAppOrigin(request)) {
     return Response.json({ error: 'Forbidden' }, { status: 403, headers });
   }
 
