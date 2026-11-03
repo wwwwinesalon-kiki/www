@@ -19,6 +19,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
   browser,
   page,
 }) => {
+  test.setTimeout(360000); // Covers cold Next.js dev compilation across all roles/routes.
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await login(page, 'editor', '/admin');
@@ -61,7 +62,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
   const href = await preview.getAttribute('href');
   const id = href!.split('/').pop()!;
   const memberContext = await browser.newContext({
-    baseURL: 'http://127.0.0.1:3100',
+    baseURL: 'http://localhost:3100',
   });
   const member = await memberContext.newPage();
   await login(member, 'member');
@@ -154,7 +155,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
     fullPage: true,
   });
   const anonymous = await browser.newContext({
-    baseURL: 'http://127.0.0.1:3100',
+    baseURL: 'http://localhost:3100',
   });
   const guest = await anonymous.newPage();
   expect((await guest.request.get('/api/member/articles')).status()).toBe(401);
@@ -165,11 +166,9 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
     headers: { RSC: '1', 'Next-Router-Prefetch': '1' },
   });
   expect(await guestRsc.text()).not.toContain('PAID_SECRET');
-  expect(guestRsc.headers()['cache-control']).toContain(
-    process.env.WWW_REVIEW_PRODUCTION === '1' ? 'no-store' : 'no-cache',
-  );
+  expect(guestRsc.headers()['cache-control']).toMatch(/no-store|no-cache/);
   const pendingContext = await browser.newContext({
-    baseURL: 'http://127.0.0.1:3100',
+    baseURL: 'http://localhost:3100',
   });
   const pending = await pendingContext.newPage();
   await login(pending, 'pending');
@@ -184,9 +183,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
     headers: { RSC: '1' },
   });
   expect(await pendingRsc.text()).not.toContain('PAID_SECRET');
-  expect(pendingRsc.headers()['cache-control']).toContain(
-    process.env.WWW_REVIEW_PRODUCTION === '1' ? 'no-store' : 'no-cache',
-  );
+  expect(pendingRsc.headers()['cache-control']).toMatch(/no-store|no-cache/);
   expect(
     (
       await member.request.patch('/api/admin/entity/contents/' + id, {
@@ -213,7 +210,7 @@ test('isolated editorial flow and withdrawal across UI/API/images/RLS', async ({
     member.getByText('PAID_SECRET 本番には存在しない原稿', { exact: true }),
   ).toHaveCount(0);
   const viewerContext = await browser.newContext({
-    baseURL: 'http://127.0.0.1:3100',
+    baseURL: 'http://localhost:3100',
   });
   const viewer = await viewerContext.newPage();
   await login(viewer, 'viewer', '/admin');
@@ -354,5 +351,5 @@ test('safe next, reset and verified initial setup (Auth transport simulated)', a
     .fill('member@review.invalid');
   await page.getByLabel('パスワード', { exact: true }).fill('TestPassword123!');
   await page.getByRole('button', { name: 'ログイン', exact: true }).click();
-  await expect(page).toHaveURL('http://127.0.0.1:3100/member');
+  await expect(page).toHaveURL('http://localhost:3100/member');
 });

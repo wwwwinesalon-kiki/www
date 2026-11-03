@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
     });
 });
 async function handle(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:3100');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3100');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'authorization,apikey,content-type,x-client-info,x-supabase-api-version,prefer,accept',
@@ -250,8 +250,9 @@ const child = spawn(
   [
     'node_modules/next/dist/bin/next',
     process.env.WWW_REVIEW_PRODUCTION === '1' ? 'start' : 'dev',
+    ...(process.env.WWW_REVIEW_PRODUCTION === '1' ? [] : ['--webpack']),
     '--hostname',
-    '127.0.0.1',
+    'localhost',
     '--port',
     '3100',
   ],
@@ -259,7 +260,7 @@ const child = spawn(
     stdio: 'inherit',
     env: {
       ...process.env,
-      NEXT_PUBLIC_SITE_URL: 'http://127.0.0.1:3100',
+      NEXT_PUBLIC_SITE_URL: 'http://localhost:3100',
       NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54329',
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-public-only',
       SUPABASE_SERVICE_ROLE_KEY: 'test-service-only',
