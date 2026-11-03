@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { memberAccess } from '@/lib/member-access';
 import { isNeonBackend, neonSql } from '@/lib/neon/db';
+import { cache } from 'react';
 
 export type EventView = {
   id: string;
@@ -52,7 +53,7 @@ function dateIso(value: unknown): string {
   return new Date(value).toISOString();
 }
 
-export async function publicEvents(member = false) {
+export const publicEvents = cache(async function publicEvents(member = false) {
   if (isNeonBackend()) {
     const rows = (await neonSql()`
       select e.*,
@@ -96,7 +97,7 @@ export async function publicEvents(member = false) {
     public_visible: Number(event.public_visible),
     member_visible: Number(event.member_visible),
   })) as EventView[];
-}
+});
 export async function upcomingMemberEvents(limit = 2) {
   const events = await publicEvents(true);
   const now = Date.now();

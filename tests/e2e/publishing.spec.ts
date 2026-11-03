@@ -254,6 +254,76 @@ test('failed save retains draft and warns before navigation', async ({
   await page.getByRole('link', { name: '← 記事一覧' }).click();
   await expect(page).toHaveURL(/contents\/new$/);
 });
+test('Markdown upload and round-trip, multiple WebP images, draft reload and list refresh', async ({ page }) => {
+  await login(page, 'editor', '/admin');
+  await page.getByRole('link', { name: '＋ 新規作成' }).click();
+  const title = 'Markdownと複数画像の検証';
+  await page.getByLabel('タイトル', { exact: true }).fill(title);
+  const body = page.getByRole('textbox', { name: '本文', exact: true });
+  await body.evaluate(el => {
+    const dt = new DataTransfer();
+    dt.setData('text/plain', '## コピペの見出し\n\n**コピペの太字**');
+    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  });
+  await expect(body.locator('h2')).toHaveText('コピペの見出し');
+  await expect(body.locator('strong')).toHaveText('コピペの太字');
+  await page.getByRole('tab', { name: 'Markdown', exact: true }).click();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByLabel('Markdownファイルを読み込む').setInputFiles({
+    name: 'article.md', mimeType: 'text/markdown',
+    buffer: Buffer.from('## 畑の記録\n\n**余市のぶどう**\n\n- 収穫\n- 醸造\n\n[詳しく](https://example.com/wine(2026))'),
+  });
+  await expect(page.getByLabel('Markdown本文')).toHaveValue(/畑の記録/);
+  await page.getByRole('tab', { name: 'ビジュアル', exact: true }).click();
+  await expect(body.locator('h2')).toHaveText('畑の記録');
+  await expect(body.locator('strong')).toHaveText('余市のぶどう');
+  await expect(body.locator('li')).toHaveCount(2);
+  await expect(body.locator('a')).toHaveAttribute('href', 'https://example.com/wine(2026)');
+  const headingSize = await body.locator('h2').evaluate(el => Number.parseFloat(getComputedStyle(el).fontSize));
+  const paragraphSize = await body.locator('p').first().evaluate(el => Number.parseFloat(getComputedStyle(el).fontSize));
+  expect(headingSize).toBeGreaterThan(paragraphSize);
+  await page.getByText('画像を追加・差し替え', { exact: true }).click();
+  await page.getByLabel('画像を入れる場所').selectOption('body');
+  const alt = '画像 [余市] \\収穫';
+  await page.getByLabel('アップロード画像の説明').fill(alt);
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
+  await page.getByLabel('画像ファイル', { exact: true }).setInputFiles([
+    { name: 'first.png', mimeType: 'image/png', buffer: png },
+    { name: 'second.png', mimeType: 'image/png', buffer: png },
+  ]);
+  await expect(page.getByRole('status')).toContainText('2枚の画像を保存しました');
+  await expect(body.locator('img')).toHaveCount(2);
+  const urls = await body.locator('img').evaluateAll(images => images.map(image => image.getAttribute('src')!));
+  expect(new Set(urls).size).toBe(2);
+  for (const url of urls) {
+    const image = await page.request.get(url);
+    expect(image.status()).toBe(200);
+    expect(image.headers()['content-type']).toBe('image/webp');
+    const bytes = await image.body();
+    expect(bytes.subarray(0, 4).toString()).toBe('RIFF');
+    expect(bytes.subarray(8, 12).toString()).toBe('WEBP');
+  }
+  await page.getByRole('tab', { name: 'Markdown', exact: true }).click();
+  await expect(page.getByLabel('Markdown本文')).toHaveValue(/\\\[余市\\\]/);
+  await page.getByRole('tab', { name: 'プレビュー', exact: true }).click();
+  const preview = page.getByRole('tabpanel', { name: 'プレビュー', exact: true });
+  await expect(preview.locator('img')).toHaveCount(2);
+  await expect(preview.locator('img').first()).toHaveAttribute('alt', alt);
+  await expect(preview.locator('a')).toHaveAttribute('href', 'https://example.com/wine(2026)');
+  await page.getByRole('button', { name: '下書き保存', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('下書きとして保存しました');
+  await expect(page).toHaveURL(/\/admin\/contents\/[a-f0-9-]{36}$/);
+  await page.reload();
+  await expect(page.getByLabel('タイトル', { exact: true })).toHaveValue(title);
+  await expect(body.locator('h2')).toHaveText('畑の記録');
+  await expect(body.locator('strong')).toHaveText('余市のぶどう');
+  await expect(body.locator('img')).toHaveCount(2);
+  await page.getByLabel('タイトル', { exact: true }).fill(title + ' 更新済み');
+  await page.getByRole('button', { name: '下書き保存', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('下書きとして保存しました');
+  await page.getByRole('link', { name: '← 記事一覧' }).click();
+  await expect(page.getByText(title + ' 更新済み', { exact: true })).toBeVisible();
+});
 test('safe next, reset and verified initial setup (Auth transport simulated)', async ({
   page,
 }) => {

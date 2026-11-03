@@ -6,6 +6,19 @@
 @import './public-design.css';
 @import './enhancements.css';
 
+/* Shared slender wordmark, matching the public first view. */
+.brand span,
+.admin-article-brand,
+.admin-brand b,
+.kaihipay-admin-brand,
+.home-hero h1 {
+  font-family: 'Times New Roman', 'Yu Mincho', serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.055em !important;
+}
+.brand span { font-size: 36px; line-height: 1; }
+.brand small { display: none; }
+
 /* Reference direction: quiet ivory paper, fine rules and generous whitespace. */
 :root {
   --font-sans-jp: 'Yu Gothic', 'Hiragino Kaku Gothic ProN', sans-serif;

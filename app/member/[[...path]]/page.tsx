@@ -28,24 +28,42 @@ export default async function MemberPage({
     return (
       <>
         <SiteHeader member />
-        <main className="article-shell member-article-page">
-          <h1>アカウントのご案内</h1>
-          <p>
-            月額の支払総額は{MEMBERSHIP_TOTAL_LABEL}です
-            契約と支払方法の確認・退会は会費ペイが管理しています
-          </p>
-          <p>
-            記事の閲覧はお支払い済みの会費の対象月末までです
-            イベント参加費は別料金です
-          </p>
-          <p>手続きが分からない場合は公式LINEへお問い合わせください</p>
-          <a href="https://lin.ee/xWYPyBv" className="button">
-            公式LINE
-          </a>
-          <p>
-            <Link href="/member/reset">パスワード再設定</Link>
-          </p>
+        <main className="article-shell member-article-page member-account">
+          <header className="member-account-heading">
+            <p className="eyebrow">MY ACCOUNT</p>
+            <h1>アカウント</h1>
+            <p>ご利用状況とお手続き</p>
+          </header>
+          <section className="member-account-card member-account-identity" aria-label="ご利用状況">
+            <div>
+              <span className="member-account-label">ログイン中のメールアドレス</span>
+              <p className="member-account-email">{access.user?.email}</p>
+            </div>
+            <span className={'member-account-badge' + (access.entitled ? ' is-active' : '')}>
+              {access.editor ? '管理者アクセス' : access.entitled ? '会員コンテンツを閲覧できます' : 'お支払い確認待ち'}
+            </span>
+            {access.editor && <Link className="member-account-text-link" href="/admin">管理画面を開く <span aria-hidden>↗</span></Link>}
+          </section>
+          <div className="member-account-grid">
+            <section className="member-account-card">
+              <p className="eyebrow">MEMBERSHIP</p>
+              <h2>会費とご利用期間</h2>
+              <p className="member-account-price">{MEMBERSHIP_TOTAL_LABEL}<small> / 月</small></p>
+              <p>会員記事はお支払い対象月の末日まで閲覧できます</p>
+              <p>イベント参加費は別料金です</p>
+              <div className="member-account-note">契約内容やお支払い方法の変更・退会は会費ペイでお手続きください</div>
+            </section>
+            <section className="member-account-card">
+              <p className="eyebrow">SUPPORT</p>
+              <h2>お困りのときは</h2>
+              <p>会員登録やお支払いのお問い合わせは公式LINEへ</p>
+              <a href="https://lin.ee/xWYPyBv" className="member-account-line">公式LINEで問い合わせる <span aria-hidden>↗</span></a>
+              <Link className="member-account-text-link" href="/member/reset">パスワードを再設定する <span aria-hidden>→</span></Link>
+            </section>
+          </div>
+          <Link className="member-back-link" href="/member">← 会員ホームへ</Link>
         </main>
+        <SiteFooter member />
       </>
     );
   if (!access.entitled)
@@ -128,14 +146,16 @@ export default async function MemberPage({
       </>
     );
   }
-  const all = await visibleContents(true);
+  const [all, upcoming] = await Promise.all([
+    visibleContents(true),
+    !key ? upcomingMemberEvents(2) : Promise.resolve([]),
+  ]);
   const categories = Array.from(
     new Set([...PRIMARY_CATEGORIES, ...all.map((c) => c.type)]),
   );
   const selected = key && key !== 'archive' ? key.toUpperCase() : '';
   if (key && key !== 'archive' && !categories.includes(selected)) notFound();
   const articles = selected ? all.filter((c) => c.type === selected) : all;
-  const upcoming = !key ? await upcomingMemberEvents(2) : [];
   const sections = [
     {
       type: 'FIELD',

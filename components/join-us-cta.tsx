@@ -19,19 +19,22 @@ export function WineGlassIcon({ className = '' }: { className?: string }) {
 
 export default function JoinUsCta() {
   const pathname = usePathname();
+  const disabled = pathname.startsWith('/admin') || pathname.startsWith('/member') || pathname === '/join';
   const [isMobile, setIsMobile] = useState(false);
   const [pastHero, setPastHero] = useState(false);
   const [fill, setFill] = useState(0);
 
   useEffect(() => {
+    if (disabled) return;
     const media = window.matchMedia('(max-width: 760px)');
     const update = () => setIsMobile(media.matches);
     update();
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
-  }, []);
+  }, [disabled]);
 
   useEffect(() => {
+    if (disabled) return;
     const update = () => {
       setPastHero(window.scrollY > window.innerHeight * 0.72);
       setFill(Math.min(100, Math.max(0, (window.scrollY / (window.innerHeight * 0.55)) * 100)));
@@ -43,9 +46,9 @@ export default function JoinUsCta() {
       window.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, [pathname]);
+  }, [pathname, disabled]);
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/member') || pathname === '/join') return null;
+  if (disabled) return null;
 
   const show = isMobile || (pathname === '/' && pastHero);
   const style = { '--wine-fill': `${isMobile ? fill : 0}%` } as CSSProperties;

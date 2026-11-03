@@ -4,7 +4,7 @@ import PublicMenu from '@/components/public-menu';
 import { WineGlassIcon } from '@/components/join-us-cta';
 export function SiteHeader({ member = false }: { member?: boolean }) {
   return (
-    <header className="site-header">
+    <header className={'site-header' + (member ? ' member-site-header' : '')}>
       {!member && (
         <div className="mobile-public-menu">
           <PublicMenu />
@@ -12,7 +12,7 @@ export function SiteHeader({ member = false }: { member?: boolean }) {
       )}
       <Link href={member ? '/member' : '/'} className="brand">
         <span>WWW</span>
-        <small>WINE WORK WOMEN</small>
+        <small className="brand-description">WINE WORK WOMEN</small>
       </Link>
       <nav aria-label={member ? '会員ナビゲーション' : 'メインナビゲーション'}>
         {member ? (

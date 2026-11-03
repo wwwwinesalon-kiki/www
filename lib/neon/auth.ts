@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { createNeonAuth } from '@neondatabase/auth/next/server';
+import { cache } from 'react';
 
 type NeonAuthServer = ReturnType<typeof createNeonAuth>;
 
@@ -22,8 +23,10 @@ export function getNeonAuth(): NeonAuthServer {
   return authServer;
 }
 
-export async function neonSessionUser() {
+// React cache is limited to a server render; authentication is never shared
+// between users or persisted beyond the request.
+export const neonSessionUser = cache(async function neonSessionUser() {
   const result = await getNeonAuth().getSession();
   if (result.error || !result.data?.user) return null;
   return result.data.user;
-}
+});

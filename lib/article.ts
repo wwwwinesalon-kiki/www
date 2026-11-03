@@ -82,7 +82,8 @@ export function articlePayload(
   input: Record<string, unknown>,
   existing?: Record<string, unknown>,
 ) {
-  const title = typeof input.title === 'string' ? input.title.trim() : '';
+  const enteredTitle = typeof input.title === 'string' ? input.title.trim() : '';
+  const title = enteredTitle || (input.publish_status === 'draft' ? '無題の記事' : '');
   const type = typeof input.type === 'string' ? input.type : '';
   if (!title || title.length > 200 || !/^[A-Z_]{1,40}$/.test(type))
     throw new Error('タイトルとカテゴリを確認してください');
@@ -105,7 +106,7 @@ export function articlePayload(
     typeof input.cover_alt === 'string'
       ? input.cover_alt.trim().slice(0, 500)
       : '';
-  if (input.cover_image && !coverAlt)
+  if (input.cover_image && !coverAlt && input.publish_status !== 'draft')
     throw new Error('メイン画像の説明を入力してください');
   const summary = typeof input.summary === 'string' ? input.summary.trim() : '';
   if (summary.length > 300) throw new Error('概要は300文字以内にしてください');
@@ -121,7 +122,7 @@ export function articlePayload(
     body,
     body_format: 'html',
     cover_image: input.cover_image ? cover || legacyCover : null,
-    cover_alt: coverAlt,
+    cover_alt: coverAlt || (input.cover_image ? title : ''),
     publish_status: input.publish_status,
     published_at:
       input.publish_status === 'published'

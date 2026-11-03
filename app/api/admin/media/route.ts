@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { requireAdmin } from '@/lib/admin-auth';
-import { UUID, MAX_IMAGE_BYTES } from '@/lib/article';
-import { checkImage } from '@/lib/image-upload';
+import { UUID } from '@/lib/article';
+import { articleWebp } from '@/lib/article-image';
 import { isNeonBackend, neonSql } from '@/lib/neon/db';
 import {
   articleImagePath,
@@ -55,9 +55,9 @@ export async function POST(req: Request) {
       { error: '画像配信のサーバー設定が未完了です' },
       { status: 503 },
     );
-  if (Number(req.headers.get('content-length') || 0) > MAX_IMAGE_BYTES + 65536)
+  if (Number(req.headers.get('content-length') || 0) > 12 * 1024 * 1024 + 65536)
     return Response.json(
-      { error: '画像は3MB以下にしてください' },
+      { error: '画像は12MB以下にしてください' },
       { status: 413 },
     );
   try {
@@ -72,18 +72,16 @@ export async function POST(req: Request) {
       !UUID.test(articleId) ||
       !alt ||
       alt.length > 500 ||
-      file.size > MAX_IMAGE_BYTES
+      file.size > 12 * 1024 * 1024
     )
-      throw new Error('画像・記事ID・画像の説明を確認してください 最大3MBです');
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    if (!checkImage(bytes, file.type))
-      throw new Error('JPEG PNG WebPの画像を選択してください');
+      throw new Error('画像・記事ID・画像の説明を確認してください 最大12MBです');
+    const bytes = await articleWebp(file);
     const id = crypto.randomUUID();
     const objectPath = articleImagePath(articleId, id);
     if (isNeonBackend()) {
       let uploaded = false;
       try {
-        await putArticleImage(objectPath, bytes, file.type);
+        await putArticleImage(objectPath, bytes, 'image/webp');
         uploaded = true;
         const copiedBytes = await getArticleImage(objectPath);
         const sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -99,7 +97,7 @@ export async function POST(req: Request) {
                 (id, article_id, object_path, alt, mime_type, size_bytes)
               values
                 (${id}::uuid, ${articleId}::uuid, ${objectPath}, ${alt},
-                  ${file.type}, ${file.size})
+                  ${'image/webp'}, ${bytes.length})
               returning id, object_path
             )
             insert into www_media_migration_status
@@ -156,7 +154,7 @@ export async function POST(req: Request) {
     }
     const { error: uploadError } = await actor.supabase.storage
       .from('www-article-images')
-      .upload(objectPath, bytes, { contentType: file.type, upsert: false });
+      .upload(objectPath, bytes, { contentType: 'image/webp', upsert: false });
     if (uploadError)
       throw new Error(
         '画像を保存できませんでした Storage設定を確認して再試行してください',
@@ -166,8 +164,8 @@ export async function POST(req: Request) {
       article_id: articleId,
       object_path: objectPath,
       alt,
-      mime_type: file.type,
-      size_bytes: file.size,
+      mime_type: 'image/webp',
+      size_bytes: bytes.length,
     });
     if (error)
       throw new Error(

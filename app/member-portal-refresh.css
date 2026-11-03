@@ -1,4 +1,42 @@
 /* Member pages keep the public site's ivory and wine palette while putting reading first. */
+.member-site-header {
+  height: 76px;
+  background: #fcf9f4;
+  border-bottom: 1px solid #e6dcd3;
+  backdrop-filter: none;
+}
+.member-site-header .brand span { color: #65635d; }
+.member-account {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 62px 28px 90px;
+  color: #542332;
+}
+.member-account-heading { margin-bottom: 30px; }
+.member-account-heading h1 { margin: 10px 0; font-size: clamp(30px,4vw,44px); font-weight: 400; letter-spacing: .05em; }
+.member-account-heading > p:last-child { color: #846b6c; margin: 0; }
+.member-account-card { padding: 30px; border: 1px solid #e5d9ce; border-radius: 10px; background: #fffdf9; box-shadow: 0 7px 24px #633b3b05; }
+.member-account-identity { display: flex; align-items: center; flex-wrap: wrap; gap: 20px 28px; margin-bottom: 22px; background: #f6efe7; }
+.member-account-label { color: #806d68; font-size: 12px; }
+.member-account-email { margin: 7px 0 0; font-family: var(--font-sans-jp); font-size: clamp(15px,2vw,20px); overflow-wrap: anywhere; }
+.member-account-badge { padding: 8px 13px; border-radius: 30px; color: #816747; background: #eee1ca; font-size: 12px; margin-left: auto; }
+.member-account-badge.is-active { background: #e4ebe1; color: #42583c; }
+.member-account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 30px; }
+.member-account-card h2 { font-size: 21px; font-weight: 400; margin: 12px 0 20px; }
+.member-account-card > p { line-height: 1.8; }
+.member-account-card .member-account-price { font-family: 'Times New Roman', var(--font-mincho-jp), serif; font-size: 32px; line-height: 1.4; margin: 12px 0 20px; }
+.member-account-price small { color: #846b6c; font-size: 14px; }
+.member-account-note { border-top: 1px solid #e5d9ce; padding-top: 18px; margin-top: 22px; color: #846b6c; line-height: 1.9; font-size: 13px; }
+.member-account-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 20px; margin: 25px 0 18px; background: #42634f; color: #fff; border-radius: 6px; font-size: 14px; transition: background .2s; }
+.member-account-line:hover { background: #2c4b37; }
+.member-account-text-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; font-size: 13px; text-decoration: underline; text-underline-offset: 5px; }
+@media (max-width: 720px) {
+  .member-account { padding: 35px 18px 90px; }
+  .member-account-grid { grid-template-columns: 1fr; }
+  .member-account-card { padding: 24px 20px; }
+  .member-account-identity { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .member-account-badge { margin-left: 0; }
+}
 body:has(.member-portal) .site-header {
   height: 66px;
   border-bottom-color: #bfa3a5;

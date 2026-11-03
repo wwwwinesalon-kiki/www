@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 const palette = [
   ['236,142,158', '226,116,138'],
@@ -23,8 +24,11 @@ type Ripple = {
 };
 
 export default function WineRippleBackground() {
+  const pathname = usePathname();
+  const disabled = /^\/(member|admin)(\/|$)/.test(pathname);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (disabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -96,7 +100,7 @@ export default function WineRippleBackground() {
         });
       }
       ctx.restore();
-      frame = requestAnimationFrame(draw);
+      frame = ripples.length ? requestAnimationFrame(draw) : 0;
     };
     const down = (e: PointerEvent) => {
       pointer = {
@@ -131,6 +135,7 @@ export default function WineRippleBackground() {
         });
         const visible = ripples.filter((r) => !r.fade);
         if (visible.length > 4) visible[0].fade = performance.now();
+        if (!frame) frame = requestAnimationFrame(draw);
       }
       pointer = null;
     };
@@ -140,7 +145,6 @@ export default function WineRippleBackground() {
     addEventListener('pointermove', move, { passive: true });
     addEventListener('pointerup', up, { passive: true });
     addEventListener('pointercancel', up, { passive: true });
-    if (!reduced) frame = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(frame);
       removeEventListener('resize', resize);
@@ -149,7 +153,8 @@ export default function WineRippleBackground() {
       removeEventListener('pointerup', up);
       removeEventListener('pointercancel', up);
     };
-  }, []);
+  }, [disabled]);
+  if (disabled) return null;
   return (
     <div id="wine-ripple-app" aria-hidden="true">
       <canvas id="wine-ripple-canvas" ref={canvasRef} />
