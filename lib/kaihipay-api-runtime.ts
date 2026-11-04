@@ -1,4 +1,5 @@
 import type { Order } from './kaihipay-orders';
+import { readCourseRecurringFee } from './kaihipay-read';
 
 type Customer = {
   customer_number?: unknown;
@@ -29,6 +30,12 @@ export async function resolveMembershipCourseIdWithFee(
     if (!Array.isArray(data)) throw new Error('kaihipay_courses_shape');
     for (const item of data) {
       const course = item as Record<string, unknown>;
+      if (course.name === 'www月額費用' && course.billing_type === 'monthly' &&
+          course.recuring_fee === undefined && Number.isSafeInteger(course.id) && Number(course.id) > 0) {
+        course.recuring_fee = await readCourseRecurringFee(token, {
+          id: Number(course.id), name: course.name as string, billingType: course.billing_type as string,
+        });
+      }
       if (course.name === 'www月額費用' && course.billing_type === 'monthly' &&
           course.recuring_fee === expectedRecurringFee &&
           Number.isSafeInteger(course.id) && Number(course.id) > 0)
