@@ -1,0 +1,16 @@
+.kaihipay-connection { padding: 22px; margin: 12px 0 24px; border: 1px solid #dfd7d0; border-radius: 8px; background: #fffdfa; }
+.kaihipay-connection-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.kaihipay-connection-heading h2 { font-size: 18px; margin: 0; }
+.kaihipay-connection-heading > span { font-size: 12px; color: #80513b; }
+.kaihipay-connection ul { padding: 0; margin: 18px 0; list-style: none; }
+.kaihipay-connection li { display: grid; grid-template-columns: minmax(140px,1fr) 110px minmax(0,1.5fr); align-items: center; gap: 12px; min-height: 44px; padding: 10px 0; border-bottom: 1px solid #eee6df; font-size: 13px; }
+.kaihipay-connection li strong { font-size: 12px; font-weight: 500; color: #9a4d39; }
+.kaihipay-connection li .is-configured { color: #3e6546; }
+.kaihipay-connection code { overflow-wrap: anywhere; font-size: 11px; color: #816f67; }
+.kaihipay-connection > p { font-size: 12px; line-height: 1.8; color: #7c6b62; margin-bottom: 0; }
+.kaihipay-connection > p[role='alert'] { color: #9a3a3a; }
+@media (max-width: 700px) {
+  .kaihipay-connection { padding: 18px; }
+  .kaihipay-connection li { grid-template-columns: minmax(0,1fr) auto; gap: 5px 12px; }
+  .kaihipay-connection code { grid-column: 1 / -1; }
+}

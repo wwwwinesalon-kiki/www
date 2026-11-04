@@ -19,13 +19,25 @@ it.each(['2026-00', '2026-13', '2026-9', '2026-09-01', '', '0099-01'])('rejects 
 });
 it('reads only courses and returns only selected fields', async () => {
   const fetcher = vi.fn().mockResolvedValue(Response.json({ response: { total_count: 1, data: [
-    { id: 5, name: 'WWW', billing_type: 'monthly', contracted_count: 10 },
+    { id: 5, name: 'WWW', billing_type: 'monthly', recuring_fee: 3300, contracted_count: 10 },
   ] } }));
   expect(await readKaihipayCourses('test-token', fetcher)).toEqual({
-    total: 1, courses: [{ id: 5, name: 'WWW', billingType: 'monthly' }],
+    total: 1, courses: [{ id: 5, name: 'WWW', billingType: 'monthly', recurringFee: 3300 }],
   });
   expect(fetcher).toHaveBeenCalledWith('https://api.kaihipay.jp/v1/courses?limit=100&offset=0',
     expect.objectContaining({ method: 'GET', cache: 'no-store', redirect: 'error' }));
+});
+it.each([-1, '3300', 1.5, null])('rejects invalid provider recurring fee %s', async fee => {
+  const fetcher = vi.fn().mockResolvedValue(Response.json({ response: { total_count: 1, data: [
+    { id: 5, name: 'WWW', billing_type: 'monthly', recuring_fee: fee },
+  ] } }));
+  await expect(readKaihipayCourses('test-token', fetcher)).rejects.toThrow('kaihipay_lookup_failed');
+});
+it('shows an omitted fee as unknown rather than inferring the membership total', async () => {
+  const fetcher = vi.fn().mockResolvedValue(Response.json({ response: { total_count: 1, data: [
+    { id: 5, name: 'WWW', billing_type: 'monthly' },
+  ] } }));
+  expect((await readKaihipayCourses('test-token', fetcher)).courses[0].recurringFee).toBeNull();
 });
 it('never calls provider without credentials', async () => {
   const fetcher = vi.fn();

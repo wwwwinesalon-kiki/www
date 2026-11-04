@@ -1,5 +1,5 @@
 // Read-only transport. Credentials are supplied only by server callers.
-export type CourseSummary = { id: number; name: string; billingType: string };
+export type CourseSummary = { id: number; name: string; billingType: string; recurringFee: number | null };
 export async function readKaihipayCourses(
   token: string | undefined,
   fetcher: typeof fetch = fetch,
@@ -22,7 +22,14 @@ export async function readKaihipayCourses(
       if (!item || !Number.isInteger(item.id) || Number(item.id) < 1 ||
           typeof item.name !== 'string' || typeof item.billing_type !== 'string')
         throw new Error('invalid_course');
-      return { id: item.id as number, name: item.name, billingType: item.billing_type };
+      if (item.recuring_fee !== undefined &&
+          (!Number.isSafeInteger(item.recuring_fee) || Number(item.recuring_fee) < 0))
+        throw new Error('invalid_course_fee');
+      // The list endpoint spells this field "recuring_fee" in the official spec.
+      return {
+        id: item.id as number, name: item.name, billingType: item.billing_type,
+        recurringFee: item.recuring_fee === undefined ? null : item.recuring_fee as number,
+      };
     });
     return { courses, total: result.total_count };
   } catch {
