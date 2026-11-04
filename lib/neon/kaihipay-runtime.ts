@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { readAllOrders, readCustomer, resolveMembershipCourseIdWithFee } from '../kaihipay-api-runtime';
 import { paidAccessWindow, paidServiceMonths, type Order } from '../kaihipay-orders';
 import { neonSql } from './db-runtime';
+import { getKaihipayToken } from './kaihipay-token-runtime';
 
 type PaidWindow = { validFrom: string; validUntil: string } | null;
 
@@ -66,7 +67,7 @@ export async function authoritativeSnapshot(
   memberId: string,
   context?: { token: string; courseId: number; orders: Order[]; ordersReadAt?: string },
 ): Promise<KaihipaySnapshot> {
-  const token = context?.token ?? requiredSetting('KAIHIPAY_API_TOKEN');
+  const token = context?.token ?? await getKaihipayToken();
   const courseId = context?.courseId ?? await neonMembershipCourseId(token);
   const orders = context?.orders ?? await readAllOrders(token);
   // Timestamp the order read, not the later customer lookup. A slow cron must
@@ -163,7 +164,7 @@ export async function activateNeonFromKaihipay(): Promise<{
   // Validate all secrets before any write. The API can still fail afterwards;
   // no new entitlement is granted without a complete authoritative snapshot.
   hmacSecret();
-  const token = requiredSetting('KAIHIPAY_API_TOKEN');
+  const token = await getKaihipayToken();
   const courseId = await neonMembershipCourseId(token);
   const orders = await readAllOrders(token);
   const ordersReadAt = new Date().toISOString();
@@ -259,7 +260,7 @@ export async function discoverPaidClaimByEmail(
 
   try {
     hmacSecret();
-    const token = requiredSetting('KAIHIPAY_API_TOKEN');
+    const token = await getKaihipayToken();
     const courseId = await neonMembershipCourseId(token);
     const orders = await readAllOrders(token);
     const ordersReadAt = new Date().toISOString();

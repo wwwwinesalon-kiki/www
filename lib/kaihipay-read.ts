@@ -1,11 +1,9 @@
 // Read-only transport. Credentials are supplied only by server callers.
+import { kaihipayGet } from './kaihipay-request';
 export type CourseSummary = { id: number; name: string; billingType: string; recurringFee: number | null };
 export async function readCourseRecurringFee(token: string, course: { id: number; name: string; billingType: string }, fetcher: typeof fetch = fetch): Promise<number> {
   try {
-    const response = await fetcher(`https://api.kaihipay.jp/v1/courses/${course.id}`, {
-      method: 'GET', headers: { Authorization: `Bearer ${token.trim()}`, Accept: 'application/json' },
-      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000),
-    });
+    const response = await kaihipayGet(`/courses/${course.id}`, token, fetcher);
     if (!response.ok) throw new Error('upstream_error');
     const detail = (await response.json())?.response?.data;
     if (detail?.id !== course.id || detail?.name !== course.name || detail?.billing_type !== course.billingType ||
@@ -20,13 +18,7 @@ export async function readKaihipayCourses(
 ): Promise<{ courses: CourseSummary[]; total: number }> {
   if (!token?.trim()) throw new Error('kaihipay_not_configured');
   try {
-    const response = await fetcher('https://api.kaihipay.jp/v1/courses?limit=100&offset=0', {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token.trim()}`, Accept: 'application/json' },
-      cache: 'no-store',
-      redirect: 'error',
-      signal: AbortSignal.timeout(10000),
-    });
+    const response = await kaihipayGet('/courses?limit=100&offset=0', token, fetcher);
     if (!response.ok) throw new Error('upstream_error');
     const body = await response.json();
     const result = body?.response;

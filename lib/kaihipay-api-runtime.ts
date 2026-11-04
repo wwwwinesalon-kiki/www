@@ -1,5 +1,6 @@
 import type { Order } from './kaihipay-orders';
 import { readCourseRecurringFee } from './kaihipay-read';
+import { kaihipayGet } from './kaihipay-request';
 
 type Customer = {
   customer_number?: unknown;
@@ -7,11 +8,7 @@ type Customer = {
 };
 
 async function apiGet(path: string, token: string): Promise<unknown> {
-  const response = await fetch('https://api.kaihipay.jp/v1' + path, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(10000),
-  });
+  const response = await kaihipayGet(path, token);
   if (!response.ok) throw new Error('kaihipay_api_failed');
   return response.json();
 }

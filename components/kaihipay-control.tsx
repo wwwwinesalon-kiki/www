@@ -9,6 +9,7 @@ type ConnectionReport = {
   configuration: { checks: { key: string; configured: boolean }[]; missing: string[]; settingsReady: boolean };
   courseVerification: 'not_checked' | 'matched' | 'mismatch' | 'missing_configuration' | 'incomplete_course_list' | 'failed';
   canAttemptSync: boolean;
+  tokenAutomation?: { configured: boolean; initialized: boolean; expiresAt: string | null; refreshedAt: string | null; error: string | null };
 };
 const settingLabels: Record<string, string> = {
   BACKEND_PROVIDER: '保存先の設定', NEON_DATABASE_URL: 'データベース',
@@ -169,6 +170,16 @@ export default function KaihipayControl() {
           {connection?.courseVerification === 'mismatch' && <p role="alert">設定したコースID・コース名・継続課金額が会費ペイの月会費コースと一致していません</p>}
           {connection?.courseVerification === 'incomplete_course_list' && <p role="alert">コース一覧をすべて確認できていないため 同期は開始できません</p>}
           <p>接続確認で月会費コースを照合してから入金同期を実行できます 接続確認で請求は発生しません</p>
+        </section>
+        <section className="kaihipay-connection" aria-label="APIトークンの自動更新">
+          <div className="kaihipay-connection-heading"><h2>APIトークンの自動更新</h2>
+            <span>{connection?.tokenAutomation?.configured ? connection.tokenAutomation.initialized ? '設定済み' : '初回接続待ち' : '初回設定待ち'}</span>
+          </div>
+          {connection?.tokenAutomation?.configured ? <>
+            <p>期限の3日前から自動更新します</p>
+            {connection.tokenAutomation.expiresAt && <p>次の有効期限 {new Date(connection.tokenAutomation.expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}（日本時間）</p>}
+            {connection.tokenAutomation.error && <p role="alert">更新を確認できません API連携用の認証情報を確認してください</p>}
+          </> : <p>Netlifyの秘密設定へ KAIHIPAY_API_EMAIL と KAIHIPAY_API_PASSWORD を登録すると有効になります 会費ペイの「API連携」で設定したメールアドレスとパスワードを使用します</p>}
         </section>
         {courses.length > 0 && (
           <ul className="kaihipay-admin-courses">
