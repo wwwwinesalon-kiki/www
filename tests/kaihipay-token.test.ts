@@ -76,7 +76,7 @@ it('renews before expiry and preserves a still-valid token during a temporary fa
   expect(await service.getKaihipayToken()).toBe(renewedToken);
   expect(fetcher).toHaveBeenCalledTimes(3);
   await expect(service.getKaihipayToken(renewedToken)).rejects.toThrow('kaihipay_token_refresh_backoff');
-  expect(await service.kaihipayTokenStatus()).toMatchObject({ initialized: true, error: 'refresh_failed' });
+  expect(await service.kaihipayTokenStatus()).toMatchObject({ initialized: true, error: 'request_failed' });
 });
 
 it('stops retrying rejected credentials until they change while retaining manual access', async () => {
@@ -123,6 +123,7 @@ it('rejects invalid expiry responses without storing or exposing the new token',
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ token: originalToken, expire_date: '2099-01-01 00:00:00' })));
   await expect(service.getKaihipayToken()).rejects.toThrow(/^kaihipay_token_refresh_failed$/);
   expect((await db.query<{ encrypted_token: string | null }>('SELECT encrypted_token FROM www_private.kaihipay_token')).rows[0].encrypted_token).toBeNull();
+  expect(await service.kaihipayTokenStatus()).toMatchObject({ error: 'response_invalid_expiry' });
   const now = Date.parse('2026-11-04T03:00:00Z');
   expect(service.kaihipayTokenExpiry('2026-12-04 12:00:00', now)).toBe('2026-12-04T03:00:00.000Z');
   expect(() => service.kaihipayTokenExpiry('invalid', now)).toThrow('kaihipay_token_expiry_invalid');

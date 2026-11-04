@@ -127,24 +127,28 @@ export async function getKaihipayToken(rejectedToken?: string): Promise<string> 
     }
     throw new Error('kaihipay_token_refresh_in_progress');
   }
-  let errorCode = 'refresh_failed';
+  let errorCode = 'request_failed';
   try {
     const response = await fetch('https://api.kaihipay.jp/v1/regenerate_token', {
       method: 'POST', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(10000),
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ email: process.env.KAIHIPAY_API_EMAIL!.trim(), password: process.env.KAIHIPAY_API_PASSWORD! }),
     });
-    if (response.status === 401 || response.status === 403) errorCode = 'credentials_rejected';
+    errorCode = response.status === 401 || response.status === 403 ? 'credentials_rejected' : `http_${response.status}`;
     if (!response.ok) throw new Error('refresh_failed');
+    errorCode = 'response_invalid_json';
     const data = await response.json();
+    errorCode = 'response_invalid_token';
     if (typeof data?.token !== 'string' || !/^\S{16,4096}$/.test(data.token)) throw new Error('refresh_failed');
+    errorCode = typeof data.expire_date === 'string' ? 'response_invalid_expiry' : 'response_missing_expiry';
     const expiresAt = kaihipayTokenExpiry(data.expire_date);
+    errorCode = 'token_store_failed';
     const encrypted = encrypt(data.token);
     const saved = (await sql`UPDATE www_private.kaihipay_token SET encrypted_token=${encrypted},
       expires_at=${expiresAt}::timestamptz,updated_at=now(),lease_owner=NULL,lease_until=NULL,
       next_attempt_at=NULL,last_error_code=NULL
       WHERE singleton=true AND lease_owner=${owner}::uuid RETURNING singleton`) as unknown as object[];
-    if (!saved.length) throw new Error('lease_lost');
+    if (!saved.length) { errorCode = 'token_lease_lost'; throw new Error('lease_lost'); }
     return data.token;
   } catch {
     await sql`UPDATE www_private.kaihipay_token SET lease_owner=NULL,lease_until=NULL,
