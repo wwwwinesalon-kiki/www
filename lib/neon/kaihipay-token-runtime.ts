@@ -129,6 +129,7 @@ export async function getKaihipayToken(rejectedToken?: string): Promise<string> 
   }
   let errorCode = 'request_failed';
   try {
+    const requestedAt = Date.now();
     const response = await fetch('https://api.kaihipay.jp/v1/regenerate_token', {
       method: 'POST', redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(10000),
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -140,8 +141,13 @@ export async function getKaihipayToken(rejectedToken?: string): Promise<string> 
     const data = await response.json();
     errorCode = 'response_invalid_token';
     if (typeof data?.token !== 'string' || !/^\S{16,4096}$/.test(data.token)) throw new Error('refresh_failed');
-    errorCode = typeof data.expire_date === 'string' ? 'response_invalid_expiry' : 'response_missing_expiry';
-    const expiresAt = kaihipayTokenExpiry(data.expire_date);
+    errorCode = 'response_invalid_expiry';
+    // Production may omit expire_date despite the documented response schema.
+    // The official lifetime is 30 days; use an earlier 29-day management limit
+    // from request start, then renew another 3 days ahead of that limit.
+    const expiresAt = data.expire_date == null
+      ? new Date(requestedAt + 29 * 24 * 60 * 60 * 1000).toISOString()
+      : kaihipayTokenExpiry(data.expire_date);
     errorCode = 'token_store_failed';
     const encrypted = encrypt(data.token);
     const saved = (await sql`UPDATE www_private.kaihipay_token SET encrypted_token=${encrypted},

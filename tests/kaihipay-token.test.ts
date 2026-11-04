@@ -64,6 +64,20 @@ it('serializes concurrent first-use renewals using the database lease', async ()
   expect(fetcher).toHaveBeenCalledTimes(1);
 });
 
+it('uses an earlier management deadline when production omits the documented expiry', async () => {
+  const startedAt = Date.now();
+  const fetcher = vi.fn().mockResolvedValue(Response.json({ token: originalToken }));
+  vi.stubGlobal('fetch', fetcher);
+  expect(await service.getKaihipayToken()).toBe(originalToken);
+  const status = await service.kaihipayTokenStatus();
+  expect(status).toMatchObject({ initialized: true, error: null });
+  const limit = Date.parse(status.expiresAt!);
+  expect(limit).toBeGreaterThanOrEqual(startedAt + 29 * 24 * 60 * 60 * 1000);
+  expect(limit).toBeLessThanOrEqual(Date.now() + 29 * 24 * 60 * 60 * 1000);
+  expect(await service.getKaihipayToken()).toBe(originalToken);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
 it('renews before expiry and preserves a still-valid token during a temporary failure', async () => {
   const fetcher = vi.fn().mockImplementation(async () => tokenResponse()); vi.stubGlobal('fetch', fetcher);
   await service.getKaihipayToken();

@@ -177,7 +177,7 @@ export default function KaihipayControl() {
           </div>
           {connection?.tokenAutomation?.configured ? <>
             <p>期限の3日前から自動更新します</p>
-            {connection.tokenAutomation.expiresAt && <p>次の有効期限 {new Date(connection.tokenAutomation.expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}（日本時間）</p>}
+            {connection.tokenAutomation.expiresAt && <p>自動更新の管理期限 {new Date(connection.tokenAutomation.expiresAt).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}（日本時間）</p>}
             {connection.tokenAutomation.error && <p role="alert">更新を確認できません API連携用の認証情報を確認してください</p>}
           </> : <p>Netlifyの秘密設定へ KAIHIPAY_API_EMAIL と KAIHIPAY_API_PASSWORD を登録すると有効になります 会費ペイの「API連携」で設定したメールアドレスとパスワードを使用します</p>}
         </section>
