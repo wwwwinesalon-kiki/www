@@ -1,5 +1,14 @@
 # 会費ペイ接続手順（Neon・Netlify） 2026-11-04
 
+## 2026-11-04 本番接続確認
+
+- API接続成功、コース一覧・詳細で `www月額費用` / monthly / ID `643029` を確認。
+- 一覧APIで継続課金額が省略されたため、詳細APIの `recurring_payment_type=fixed` と `recurring_fee=3300` を照合して補完する。支払案内総額3,410円の内訳は別途確認する。
+- Productionへ確認済みID・継続課金額3,300円・新しいCRON_SECRETを登録し再デプロイ済み。
+- ownerの本番「入金同期」が成功。確認対象0件・更新0件・要確認0件。実際の支払済み会員の新規開通は未検証。
+- 定期実行は毎日12:00 JST、次回予定2026-11-05 12:00。NetlifyのRun nowから定期処理→バックグラウンド同期を実行し、成功ログ `Kaihipay reconciliation completed { scanned: 0, updated: 0, review: 0 }` を確認済み。
+- 現行の申込URLは https://www.kaihipay.jp/forms?form_code=3006100915631325 。メール認証画面の表示を確認。旧auth_key付きURLは使用しない。
+
 現在の本番は以下。後半の「旧Supabase・Vercel構成」は移行前の参考情報であり、新しい設定には使用しない。
 
 - 会員サイト: https://velvety-tarsier-0c3859.netlify.app/member
