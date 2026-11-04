@@ -110,6 +110,8 @@ export async function getKaihipayToken(rejectedToken?: string): Promise<string> 
   const leases = (await sql`UPDATE www_private.kaihipay_token SET lease_owner=${owner}::uuid,
     lease_until=now()+interval '90 seconds',credentials_fingerprint=${fingerprint},last_error_code=NULL,next_attempt_at=NULL
     WHERE singleton=true AND (lease_until IS NULL OR lease_until<now())
+      AND encrypted_token IS NOT DISTINCT FROM ${row.encrypted_token}
+      AND (last_error_code IS DISTINCT FROM 'credentials_rejected' OR credentials_fingerprint IS DISTINCT FROM ${fingerprint})
       AND (next_attempt_at IS NULL OR next_attempt_at<=now() OR credentials_fingerprint IS DISTINCT FROM ${fingerprint}) RETURNING singleton`) as unknown as object[];
   if (!leases.length) {
     if (valid && !rejectedCurrent) return current!;
